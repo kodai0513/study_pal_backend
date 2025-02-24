@@ -1,0 +1,23 @@
+{
+	"name": "Existing Docker Compose (Extend)",
+	"dockerComposeFile": [
+        "../docker-compose.yml"
+        // "/docker-compose.yml"は使用しないので削除
+	],
+    // vscodeで開くコンテナ
+    "service": "app",
+    // マウンティング先のディレクトリを指定
+    "workspaceFolder": "/go/src/app",
+    // 各種セッティング
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/sh",
+        "go.gopath": "/go",
+        "go.inferGopath": true,
+        "go.useLanguageServer": true
+    },
+    // コンテナ内で使用するエクステンションの指定
+	"extensions": [
+	    "golang.go",
+	    "wholroyd.jinja"
+	]
+}
