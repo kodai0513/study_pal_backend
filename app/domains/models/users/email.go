@@ -2,7 +2,9 @@ package users
 
 import (
 	"study-pal-backend/app/utils/application_errors"
-	"study-pal-backend/app/utils/validations"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 )
 
 type Email struct {
@@ -10,13 +12,11 @@ type Email struct {
 }
 
 func NewEmail(value string) (*Email, application_errors.ApplicationError) {
-	isRequired, err := validations.IsRequired(value)
-	if !isRequired {
-		return nil, application_errors.NewClientInputValidationApplicationError(err)
-	}
-
-	isEmail, err := validations.IsEmailValid(value)
-	if !isEmail {
+	err := validation.Validate(value,
+		validation.Required,
+		is.Email,
+	)
+	if err != nil {
 		return nil, application_errors.NewClientInputValidationApplicationError(err)
 	}
 

@@ -2,7 +2,8 @@ package users
 
 import (
 	"study-pal-backend/app/utils/application_errors"
-	"study-pal-backend/app/utils/validations"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type NickName struct {
@@ -10,9 +11,11 @@ type NickName struct {
 }
 
 func NewNickName(value string) (*NickName, application_errors.ApplicationError) {
+	err := validation.Validate(value,
+		validation.Length(1, 20),
+	)
 
-	isCharactersMaxLength, err := validations.IsCharactersMaxLength(value, 20)
-	if !isCharactersMaxLength {
+	if err != nil {
 		return nil, application_errors.NewClientInputValidationApplicationError(err)
 	}
 
