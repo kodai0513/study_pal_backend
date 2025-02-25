@@ -3,3 +3,4 @@
 /db/seeders
 go.sum
 /tmp/*
+/docs/*

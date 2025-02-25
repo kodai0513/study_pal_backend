@@ -38,24 +38,51 @@ func NewTimelineResponse(timeline *usecases.TimelineDto) *TimelineResponse {
 	}
 }
 
+type IndexResponse struct {
+	PageInfo  *app_types.PageResponse `json:"page_info"`
+	Timelines []*TimelineResponse     `json:"timelines"`
+}
+
+func NewIndexResponse(pageResponse *app_types.PageResponse, timelineResponses []*TimelineResponse) *IndexResponse {
+	return &IndexResponse{
+		PageInfo:  pageResponse,
+		Timelines: timelineResponses,
+	}
+}
+
+// timelines godoc
+//
+//	@Summary		タイムライン取得API
+//	@Description	タイムラインを取得します
+//	@Tags			timelines
+//	@Accept			json
+//	@Produce		json
+//	@Param			page_size		query		int		true "ページサイズ"
+//	@Param			prev_page_token	query		string	false "次のページのトークン"
+//	@Param			next_page_token	query		string	false "前のページのトークン"
+//	@Success		200				{object}	IndexResponse
+//	@Failure		400				{object}	app_types.ErrorResponse
+//	@Failure		500				{object}	app_types.ErrorResponse
+//	@Router			/timelines [get]
 func (t *TimelineController) Index(c *gin.Context) {
+	_ = c.Query("page_size")
 	timelineList, page, err := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(10, "a", "b"))
 
 	if err != nil && err.Kind() == application_errors.ClientInputValidation {
+		var errors []string
+		errors = append(errors, err.Error())
 		c.SecureJSON(
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			app_types.NewErrorResponse(errors),
 		)
 	}
 
 	if err != nil && err.Kind() == application_errors.DatabaseConnection {
+		var errors []string
+		errors = append(errors, err.Error())
 		c.SecureJSON(
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			app_types.NewErrorResponse(errors),
 		)
 	}
 
@@ -65,9 +92,6 @@ func (t *TimelineController) Index(c *gin.Context) {
 	}
 	c.SecureJSON(
 		http.StatusOK,
-		gin.H{
-			"timelines": timelineResponses,
-			"page_info": app_types.NewPageResponse(page),
-		},
+		NewIndexResponse(app_types.NewPageResponse(page), timelineResponses),
 	)
 }
