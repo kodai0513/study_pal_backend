@@ -6,11 +6,30 @@ import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers"
 	"study-pal-backend/app/infrastructures/db"
+	_ "study-pal-backend/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+//	@title			StudyPal API
+//	@version		1.0
+//	@description	StudyPalAPIサーバー
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.basic	JWTAuth
+
+//	@externalDocs.description	OpenAPI
+//	@externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -37,9 +56,11 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	v1 := r.Group("/v1")
+	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/timelines", timelineController.Index)
 	}
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run()
 }
