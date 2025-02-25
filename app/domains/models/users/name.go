@@ -2,7 +2,9 @@ package users
 
 import (
 	"study-pal-backend/app/utils/application_errors"
-	"study-pal-backend/app/utils/validations"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 )
 
 type Name struct {
@@ -10,18 +12,13 @@ type Name struct {
 }
 
 func NewName(value string) (*Name, application_errors.ApplicationError) {
-	isRequired, err := validations.IsRequired(value)
-	if !isRequired {
-		return nil, application_errors.NewClientInputValidationApplicationError(err)
-	}
+	err := validation.Validate(value,
+		validation.Required,
+		validation.Length(1, 20),
+		is.Alphanumeric,
+	)
 
-	isAlphanumeric, err := validations.IsAlphanumeric(value)
-	if !isAlphanumeric {
-		return nil, application_errors.NewClientInputValidationApplicationError(err)
-	}
-
-	isCharactersMaxLength, err := validations.IsCharactersMaxLength(value, 20)
-	if !isCharactersMaxLength {
+	if err != nil {
 		return nil, application_errors.NewClientInputValidationApplicationError(err)
 	}
 

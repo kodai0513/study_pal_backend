@@ -3,7 +3,8 @@ package users
 import (
 	"study-pal-backend/app/utils/application_errors"
 	"study-pal-backend/app/utils/password_hashes"
-	"study-pal-backend/app/utils/validations"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type Password struct {
@@ -11,8 +12,10 @@ type Password struct {
 }
 
 func NewPassword(value string) (*Password, application_errors.ApplicationError) {
-	isRequired, err := validations.IsRequired(value)
-	if !isRequired {
+	err := validation.Validate(value,
+		validation.Required,
+	)
+	if err != nil {
 		return nil, application_errors.NewClientInputValidationApplicationError(err)
 	}
 

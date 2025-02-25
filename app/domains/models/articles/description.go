@@ -2,7 +2,8 @@ package articles
 
 import (
 	"study-pal-backend/app/utils/application_errors"
-	"study-pal-backend/app/utils/validations"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type Description struct {
@@ -10,13 +11,11 @@ type Description struct {
 }
 
 func NewDescription(value string) (*Description, application_errors.ApplicationError) {
-	isRequired, err := validations.IsRequired(value)
-	if !isRequired {
-		return nil, application_errors.NewClientInputValidationApplicationError(err)
-	}
-
-	isCharactersMaxLength, err := validations.IsCharactersMaxLength(value, 400)
-	if !isCharactersMaxLength {
+	err := validation.Validate(value,
+		validation.Required,
+		validation.Length(1, 400),
+	)
+	if err != nil {
 		return nil, application_errors.NewClientInputValidationApplicationError(err)
 	}
 
