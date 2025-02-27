@@ -1,26 +1,35 @@
 # マイグレーション手順
 
-### entのアセットの生成
+#### entのアセットの生成
+```
 go generate ./ent
+```
 
-### atlasgoが入っていない場合はインストールしておく
+#### atlasgoが入っていない場合はインストールしておく
+```
 curl -sSf https://atlasgo.sh | sh
+```
 
-### マイグレーションファイルの生成
+#### マイグレーションファイルの生成
+```
 atlas migrate diff migration_name \
     --dir "file://db/migrations" \
     --to "ent://ent/schema" \
     --dev-url "docker://postgres/15/study_pal?search_path=public"
+```
 
-### マイグレーションの適用
+#### マイグレーションの適用
+```
 atlas migrate apply \
     --dir "file://db/migrations" \
     --url "postgres://postgres:postgres@study_pal_db:5432/study_pal?search_path=public&sslmode=disable"
+```
 
 
 # API仕様書の自動生成手順
 
-### controllerのメソッドに以下のようにして記述
+#### controllerのメソッドに以下のようにして記述
+```
 // timelines godoc
 //
 //	@Summary		タイムライン取得API
@@ -36,7 +45,8 @@ atlas migrate apply \
 //	@Failure		500				{object}	app_types.ErrorResponse
 //	@Router			/timelines [get]
 func (t *TimelineController) Index(c *gin.Context)
+```
 
-### swag fmtコマンドを実行してファイルを自動整形
+#### swag fmtコマンドを実行してファイルを自動整形
 
-### swag initコマンドを実行してswaggerファイルを自動生成
+#### swag initコマンドを実行してswaggerファイルを自動生成
