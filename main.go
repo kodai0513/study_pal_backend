@@ -28,8 +28,8 @@ import (
 
 //	@securityDefinitions.basic	JWTAuth
 
-//	@externalDocs.description	OpenAPI
-//	@externalDocs.url			https://swagger.io/resources/open-api/
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -56,6 +56,7 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/timelines", timelineController.Index)
