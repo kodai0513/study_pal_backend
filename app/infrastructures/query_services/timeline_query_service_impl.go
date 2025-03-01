@@ -43,9 +43,9 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*usecases.Time
 		nextPage.SetNextPageId(strconv.Itoa(timelines[len(timelines)-1].ID))
 		timelines = timelines[:len(timelines)-1]
 		nextPage.SetPageSize(len(timelines))
-	} else {
-		nextPage.SetPageSize(len(timelines))
 	}
+
+	nextPage.SetPageSize(len(timelines))
 
 	var timelineList []*usecases.TimelineDto
 	for _, result := range timelines {
