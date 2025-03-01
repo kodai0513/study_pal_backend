@@ -47,6 +47,12 @@ atlas migrate apply \
 func (t *TimelineController) Index(c *gin.Context)
 ```
 
-#### swag fmtコマンドを実行してファイルを自動整形
+#### ファイルを自動整形
+'''
+swag fmt
+'''
 
-#### swag initコマンドを実行してswaggerファイルを自動生成
+#### swaggerファイルを自動生成
+```
+swag init
+```

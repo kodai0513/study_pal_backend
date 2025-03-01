@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/infrastructures/query_services"
 	"study-pal-backend/app/usecases"
 	"study-pal-backend/app/utils/application_errors"
+	"study-pal-backend/app/utils/converts"
 
 	"github.com/gin-gonic/gin"
 )
@@ -57,33 +58,34 @@ func NewIndexResponse(pageResponse *app_types.PageResponse, timelineResponses []
 //	@Tags			timelines
 //	@Accept			json
 //	@Produce		json
-//	@Param			page_size		query		int		true "ページサイズ"
-//	@Param			prev_page_token	query		string	false "次のページのトークン"
-//	@Param			next_page_token	query		string	false "前のページのトークン"
-//	@Success		200				{object}	IndexResponse
-//	@Failure		400				{object}	app_types.ErrorResponse
-//	@Failure		500				{object}	app_types.ErrorResponse
+//	@Param			page_size			query		int	false	"ページサイズ"
+//	@Param			next_page_number	query		int	false	"次のページのナンバー"
+//	@Success		200					{object}	IndexResponse
+//	@Failure		400					{object}	app_types.ErrorResponse
+//	@Failure		500					{object}	app_types.ErrorResponse
 //	@Router			/timelines [get]
 func (t *TimelineController) Index(c *gin.Context) {
-	_ = c.Query("page_size")
-	timelineList, page, err := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(10, "a", "b"))
+	pageSizeInput := c.Query("page_size")
+	pageSize := converts.StringToInt(pageSizeInput, 50)
+
+	nextPageNumberInput := c.Query("next_page_number")
+
+	timelineList, page, err := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(pageSize, "", nextPageNumberInput))
 
 	if err != nil && err.Kind() == application_errors.ClientInputValidation {
-		var errors []string
-		errors = append(errors, err.Error())
 		c.SecureJSON(
 			http.StatusBadRequest,
-			app_types.NewErrorResponse(errors),
+			app_types.NewErrorResponse([]string{err.Error()}),
 		)
+		return
 	}
 
 	if err != nil && err.Kind() == application_errors.DatabaseConnection {
-		var errors []string
-		errors = append(errors, err.Error())
 		c.SecureJSON(
 			http.StatusInternalServerError,
-			app_types.NewErrorResponse(errors),
+			app_types.NewErrorResponse([]string{err.Error()}),
 		)
+		return
 	}
 
 	var timelineResponses []*TimelineResponse
