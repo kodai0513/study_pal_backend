@@ -10,6 +10,8 @@ type ApplicationError interface {
 const (
 	ClientInputValidation applicationErrorType = iota
 	DatabaseConnection
+	DataNotFound
+	FatalError
 )
 
 type applicationError struct {
@@ -31,9 +33,23 @@ func NewClientInputValidationApplicationError(err error) *applicationError {
 	}
 }
 
+func NewDataNotFoundApplicationError(err error) *applicationError {
+	return &applicationError{
+		kind:    DataNotFound,
+		message: err.Error(),
+	}
+}
+
 func NewDatabaseConnectionApplicationError(err error) *applicationError {
 	return &applicationError{
 		kind:    DatabaseConnection,
+		message: err.Error(),
+	}
+}
+
+func NewFatalApplicationError(err error) *applicationError {
+	return &applicationError{
+		kind:    FatalError,
 		message: err.Error(),
 	}
 }

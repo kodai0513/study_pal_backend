@@ -1,4 +1,4 @@
-package usecases
+package timelines
 
 import (
 	"study-pal-backend/app/app_types"

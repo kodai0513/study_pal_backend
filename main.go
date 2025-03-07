@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers"
 	"study-pal-backend/app/infrastructures/db"
+	"study-pal-backend/app/middlewares"
 	_ "study-pal-backend/docs"
 
 	"github.com/gin-gonic/gin"
@@ -49,8 +51,10 @@ func main() {
 	}
 	defer client.Close()
 
-	appData := app_types.NewAppData(client)
+	jwtSecretKey := os.Getenv("JWT_SERCRET_KEY")
+	appData := app_types.NewAppData(client, jwtSecretKey)
 
+	authController := controllers.NewAuthController(appData)
 	timelineController := controllers.NewTimelineController(appData)
 
 	r := gin.New()
@@ -59,7 +63,15 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	{
+		v1.POST("/login", authController.Login)
+		v1.POST("/refresh-token", authController.RefreshToken)
 		v1.GET("/timelines", timelineController.Index)
+		v1.Use(middlewares.AuthRequired(appData.JwtSecretKey())).GET("/auth-test", func(c *gin.Context) {
+			c.JSON(
+				http.StatusOK,
+				gin.H{"message": "hello world"},
+			)
+		})
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

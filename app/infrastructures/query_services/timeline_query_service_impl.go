@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"study-pal-backend/app/app_types"
-	"study-pal-backend/app/usecases"
+	timeline_query_service "study-pal-backend/app/usecases/timelines"
 	"study-pal-backend/app/utils/application_errors"
 	"study-pal-backend/app/utils/converts"
 	"study-pal-backend/ent"
@@ -16,14 +16,14 @@ type TimelineQueryServiceImpl struct {
 	client *ent.Client
 }
 
-func NewTimelineQueryServiceImpl(ctx context.Context, client *ent.Client) usecases.TimelineQueryService {
+func NewTimelineQueryServiceImpl(ctx context.Context, client *ent.Client) timeline_query_service.TimelineQueryService {
 	return &TimelineQueryServiceImpl{
 		ctx:    ctx,
 		client: client,
 	}
 }
 
-func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*usecases.TimelineDto, *app_types.Page, application_errors.ApplicationError) {
+func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_query_service.TimelineDto, *app_types.Page, application_errors.ApplicationError) {
 	limit := page.PageSize() + 1
 
 	query := t.client.Article.Query().WithPost().Limit(limit)
@@ -47,9 +47,9 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*usecases.Time
 
 	nextPage.SetPageSize(len(timelines))
 
-	var timelineList []*usecases.TimelineDto
+	var timelineList []*timeline_query_service.TimelineDto
 	for _, result := range timelines {
-		timelineList = append(timelineList, usecases.NewTimelineDto(
+		timelineList = append(timelineList, timeline_query_service.NewTimelineDto(
 			result.ID,
 			result.Description,
 			result.PostID,

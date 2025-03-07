@@ -27,6 +27,8 @@ atlas migrate apply \
 
 
 # API仕様書の自動生成手順
+下記を使用している
+https://github.com/swaggo/swag
 
 #### controllerのメソッドに以下のようにして記述
 ```

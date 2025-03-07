@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/infrastructures/query_services"
-	"study-pal-backend/app/usecases"
 	"study-pal-backend/app/utils/application_errors"
 	"study-pal-backend/app/utils/converts"
 
@@ -29,26 +28,9 @@ type TimelineResponse struct {
 	PostNickName string `json:"post_nick_name"`
 }
 
-func NewTimelineResponse(timeline *usecases.TimelineDto) *TimelineResponse {
-	return &TimelineResponse{
-		Id:           timeline.Id(),
-		Description:  timeline.Description(),
-		PostId:       timeline.PostId(),
-		PostName:     timeline.PostName(),
-		PostNickName: timeline.PostNickName(),
-	}
-}
-
 type IndexResponse struct {
 	PageInfo  *app_types.PageResponse `json:"page_info"`
 	Timelines []*TimelineResponse     `json:"timelines"`
-}
-
-func NewIndexResponse(pageResponse *app_types.PageResponse, timelineResponses []*TimelineResponse) *IndexResponse {
-	return &IndexResponse{
-		PageInfo:  pageResponse,
-		Timelines: timelineResponses,
-	}
 }
 
 // timelines godoc
@@ -90,10 +72,19 @@ func (t *TimelineController) Index(c *gin.Context) {
 
 	var timelineResponses []*TimelineResponse
 	for _, timeline := range timelineList {
-		timelineResponses = append(timelineResponses, NewTimelineResponse(timeline))
+		timelineResponses = append(timelineResponses, &TimelineResponse{
+			Id:           timeline.Id(),
+			Description:  timeline.Description(),
+			PostId:       timeline.PostId(),
+			PostName:     timeline.PostName(),
+			PostNickName: timeline.PostNickName(),
+		})
 	}
 	c.SecureJSON(
 		http.StatusOK,
-		NewIndexResponse(app_types.NewPageResponse(page), timelineResponses),
+		&IndexResponse{
+			PageInfo:  app_types.NewPageResponse(page),
+			Timelines: timelineResponses,
+		},
 	)
 }
