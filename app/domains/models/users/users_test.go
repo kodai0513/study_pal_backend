@@ -92,7 +92,7 @@ func TestNewNickName_名前が20文字を超えた時エラー(t *testing.T) {
 
 func TestNewPassword_正常な値の時(t *testing.T) {
 	input := "ValidPassword123"
-	password, err := NewPassword(input)
+	password, err := NewHashPassword(input)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, password.Value()) // ハッシュ化されたパスワードが空でないことを確認
@@ -100,7 +100,7 @@ func TestNewPassword_正常な値の時(t *testing.T) {
 
 func TestNewPassword_パスワードが空の時エラー(t *testing.T) {
 	input := ""
-	password, err := NewPassword(input)
+	password, err := NewHashPassword(input)
 
 	assert.Error(t, err)
 	assert.Nil(t, password)

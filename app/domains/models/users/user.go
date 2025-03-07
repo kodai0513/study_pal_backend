@@ -1,19 +1,30 @@
 package users
 
+import "study-pal-backend/app/domains/models/value_object_commons"
+
 type User struct {
+	id       *value_object_commons.Id
 	email    Email
 	name     Name
 	nickName NickName
 	password Password
 }
 
-func NewUser(email Email, name Name, nickName NickName, password Password) *User {
+func NewUser(id *value_object_commons.Id, email Email, name Name, nickName NickName, password Password) *User {
 	return &User{
+		id:       id,
 		email:    email,
 		name:     name,
 		nickName: nickName,
 		password: password,
 	}
+}
+
+func (u *User) Id() int {
+	if u.id != nil {
+		return 0
+	}
+	return u.id.Value()
 }
 
 func (u *User) Email() string {
