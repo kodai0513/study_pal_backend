@@ -40,19 +40,19 @@ type IndexResponse struct {
 //	@Tags			timelines
 //	@Accept			json
 //	@Produce		json
-//	@Param			page_size			query		int	false	"ページサイズ"
-//	@Param			next_page_number	query		int	false	"次のページのナンバー"
-//	@Success		200					{object}	IndexResponse
-//	@Failure		400					{object}	app_types.ErrorResponse
-//	@Failure		500					{object}	app_types.ErrorResponse
+//	@Param			page_size		query		int	false	"ページサイズ"
+//	@Param			next_page_id	query		int	false	"次のページのid"
+//	@Success		200				{object}	IndexResponse
+//	@Failure		400				{object}	app_types.ErrorResponse
+//	@Failure		500				{object}	app_types.ErrorResponse
 //	@Router			/timelines [get]
 func (t *TimelineController) Index(c *gin.Context) {
 	pageSizeInput := c.Query("page_size")
 	pageSize := converts.StringToInt(pageSizeInput, 50)
 
-	nextPageNumberInput := c.Query("next_page_number")
+	nextPageIdInput := c.Query("next_page_id")
 
-	timelineList, page, err := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(pageSize, "", nextPageNumberInput))
+	timelineList, page, err := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(pageSize, "", nextPageIdInput))
 
 	if err != nil && err.Kind() == application_errors.ClientInputValidation {
 		c.SecureJSON(
