@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 	"study-pal-backend/app/app_types"
+	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/query_services"
-	"study-pal-backend/app/utils/application_errors"
-	"study-pal-backend/app/utils/converts"
+	"study-pal-backend/app/utils/type_converts"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,26 +48,17 @@ type IndexResponse struct {
 //	@Router			/timelines [get]
 func (t *TimelineController) Index(c *gin.Context) {
 	pageSizeInput := c.Query("page_size")
-	pageSize := converts.StringToInt(pageSizeInput, 50)
+	pageSize := type_converts.StringToInt(pageSizeInput, 50)
 
 	nextPageIdInput := c.Query("next_page_id")
 
-	timelineList, page, err := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(pageSize, "", nextPageIdInput))
+	timelineList, page, usecaseErrGroup := query_services.NewTimelineQueryServiceImpl(c, t.appData.Client()).Fetch(app_types.NewPage(pageSize, "", nextPageIdInput))
 
-	if err != nil && err.Kind() == application_errors.ClientInputValidation {
+	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
-			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
+			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
-		return
-	}
-
-	if err != nil && err.Kind() == application_errors.DatabaseConnection {
-		c.SecureJSON(
-			http.StatusInternalServerError,
-			app_types.NewErrorResponse([]string{err.Error()}),
-		)
-		return
 	}
 
 	var timelineResponses []*TimelineResponse

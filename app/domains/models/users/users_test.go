@@ -19,7 +19,7 @@ func TestNewEmail_空のメールアドレスはエラー(t *testing.T) {
 	email, err := NewEmail(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, email)
+	assert.Empty(t, email.Value())
 }
 
 func TestNewEmail_無効なメールアドレスはエラー(t *testing.T) {
@@ -37,7 +37,7 @@ func TestNewEmail_無効なメールアドレスはエラー(t *testing.T) {
 			email, err := NewEmail(input)
 
 			assert.Error(t, err)
-			assert.Nil(t, email)
+			assert.Empty(t, email.Value())
 		})
 	}
 }
@@ -55,7 +55,7 @@ func TestNewName_名前が空の時エラー(t *testing.T) {
 	name, err := NewName(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, name)
+	assert.Empty(t, name.Value())
 }
 
 func TestNewName_名前が英数字でない時エラー(t *testing.T) {
@@ -63,7 +63,7 @@ func TestNewName_名前が英数字でない時エラー(t *testing.T) {
 	name, err := NewName(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, name)
+	assert.Empty(t, name.Value())
 }
 
 func TestNewName_名前が20文字を超えた時エラー(t *testing.T) {
@@ -71,7 +71,7 @@ func TestNewName_名前が20文字を超えた時エラー(t *testing.T) {
 	name, err := NewName(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, name)
+	assert.Empty(t, name.Value())
 }
 
 func TestNewNickName_正常な値の時(t *testing.T) {
@@ -87,7 +87,7 @@ func TestNewNickName_名前が20文字を超えた時エラー(t *testing.T) {
 	nickName, err := NewNickName(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, nickName)
+	assert.Empty(t, nickName.Value())
 }
 
 func TestNewPassword_正常な値の時(t *testing.T) {
@@ -103,5 +103,5 @@ func TestNewPassword_パスワードが空の時エラー(t *testing.T) {
 	password, err := NewHashPassword(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, password)
+	assert.Empty(t, password.Value())
 }

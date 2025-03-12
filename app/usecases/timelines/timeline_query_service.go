@@ -2,7 +2,7 @@ package timelines
 
 import (
 	"study-pal-backend/app/app_types"
-	"study-pal-backend/app/utils/application_errors"
+	"study-pal-backend/app/usecases/shared/usecase_errors"
 )
 
 type TimelineDto struct {
@@ -44,5 +44,5 @@ func (t *TimelineDto) PostNickName() string {
 }
 
 type TimelineQueryService interface {
-	Fetch(page *app_types.Page) ([]*TimelineDto, *app_types.Page, application_errors.ApplicationError)
+	Fetch(page *app_types.Page) ([]*TimelineDto, *app_types.Page, usecase_errors.UsecaseErrorGroup)
 }
