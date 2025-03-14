@@ -27,9 +27,25 @@ func (ac *ArticleCreate) SetCreatedAt(t time.Time) *ArticleCreate {
 	return ac
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ac *ArticleCreate) SetNillableCreatedAt(t *time.Time) *ArticleCreate {
+	if t != nil {
+		ac.SetCreatedAt(*t)
+	}
+	return ac
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (ac *ArticleCreate) SetUpdatedAt(t time.Time) *ArticleCreate {
 	ac.mutation.SetUpdatedAt(t)
+	return ac
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ac *ArticleCreate) SetNillableUpdatedAt(t *time.Time) *ArticleCreate {
+	if t != nil {
+		ac.SetUpdatedAt(*t)
+	}
 	return ac
 }
 
@@ -65,6 +81,7 @@ func (ac *ArticleCreate) Mutation() *ArticleMutation {
 
 // Save creates the Article in the database.
 func (ac *ArticleCreate) Save(ctx context.Context) (*Article, error) {
+	ac.defaults()
 	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
@@ -87,6 +104,18 @@ func (ac *ArticleCreate) Exec(ctx context.Context) error {
 func (ac *ArticleCreate) ExecX(ctx context.Context) {
 	if err := ac.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ac *ArticleCreate) defaults() {
+	if _, ok := ac.mutation.CreatedAt(); !ok {
+		v := article.DefaultCreatedAt()
+		ac.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ac.mutation.UpdatedAt(); !ok {
+		v := article.DefaultUpdatedAt()
+		ac.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -182,6 +211,7 @@ func (acb *ArticleCreateBulk) Save(ctx context.Context) ([]*Article, error) {
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ArticleMutation)
 				if !ok {

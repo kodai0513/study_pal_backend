@@ -8,37 +8,31 @@ import (
 	"study-pal-backend/app/usecases/shared/usecase_errors"
 )
 
-type UpdateActionCommand struct {
-	articleId   int
-	description string
-	postId      int
+type DeleteActionCommand struct {
+	postId    int
+	articleId int
 }
 
-func NewUpdateActionCommand(articleId int, description string, postId int) *UpdateActionCommand {
-	return &UpdateActionCommand{
-		articleId:   articleId,
-		description: description,
-		postId:      postId,
+func NewDeleteActionCommand(articleId int, postId int) *DeleteActionCommand {
+	return &DeleteActionCommand{
+		articleId: articleId,
+		postId:    postId,
 	}
 }
 
-type UpdateAction struct {
+type DeleteAction struct {
 	articleRepository repositories.ArticleRepository
 }
 
-func NewUpdateAction(articleRepository repositories.ArticleRepository) *UpdateAction {
-	return &UpdateAction{
+func NewDeleteAction(articleRepository repositories.ArticleRepository) *DeleteAction {
+	return &DeleteAction{
 		articleRepository: articleRepository,
 	}
 }
 
-func (c *UpdateAction) Execute(command *UpdateActionCommand) usecase_errors.UsecaseErrorGroup {
+func (c *DeleteAction) Execute(command *DeleteActionCommand) usecase_errors.UsecaseErrorGroup {
 	usecaseErrGroup := usecase_errors.NewUsecaseErrorGroup(usecase_errors.InvalidParameter)
 	articleId, err := shared.NewId(command.articleId)
-	if err != nil {
-		usecaseErrGroup.AddOnlySameUsecaseError(usecase_errors.NewUsecaseError(usecase_errors.InvalidParameter, err))
-	}
-	description, err := articles.NewDescription(command.description)
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_errors.NewUsecaseError(usecase_errors.InvalidParameter, err))
 	}
@@ -52,18 +46,18 @@ func (c *UpdateAction) Execute(command *UpdateActionCommand) usecase_errors.Usec
 	}
 
 	targetArticle := c.articleRepository.FindById(*articleId)
+
 	if targetArticle == nil {
 		return usecase_errors.NewUsecaseErrorGroupWithMessage(usecase_errors.NewUsecaseError(usecase_errors.QueryDataNotFoundError, errors.New("article not found")))
 	}
 
 	if postId.Value() != targetArticle.PostId() {
 		return usecase_errors.NewUsecaseErrorGroupWithMessage(
-			usecase_errors.NewUsecaseError(usecase_errors.UnPermittedOperation, errors.New("you are not authorized to edit that article")),
+			usecase_errors.NewUsecaseError(usecase_errors.UnPermittedOperation, errors.New("you are not authorized to delete that article")),
 		)
 	}
 
-	article := articles.NewArticle(articleId, description, postId)
-	c.articleRepository.Update(article)
+	c.articleRepository.Delete(*articleId)
 
 	return nil
 }

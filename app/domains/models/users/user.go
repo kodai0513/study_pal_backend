@@ -23,7 +23,7 @@ func NewUser(id *shared.Id, email Email, name Name, nickName NickName, password 
 }
 
 func (u *User) Id() int {
-	if u.id != nil {
+	if u.id == nil {
 		return 0
 	}
 	return u.id.Value()

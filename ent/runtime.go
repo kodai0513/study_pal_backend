@@ -6,20 +6,43 @@ import (
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/schema"
 	"study-pal-backend/ent/user"
+	"time"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	articleMixin := schema.Article{}.Mixin()
+	articleMixinFields0 := articleMixin[0].Fields()
+	_ = articleMixinFields0
 	articleFields := schema.Article{}.Fields()
 	_ = articleFields
+	// articleDescCreatedAt is the schema descriptor for created_at field.
+	articleDescCreatedAt := articleMixinFields0[0].Descriptor()
+	// article.DefaultCreatedAt holds the default value on creation for the created_at field.
+	article.DefaultCreatedAt = articleDescCreatedAt.Default.(func() time.Time)
+	// articleDescUpdatedAt is the schema descriptor for updated_at field.
+	articleDescUpdatedAt := articleMixinFields0[1].Descriptor()
+	// article.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	article.DefaultUpdatedAt = articleDescUpdatedAt.Default.(func() time.Time)
 	// articleDescDescription is the schema descriptor for description field.
 	articleDescDescription := articleFields[0].Descriptor()
 	// article.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	article.DescriptionValidator = articleDescDescription.Validators[0].(func(string) error)
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userMixinFields0[0].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userMixinFields0[1].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// userDescName is the schema descriptor for name field.
 	userDescName := userFields[1].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.

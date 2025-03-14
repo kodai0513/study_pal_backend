@@ -17,7 +17,7 @@ func NewArticle(id *shared.Id, description Description, postId PostId) *Article 
 }
 
 func (a *Article) Id() int {
-	if a.id != nil {
+	if a.id == nil {
 		return 0
 	}
 	return a.id.Value()

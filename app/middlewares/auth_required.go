@@ -34,7 +34,8 @@ func AuthRequired(secretKey string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.AddParam("user_id", strconv.Itoa(userId))
+
+		c.Set("user_id", strconv.Itoa(userId))
 		c.Next()
 	}
 }

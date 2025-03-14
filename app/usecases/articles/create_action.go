@@ -11,6 +11,13 @@ type CreateActionCommand struct {
 	postId      int
 }
 
+func NewCreateActionCommand(description string, postId int) *CreateActionCommand {
+	return &CreateActionCommand{
+		description: description,
+		postId:      postId,
+	}
+}
+
 type CreateAction struct {
 	articleRepository repositories.ArticleRepository
 }

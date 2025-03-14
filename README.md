@@ -58,3 +58,6 @@ swag fmt
 ```
 swag init
 ```
+
+### APIドキュメント(swagger)
+http://localhost:8080/swagger/index.html
