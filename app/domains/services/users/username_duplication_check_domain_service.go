@@ -1,18 +1,18 @@
 package users
 
-import "study-pal-backend/app/domains/repositories/users"
+import "study-pal-backend/app/domains/repositories"
 
 type UsernameDuplicationCheckDomainService struct {
-	userRepository users.UserRepository
+	userRepository repositories.UserRepository
 }
 
-func NewUsernameDuplicationCheckDomainService(userRepository users.UserRepository) *UsernameDuplicationCheckDomainService {
+func NewUsernameDuplicationCheckDomainService(userRepository repositories.UserRepository) *UsernameDuplicationCheckDomainService {
 	return &UsernameDuplicationCheckDomainService{
 		userRepository: userRepository,
 	}
 }
 
 func (u *UsernameDuplicationCheckDomainService) Execute(name string) bool {
-	user, _ := u.userRepository.FindByName(name)
+	user := u.userRepository.FindByName(name)
 	return user != nil
 }

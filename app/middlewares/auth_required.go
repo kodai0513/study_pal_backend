@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/utils/study_pal_jwts"
@@ -23,17 +24,18 @@ func AuthRequired(secretKey string) gin.HandlerFunc {
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-		isValid, _, err := study_pal_jwts.VerifyToken(secretKey, tokenString)
+		userId, err := study_pal_jwts.VerifyToken(secretKey, tokenString)
 
-		if err != nil || !isValid {
+		if err != nil {
 			c.SecureJSON(
 				http.StatusUnauthorized,
-				app_types.NewErrorResponse([]string{"invalid token"}),
+				app_types.NewErrorResponse([]string{err.Error()}),
 			)
 			c.Abort()
 			return
 		}
 
+		c.Set("user_id", strconv.Itoa(userId))
 		c.Next()
 	}
 }

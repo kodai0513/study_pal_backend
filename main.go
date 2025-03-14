@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers"
@@ -54,6 +53,7 @@ func main() {
 	jwtSecretKey := os.Getenv("JWT_SERCRET_KEY")
 	appData := app_types.NewAppData(client, jwtSecretKey)
 
+	articleController := controllers.NewArticleController(appData)
 	authController := controllers.NewAuthController(appData)
 	timelineController := controllers.NewTimelineController(appData)
 
@@ -66,12 +66,9 @@ func main() {
 		v1.POST("/login", authController.Login)
 		v1.POST("/refresh-token", authController.RefreshToken)
 		v1.GET("/timelines", timelineController.Index)
-		v1.Use(middlewares.AuthRequired(appData.JwtSecretKey())).GET("/auth-test", func(c *gin.Context) {
-			c.JSON(
-				http.StatusOK,
-				gin.H{"message": "hello world"},
-			)
-		})
+		v1.Use(middlewares.AuthRequired(appData.JwtSecretKey())).POST("/articles", articleController.Create)
+		v1.PUT("/articles/:article_id", articleController.Update)
+		v1.DELETE("/articles/:article_id", articleController.Delete)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

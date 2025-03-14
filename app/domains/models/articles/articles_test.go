@@ -20,7 +20,7 @@ func TestNewDescription_何を入力されていないときエラー(t *testing
 	desc, err := NewDescription(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, desc)
+	assert.Empty(t, desc.Value())
 }
 
 func TestNewDescription_文字数が401を超えたときエラー(t *testing.T) {
@@ -35,5 +35,5 @@ func TestNewDescription_文字数が401を超えたときエラー(t *testing.T)
 	desc, err := NewDescription(input)
 
 	assert.Error(t, err)
-	assert.Nil(t, desc)
+	assert.Empty(t, desc.Value())
 }

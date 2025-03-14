@@ -1,16 +1,18 @@
 package users
 
-import "study-pal-backend/app/domains/models/value_object_commons"
+import (
+	"study-pal-backend/app/domains/models/shared"
+)
 
 type User struct {
-	id       *value_object_commons.Id
+	id       *shared.Id
 	email    Email
 	name     Name
 	nickName NickName
 	password Password
 }
 
-func NewUser(id *value_object_commons.Id, email Email, name Name, nickName NickName, password Password) *User {
+func NewUser(id *shared.Id, email Email, name Name, nickName NickName, password Password) *User {
 	return &User{
 		id:       id,
 		email:    email,
@@ -21,7 +23,7 @@ func NewUser(id *value_object_commons.Id, email Email, name Name, nickName NickN
 }
 
 func (u *User) Id() int {
-	if u.id != nil {
+	if u.id == nil {
 		return 0
 	}
 	return u.id.Value()

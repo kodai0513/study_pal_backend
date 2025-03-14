@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 	"study-pal-backend/app/app_types"
+	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/auths"
-	"study-pal-backend/app/utils/application_errors"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,19 +43,12 @@ type RefreshTokenResponse struct {
 func (a *AuthController) RefreshToken(c *gin.Context) {
 	var refreshTokenRequest RefreshTokenRequest
 	c.BindJSON(&refreshTokenRequest)
-	refreshTokenDto, err := auths.NewRefreshTokenAction(*a.appData).Execute(auths.NewRefreshTokenCommand(refreshTokenRequest.RefreshToken))
-	if err != nil && err.Kind() == application_errors.ClientInputValidation {
-		c.SecureJSON(
-			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
-		)
-		return
-	}
+	refreshTokenDto, usecaseErrGroup := auths.NewRefreshTokenAction(*a.appData).Execute(auths.NewRefreshTokenCommand(refreshTokenRequest.RefreshToken))
 
-	if err != nil && err.Kind() == application_errors.FatalError {
+	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
-			http.StatusInternalServerError,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
+			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
 		return
 	}
@@ -93,30 +86,14 @@ type LoginResponse struct {
 func (a *AuthController) Login(c *gin.Context) {
 	var loginRequest LoginRequest
 	c.BindJSON(&loginRequest)
-	loginDto, err := auths.NewLoginAction(*a.appData, repositories.NewUserRepositoryImpl(c, a.appData.Client())).Execute(
+	loginDto, usecaseErrGroup := auths.NewLoginAction(*a.appData, repositories.NewUserRepositoryImpl(a.appData.Client(), c)).Execute(
 		auths.NewLoginCommand(loginRequest.Name, loginRequest.Password),
 	)
 
-	if err != nil && (err.Kind() == application_errors.DatabaseConnection || err.Kind() == application_errors.FatalError) {
+	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
-			http.StatusInternalServerError,
-			app_types.NewErrorResponse([]string{err.Error()}),
-		)
-		return
-	}
-
-	if err != nil && (err.Kind() == application_errors.ClientInputValidation) {
-		c.SecureJSON(
-			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
-		)
-		return
-	}
-
-	if err != nil && err.Kind() == application_errors.DataNotFound {
-		c.SecureJSON(
-			http.StatusNotFound,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
+			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
 		return
 	}

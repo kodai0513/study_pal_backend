@@ -3,8 +3,8 @@ package auths
 import (
 	"errors"
 	"study-pal-backend/app/app_types"
-	"study-pal-backend/app/domains/repositories/users"
-	"study-pal-backend/app/utils/application_errors"
+	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/usecase_errors"
 	"study-pal-backend/app/utils/password_hashes"
 	"study-pal-backend/app/utils/study_pal_jwts"
 )
@@ -19,14 +19,6 @@ func NewLoginCommand(name string, password string) *LoginCommand {
 		name:     name,
 		password: password,
 	}
-}
-
-func (l *LoginCommand) Name() string {
-	return l.name
-}
-
-func (l *LoginCommand) Password() string {
-	return l.password
 }
 
 type LoginDto struct {
@@ -51,40 +43,30 @@ func (l *LoginDto) RefreshToken() string {
 
 type LoginAction struct {
 	appData        app_types.AppData
-	userRepository users.UserRepository
+	userRepository repositories.UserRepository
 }
 
-func NewLoginAction(appData app_types.AppData, userRepository users.UserRepository) *LoginAction {
+func NewLoginAction(appData app_types.AppData, userRepository repositories.UserRepository) *LoginAction {
 	return &LoginAction{
 		appData:        appData,
 		userRepository: userRepository,
 	}
 }
 
-func (l *LoginAction) Execute(command *LoginCommand) (*LoginDto, application_errors.ApplicationError) {
-	user, err := l.userRepository.FindByName(command.Name())
-	if err != nil {
-		return nil, application_errors.NewDatabaseConnectionApplicationError(err)
-	}
+func (l *LoginAction) Execute(command *LoginCommand) (*LoginDto, usecase_errors.UsecaseErrorGroup) {
+	user := l.userRepository.FindByName(command.name)
 
 	if user == nil {
-		return nil, application_errors.NewDataNotFoundApplicationError(errors.New("user not found"))
+		return nil, usecase_errors.NewUsecaseErrorGroupWithMessage(usecase_errors.NewUsecaseError(usecase_errors.QueryDataNotFoundError, errors.New("user not found")))
 	}
 
-	err = password_hashes.CheckPasswordHash(command.password, user.Password())
+	err := password_hashes.CheckPasswordHash(command.password, user.Password())
 	if err != nil {
-		return nil, application_errors.NewClientInputValidationApplicationError(err)
+		return nil, usecase_errors.NewUsecaseErrorGroupWithMessage(usecase_errors.NewUsecaseError(usecase_errors.InvalidParameter, err))
 	}
 
-	accessToken, err := study_pal_jwts.CreateAccessToken(l.appData.JwtSecretKey(), user.Id())
-	if err != nil {
-		return nil, application_errors.NewFatalApplicationError(err)
-	}
-
-	refreshToken, err := study_pal_jwts.CreateRefreshToken(l.appData.JwtSecretKey(), user.Id())
-	if err != nil {
-		return nil, application_errors.NewFatalApplicationError(err)
-	}
+	accessToken := study_pal_jwts.CreateAccessToken(l.appData.JwtSecretKey(), user.Id())
+	refreshToken := study_pal_jwts.CreateRefreshToken(l.appData.JwtSecretKey(), user.Id())
 
 	return NewLoginDto(accessToken, refreshToken), nil
 }
