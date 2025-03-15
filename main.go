@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers"
 	"study-pal-backend/app/infrastructures/db"
@@ -50,9 +51,9 @@ func main() {
 	}
 	defer client.Close()
 
+	devModeLogin, _ := strconv.ParseBool(os.Getenv("DEV_MODE_LOGIN"))
 	jwtSecretKey := os.Getenv("JWT_SERCRET_KEY")
 	appData := app_types.NewAppData(client, jwtSecretKey)
-
 	articleController := controllers.NewArticleController(appData)
 	authController := controllers.NewAuthController(appData)
 	timelineController := controllers.NewTimelineController(appData)
@@ -60,15 +61,19 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	authRequired := middlewares.AuthRequired(devModeLogin, appData.JwtSecretKey())
 
 	v1 := r.Group("/api/v1")
 	{
+		article := v1.Group("/articles")
+		{
+			article.POST("/", authRequired, articleController.Create)
+			article.PUT("/:article_id", authRequired, articleController.Update)
+			article.DELETE("/:article_id", authRequired, articleController.Delete)
+		}
 		v1.POST("/login", authController.Login)
 		v1.POST("/refresh-token", authController.RefreshToken)
 		v1.GET("/timelines", timelineController.Index)
-		v1.Use(middlewares.AuthRequired(appData.JwtSecretKey())).POST("/articles", articleController.Create)
-		v1.PUT("/articles/:article_id", articleController.Update)
-		v1.DELETE("/articles/:article_id", articleController.Delete)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
