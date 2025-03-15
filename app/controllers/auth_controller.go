@@ -5,7 +5,7 @@ import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
-	"study-pal-backend/app/usecases/auths"
+	"study-pal-backend/app/usecases/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,7 +43,7 @@ type RefreshTokenResponse struct {
 func (a *AuthController) RefreshToken(c *gin.Context) {
 	var refreshTokenRequest RefreshTokenRequest
 	c.BindJSON(&refreshTokenRequest)
-	refreshTokenDto, usecaseErrGroup := auths.NewRefreshTokenAction(*a.appData).Execute(auths.NewRefreshTokenCommand(refreshTokenRequest.RefreshToken))
+	refreshTokenDto, usecaseErrGroup := auth.NewRefreshTokenAction(*a.appData).Execute(auth.NewRefreshTokenCommand(refreshTokenRequest.RefreshToken))
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
@@ -86,8 +86,8 @@ type LoginResponse struct {
 func (a *AuthController) Login(c *gin.Context) {
 	var loginRequest LoginRequest
 	c.BindJSON(&loginRequest)
-	loginDto, usecaseErrGroup := auths.NewLoginAction(*a.appData, repositories.NewUserRepositoryImpl(a.appData.Client(), c)).Execute(
-		auths.NewLoginCommand(loginRequest.Name, loginRequest.Password),
+	loginDto, usecaseErrGroup := auth.NewLoginAction(*a.appData, repositories.NewUserRepositoryImpl(a.appData.Client(), c)).Execute(
+		auth.NewLoginCommand(loginRequest.Name, loginRequest.Password),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {

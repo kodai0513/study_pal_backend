@@ -1,4 +1,4 @@
-package usecase_errors
+package usecase_error
 
 type UsecaseErrorGroup interface {
 	AddOnlySameUsecaseError(usecaseErr UsecaseError)

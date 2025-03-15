@@ -1,0 +1,35 @@
+package controllers
+
+import (
+	"study-pal-backend/app/app_types"
+
+	"github.com/gin-gonic/gin"
+)
+
+type {{ .controllerName }} struct {
+	appData *app_types.AppData
+}
+
+func New{{ .controllerName }}(appData *app_types.AppData) *{{ .controllerName }} {
+	return &{{ .controllerName }}{
+		appData: appData,
+	}
+}
+
+type Request struct {}
+
+type Response struct {}
+
+// {{ .godocName }} godoc
+//
+//	@Summary		API
+//	@Description    
+//	@Tags			{{ .godocName }}
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	
+//	@Failure		400		{object}	app_types.ErrorResponse
+//	@Failure		500		{object}	app_types.ErrorResponse
+//	@Router			/ []
+func (a *{{ .controllerName }}) Index(c *gin.Context) {
+}
