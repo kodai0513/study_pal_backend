@@ -1,0 +1,23 @@
+package {{ .packageName }}
+
+import "study-pal-backend/app/usecases/shared/usecase_error"
+
+type {{ .actionCommandName }} struct {
+}
+
+func New{{ .actionCommandName }}() *{{ .actionCommandName }} {
+	return &{{ .actionCommandName }}{
+	}
+}
+
+type {{ .actionName }} struct {
+}
+
+func New{{ .actionName }}() *{{ .actionName }} {
+	return &{{ .actionName }}{
+	}
+}
+
+func (a *{{ .actionName }}) Execute(command *{{ .actionCommandName }}) usecase_error.UsecaseErrorGroup {
+	return nil
+}

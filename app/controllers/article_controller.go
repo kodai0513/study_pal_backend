@@ -5,7 +5,7 @@ import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
-	"study-pal-backend/app/usecases/articles"
+	"study-pal-backend/app/usecases/article"
 	"study-pal-backend/app/utils/type_converts"
 
 	"github.com/gin-gonic/gin"
@@ -42,8 +42,8 @@ func (a *ArticleController) Create(c *gin.Context) {
 	var request CreateArticleRequest
 	c.BindJSON(&request)
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := articles.NewCreateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		articles.NewCreateActionCommand(request.Description, type_converts.StringToInt(userId.(string), 0)),
+	usecaseErrGroup := article.NewCreateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
+		article.NewCreateActionCommand(request.Description, type_converts.StringToInt(userId.(string), 0)),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
@@ -83,8 +83,8 @@ func (a *ArticleController) Update(c *gin.Context) {
 	c.BindJSON(&request)
 	articleId := c.Param("article_id")
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := articles.NewUpdateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		articles.NewUpdateActionCommand(type_converts.StringToInt(articleId, 0), request.Description, type_converts.StringToInt(userId.(string), 0)),
+	usecaseErrGroup := article.NewUpdateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
+		article.NewUpdateActionCommand(type_converts.StringToInt(articleId, 0), request.Description, type_converts.StringToInt(userId.(string), 0)),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
@@ -117,8 +117,8 @@ func (a *ArticleController) Update(c *gin.Context) {
 func (a *ArticleController) Delete(c *gin.Context) {
 	articleId := c.Param("article_id")
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := articles.NewDeleteAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		articles.NewDeleteActionCommand(type_converts.StringToInt(articleId, 0), type_converts.StringToInt(userId.(string), 0)),
+	usecaseErrGroup := article.NewDeleteAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
+		article.NewDeleteActionCommand(type_converts.StringToInt(articleId, 0), type_converts.StringToInt(userId.(string), 0)),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {

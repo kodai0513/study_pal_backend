@@ -1,4 +1,4 @@
-package usecase_errors
+package usecase_error
 
 type usecaseErrorType int
 

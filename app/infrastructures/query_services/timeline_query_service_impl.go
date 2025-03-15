@@ -4,8 +4,8 @@ import (
 	"context"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/infrastructures/query_services/shared/create_pages"
-	"study-pal-backend/app/usecases/shared/usecase_errors"
-	timeline_query_service "study-pal-backend/app/usecases/timelines"
+	"study-pal-backend/app/usecases/shared/usecase_error"
+	timeline_query_service "study-pal-backend/app/usecases/timeline"
 	"study-pal-backend/app/utils/type_converts"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/article"
@@ -23,7 +23,7 @@ func NewTimelineQueryServiceImpl(ctx context.Context, client *ent.Client) timeli
 	}
 }
 
-func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_query_service.TimelineDto, *app_types.Page, usecase_errors.UsecaseErrorGroup) {
+func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_query_service.TimelineDto, *app_types.Page, usecase_error.UsecaseErrorGroup) {
 	limit := page.PageSize() + 1
 	baseQuery := func() []*ent.Article {
 		return t.client.Article.Query().WithPost().Limit(limit).AllX(t.ctx)
@@ -41,7 +41,7 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_quer
 	)
 
 	if err != nil {
-		return nil, nil, usecase_errors.NewUsecaseErrorGroupWithMessage(usecase_errors.NewUsecaseError(usecase_errors.InvalidParameter, err))
+		return nil, nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
 
 	var timelineDtos []*timeline_query_service.TimelineDto
