@@ -59,6 +59,8 @@ func (t *TimelineController) Index(c *gin.Context) {
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
 			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
+		c.Abort()
+		return
 	}
 
 	var timelineResponses []*TimelineResponse

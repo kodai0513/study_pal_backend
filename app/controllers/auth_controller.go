@@ -50,6 +50,7 @@ func (a *AuthController) RefreshToken(c *gin.Context) {
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
 			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
+		c.Abort()
 		return
 	}
 
@@ -95,6 +96,7 @@ func (a *AuthController) Login(c *gin.Context) {
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
 			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
+		c.Abort()
 		return
 	}
 

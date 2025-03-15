@@ -43,7 +43,7 @@ func (a *ArticleController) Create(c *gin.Context) {
 	c.BindJSON(&request)
 	userId, _ := c.Get("user_id")
 	usecaseErrGroup := article.NewCreateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		article.NewCreateActionCommand(request.Description, type_converts.StringToInt(userId.(string), 0)),
+		article.NewCreateActionCommand(request.Description, userId.(int)),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
@@ -51,6 +51,7 @@ func (a *ArticleController) Create(c *gin.Context) {
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
 			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
+		c.Abort()
 		return
 	}
 
@@ -84,7 +85,7 @@ func (a *ArticleController) Update(c *gin.Context) {
 	articleId := c.Param("article_id")
 	userId, _ := c.Get("user_id")
 	usecaseErrGroup := article.NewUpdateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		article.NewUpdateActionCommand(type_converts.StringToInt(articleId, 0), request.Description, type_converts.StringToInt(userId.(string), 0)),
+		article.NewUpdateActionCommand(type_converts.StringToInt(articleId, 0), request.Description, userId.(int)),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
@@ -92,6 +93,7 @@ func (a *ArticleController) Update(c *gin.Context) {
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
 			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
+		c.Abort()
 		return
 	}
 
@@ -118,7 +120,7 @@ func (a *ArticleController) Delete(c *gin.Context) {
 	articleId := c.Param("article_id")
 	userId, _ := c.Get("user_id")
 	usecaseErrGroup := article.NewDeleteAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		article.NewDeleteActionCommand(type_converts.StringToInt(articleId, 0), type_converts.StringToInt(userId.(string), 0)),
+		article.NewDeleteActionCommand(type_converts.StringToInt(articleId, 0), userId.(int)),
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
@@ -126,6 +128,7 @@ func (a *ArticleController) Delete(c *gin.Context) {
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
 			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
 		)
+		c.Abort()
 		return
 	}
 
