@@ -61,14 +61,6 @@ func (ac *ArticleCreate) SetPostID(i int) *ArticleCreate {
 	return ac
 }
 
-// SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (ac *ArticleCreate) SetNillablePostID(i *int) *ArticleCreate {
-	if i != nil {
-		ac.SetPostID(*i)
-	}
-	return ac
-}
-
 // SetPost sets the "post" edge to the User entity.
 func (ac *ArticleCreate) SetPost(u *User) *ArticleCreate {
 	return ac.SetPostID(u.ID)
@@ -134,6 +126,12 @@ func (ac *ArticleCreate) check() error {
 		if err := article.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Article.description": %w`, err)}
 		}
+	}
+	if _, ok := ac.mutation.PostID(); !ok {
+		return &ValidationError{Name: "post_id", err: errors.New(`ent: missing required field "Article.post_id"`)}
+	}
+	if len(ac.mutation.PostIDs()) == 0 {
+		return &ValidationError{Name: "post", err: errors.New(`ent: missing required edge "Article.post"`)}
 	}
 	return nil
 }

@@ -3,9 +3,17 @@
 package ent
 
 import (
+	"study-pal-backend/ent/answerdescription"
+	"study-pal-backend/ent/answermultichoices"
+	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/permission"
+	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/role"
 	"study-pal-backend/ent/schema"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookcategory"
 	"time"
 )
 
@@ -13,6 +21,66 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	answerdescriptionFields := schema.AnswerDescription{}.Fields()
+	_ = answerdescriptionFields
+	// answerdescriptionDescName is the schema descriptor for name field.
+	answerdescriptionDescName := answerdescriptionFields[0].Descriptor()
+	// answerdescription.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	answerdescription.NameValidator = func() func(string) error {
+		validators := answerdescriptionDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	answermultichoicesFields := schema.AnswerMultiChoices{}.Fields()
+	_ = answermultichoicesFields
+	// answermultichoicesDescName is the schema descriptor for name field.
+	answermultichoicesDescName := answermultichoicesFields[0].Descriptor()
+	// answermultichoices.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	answermultichoices.NameValidator = func() func(string) error {
+		validators := answermultichoicesDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	answertypeFields := schema.AnswerType{}.Fields()
+	_ = answertypeFields
+	// answertypeDescName is the schema descriptor for name field.
+	answertypeDescName := answertypeFields[0].Descriptor()
+	// answertype.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	answertype.NameValidator = func() func(string) error {
+		validators := answertypeDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	articleMixin := schema.Article{}.Mixin()
 	articleMixinFields0 := articleMixin[0].Fields()
 	_ = articleMixinFields0
@@ -26,10 +94,86 @@ func init() {
 	articleDescUpdatedAt := articleMixinFields0[1].Descriptor()
 	// article.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	article.DefaultUpdatedAt = articleDescUpdatedAt.Default.(func() time.Time)
+	// article.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	article.UpdateDefaultUpdatedAt = articleDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// articleDescDescription is the schema descriptor for description field.
 	articleDescDescription := articleFields[0].Descriptor()
 	// article.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
-	article.DescriptionValidator = articleDescDescription.Validators[0].(func(string) error)
+	article.DescriptionValidator = func() func(string) error {
+		validators := articleDescDescription.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(description string) error {
+			for _, fn := range fns {
+				if err := fn(description); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	permissionFields := schema.Permission{}.Fields()
+	_ = permissionFields
+	// permissionDescName is the schema descriptor for name field.
+	permissionDescName := permissionFields[0].Descriptor()
+	// permission.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	permission.NameValidator = func() func(string) error {
+		validators := permissionDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	problemFields := schema.Problem{}.Fields()
+	_ = problemFields
+	// problemDescStatement is the schema descriptor for statement field.
+	problemDescStatement := problemFields[1].Descriptor()
+	// problem.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	problem.StatementValidator = func() func(string) error {
+		validators := problemDescStatement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(statement string) error {
+			for _, fn := range fns {
+				if err := fn(statement); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	roleFields := schema.Role{}.Fields()
+	_ = roleFields
+	// roleDescName is the schema descriptor for name field.
+	roleDescName := roleFields[0].Descriptor()
+	// role.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	role.NameValidator = func() func(string) error {
+		validators := roleDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0
@@ -43,6 +187,26 @@ func init() {
 	userDescUpdatedAt := userMixinFields0[1].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescEmail is the schema descriptor for email field.
+	userDescEmail := userFields[0].Descriptor()
+	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	user.EmailValidator = func() func(string) error {
+		validators := userDescEmail.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(email string) error {
+			for _, fn := range fns {
+				if err := fn(email); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// userDescName is the schema descriptor for name field.
 	userDescName := userFields[1].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -61,8 +225,96 @@ func init() {
 			return nil
 		}
 	}()
+	// userDescNickName is the schema descriptor for nick_name field.
+	userDescNickName := userFields[2].Descriptor()
+	// user.NickNameValidator is a validator for the "nick_name" field. It is called by the builders before save.
+	user.NickNameValidator = func() func(string) error {
+		validators := userDescNickName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(nick_name string) error {
+			for _, fn := range fns {
+				if err := fn(nick_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// userDescPassword is the schema descriptor for password field.
 	userDescPassword := userFields[3].Descriptor()
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
+	workbookMixin := schema.Workbook{}.Mixin()
+	workbookMixinFields0 := workbookMixin[0].Fields()
+	_ = workbookMixinFields0
+	workbookFields := schema.Workbook{}.Fields()
+	_ = workbookFields
+	// workbookDescCreatedAt is the schema descriptor for created_at field.
+	workbookDescCreatedAt := workbookMixinFields0[0].Descriptor()
+	// workbook.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbook.DefaultCreatedAt = workbookDescCreatedAt.Default.(func() time.Time)
+	// workbookDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookDescUpdatedAt := workbookMixinFields0[1].Descriptor()
+	// workbook.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbook.DefaultUpdatedAt = workbookDescUpdatedAt.Default.(func() time.Time)
+	// workbook.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbook.UpdateDefaultUpdatedAt = workbookDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// workbookDescDescription is the schema descriptor for description field.
+	workbookDescDescription := workbookFields[1].Descriptor()
+	// workbook.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	workbook.DescriptionValidator = workbookDescDescription.Validators[0].(func(string) error)
+	// workbookDescTitle is the schema descriptor for title field.
+	workbookDescTitle := workbookFields[2].Descriptor()
+	// workbook.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	workbook.TitleValidator = func() func(string) error {
+		validators := workbookDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	workbookcategoryMixin := schema.WorkbookCategory{}.Mixin()
+	workbookcategoryMixinFields0 := workbookcategoryMixin[0].Fields()
+	_ = workbookcategoryMixinFields0
+	workbookcategoryFields := schema.WorkbookCategory{}.Fields()
+	_ = workbookcategoryFields
+	// workbookcategoryDescCreatedAt is the schema descriptor for created_at field.
+	workbookcategoryDescCreatedAt := workbookcategoryMixinFields0[0].Descriptor()
+	// workbookcategory.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbookcategory.DefaultCreatedAt = workbookcategoryDescCreatedAt.Default.(func() time.Time)
+	// workbookcategoryDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookcategoryDescUpdatedAt := workbookcategoryMixinFields0[1].Descriptor()
+	// workbookcategory.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbookcategory.DefaultUpdatedAt = workbookcategoryDescUpdatedAt.Default.(func() time.Time)
+	// workbookcategory.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbookcategory.UpdateDefaultUpdatedAt = workbookcategoryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// workbookcategoryDescName is the schema descriptor for name field.
+	workbookcategoryDescName := workbookcategoryFields[0].Descriptor()
+	// workbookcategory.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	workbookcategory.NameValidator = func() func(string) error {
+		validators := workbookcategoryDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 }

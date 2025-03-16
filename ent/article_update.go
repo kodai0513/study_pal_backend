@@ -49,14 +49,6 @@ func (au *ArticleUpdate) SetUpdatedAt(t time.Time) *ArticleUpdate {
 	return au
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (au *ArticleUpdate) SetNillableUpdatedAt(t *time.Time) *ArticleUpdate {
-	if t != nil {
-		au.SetUpdatedAt(*t)
-	}
-	return au
-}
-
 // SetDescription sets the "description" field.
 func (au *ArticleUpdate) SetDescription(s string) *ArticleUpdate {
 	au.mutation.SetDescription(s)
@@ -85,12 +77,6 @@ func (au *ArticleUpdate) SetNillablePostID(i *int) *ArticleUpdate {
 	return au
 }
 
-// ClearPostID clears the value of the "post_id" field.
-func (au *ArticleUpdate) ClearPostID() *ArticleUpdate {
-	au.mutation.ClearPostID()
-	return au
-}
-
 // SetPost sets the "post" edge to the User entity.
 func (au *ArticleUpdate) SetPost(u *User) *ArticleUpdate {
 	return au.SetPostID(u.ID)
@@ -109,6 +95,7 @@ func (au *ArticleUpdate) ClearPost() *ArticleUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (au *ArticleUpdate) Save(ctx context.Context) (int, error) {
+	au.defaults()
 	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
@@ -134,12 +121,23 @@ func (au *ArticleUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (au *ArticleUpdate) defaults() {
+	if _, ok := au.mutation.UpdatedAt(); !ok {
+		v := article.UpdateDefaultUpdatedAt()
+		au.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (au *ArticleUpdate) check() error {
 	if v, ok := au.mutation.Description(); ok {
 		if err := article.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Article.description": %w`, err)}
 		}
+	}
+	if au.mutation.PostCleared() && len(au.mutation.PostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Article.post"`)
 	}
 	return nil
 }
@@ -234,14 +232,6 @@ func (auo *ArticleUpdateOne) SetUpdatedAt(t time.Time) *ArticleUpdateOne {
 	return auo
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (auo *ArticleUpdateOne) SetNillableUpdatedAt(t *time.Time) *ArticleUpdateOne {
-	if t != nil {
-		auo.SetUpdatedAt(*t)
-	}
-	return auo
-}
-
 // SetDescription sets the "description" field.
 func (auo *ArticleUpdateOne) SetDescription(s string) *ArticleUpdateOne {
 	auo.mutation.SetDescription(s)
@@ -267,12 +257,6 @@ func (auo *ArticleUpdateOne) SetNillablePostID(i *int) *ArticleUpdateOne {
 	if i != nil {
 		auo.SetPostID(*i)
 	}
-	return auo
-}
-
-// ClearPostID clears the value of the "post_id" field.
-func (auo *ArticleUpdateOne) ClearPostID() *ArticleUpdateOne {
-	auo.mutation.ClearPostID()
 	return auo
 }
 
@@ -307,6 +291,7 @@ func (auo *ArticleUpdateOne) Select(field string, fields ...string) *ArticleUpda
 
 // Save executes the query and returns the updated Article entity.
 func (auo *ArticleUpdateOne) Save(ctx context.Context) (*Article, error) {
+	auo.defaults()
 	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
@@ -332,12 +317,23 @@ func (auo *ArticleUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (auo *ArticleUpdateOne) defaults() {
+	if _, ok := auo.mutation.UpdatedAt(); !ok {
+		v := article.UpdateDefaultUpdatedAt()
+		auo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (auo *ArticleUpdateOne) check() error {
 	if v, ok := auo.mutation.Description(); ok {
 		if err := article.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Article.description": %w`, err)}
 		}
+	}
+	if auo.mutation.PostCleared() && len(auo.mutation.PostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Article.post"`)
 	}
 	return nil
 }

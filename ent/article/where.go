@@ -240,16 +240,6 @@ func PostIDNotIn(vs ...int) predicate.Article {
 	return predicate.Article(sql.FieldNotIn(FieldPostID, vs...))
 }
 
-// PostIDIsNil applies the IsNil predicate on the "post_id" field.
-func PostIDIsNil() predicate.Article {
-	return predicate.Article(sql.FieldIsNull(FieldPostID))
-}
-
-// PostIDNotNil applies the NotNil predicate on the "post_id" field.
-func PostIDNotNil() predicate.Article {
-	return predicate.Article(sql.FieldNotNull(FieldPostID))
-}
-
 // HasPost applies the HasEdge predicate on the "post" edge.
 func HasPost() predicate.Article {
 	return predicate.Article(func(s *sql.Selector) {

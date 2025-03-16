@@ -1,5 +1,10 @@
 # マイグレーション手順
 
+### コマンドを実行しスキーマを定義
+```
+go run -mod=mod entgo.io/ent/cmd/ent new User
+```
+
 #### entのアセットの生成
 ```
 go generate ./ent

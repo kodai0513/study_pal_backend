@@ -23,19 +23,14 @@ func (Article) Mixin() []ent.Mixin {
 // Fields of the Article.
 func (Article) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("description").
-			NotEmpty(),
-		field.Int("post_id").
-			Optional(),
+		field.String("description").MaxLen(400).NotEmpty(),
+		field.Int("post_id"),
 	}
 }
 
 // Edges of the Article.
 func (Article) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("post", User.Type).
-			Ref(article.Table).
-			Unique().
-			Field("post_id"),
+		edge.From("post", User.Type).Ref(article.Table).Unique().Required().Field("post_id"),
 	}
 }

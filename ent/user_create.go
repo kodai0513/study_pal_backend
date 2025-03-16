@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbookmember"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -88,6 +89,21 @@ func (uc *UserCreate) AddArticles(a ...*Article) *UserCreate {
 	return uc.AddArticleIDs(ids...)
 }
 
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (uc *UserCreate) AddWorkbookMemberIDs(ids ...int) *UserCreate {
+	uc.mutation.AddWorkbookMemberIDs(ids...)
+	return uc
+}
+
+// AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
+func (uc *UserCreate) AddWorkbookMembers(w ...*WorkbookMember) *UserCreate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWorkbookMemberIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -144,6 +160,11 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
+	if v, ok := uc.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
@@ -154,6 +175,11 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.NickName(); !ok {
 		return &ValidationError{Name: "nick_name", err: errors.New(`ent: missing required field "User.nick_name"`)}
+	}
+	if v, ok := uc.mutation.NickName(); ok {
+		if err := user.NickNameValidator(v); err != nil {
+			return &ValidationError{Name: "nick_name", err: fmt.Errorf(`ent: validator failed for field "User.nick_name": %w`, err)}
+		}
 	}
 	if _, ok := uc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
@@ -222,6 +248,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WorkbookMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

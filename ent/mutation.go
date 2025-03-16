@@ -6,9 +6,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"study-pal-backend/ent/answerdescription"
+	"study-pal-backend/ent/answermultichoices"
+	"study-pal-backend/ent/answertruth"
+	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/role"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookmember"
 	"sync"
 	"time"
 
@@ -25,9 +36,1471 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeArticle = "Article"
-	TypeUser    = "User"
+	TypeAnswerDescription       = "AnswerDescription"
+	TypeAnswerMultiChoices      = "AnswerMultiChoices"
+	TypeAnswerTruth             = "AnswerTruth"
+	TypeAnswerType              = "AnswerType"
+	TypeArticle                 = "Article"
+	TypePermission              = "Permission"
+	TypeProblem                 = "Problem"
+	TypeRole                    = "Role"
+	TypeUser                    = "User"
+	TypeWorkbook                = "Workbook"
+	TypeWorkbookCategory        = "WorkbookCategory"
+	TypeWorkbookCategoryClosure = "WorkbookCategoryClosure"
+	TypeWorkbookMember          = "WorkbookMember"
 )
+
+// AnswerDescriptionMutation represents an operation that mutates the AnswerDescription nodes in the graph.
+type AnswerDescriptionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*AnswerDescription, error)
+	predicates    []predicate.AnswerDescription
+}
+
+var _ ent.Mutation = (*AnswerDescriptionMutation)(nil)
+
+// answerdescriptionOption allows management of the mutation configuration using functional options.
+type answerdescriptionOption func(*AnswerDescriptionMutation)
+
+// newAnswerDescriptionMutation creates new mutation for the AnswerDescription entity.
+func newAnswerDescriptionMutation(c config, op Op, opts ...answerdescriptionOption) *AnswerDescriptionMutation {
+	m := &AnswerDescriptionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAnswerDescription,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAnswerDescriptionID sets the ID field of the mutation.
+func withAnswerDescriptionID(id int) answerdescriptionOption {
+	return func(m *AnswerDescriptionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AnswerDescription
+		)
+		m.oldValue = func(ctx context.Context) (*AnswerDescription, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AnswerDescription.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAnswerDescription sets the old AnswerDescription of the mutation.
+func withAnswerDescription(node *AnswerDescription) answerdescriptionOption {
+	return func(m *AnswerDescriptionMutation) {
+		m.oldValue = func(context.Context) (*AnswerDescription, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AnswerDescriptionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AnswerDescriptionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AnswerDescriptionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AnswerDescriptionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AnswerDescription.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *AnswerDescriptionMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *AnswerDescriptionMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the AnswerDescription entity.
+// If the AnswerDescription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnswerDescriptionMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *AnswerDescriptionMutation) ResetName() {
+	m.name = nil
+}
+
+// Where appends a list predicates to the AnswerDescriptionMutation builder.
+func (m *AnswerDescriptionMutation) Where(ps ...predicate.AnswerDescription) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AnswerDescriptionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AnswerDescriptionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AnswerDescription, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AnswerDescriptionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AnswerDescriptionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AnswerDescription).
+func (m *AnswerDescriptionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AnswerDescriptionMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, answerdescription.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AnswerDescriptionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case answerdescription.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AnswerDescriptionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case answerdescription.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown AnswerDescription field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerDescriptionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case answerdescription.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerDescription field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AnswerDescriptionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AnswerDescriptionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerDescriptionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AnswerDescription numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AnswerDescriptionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AnswerDescriptionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AnswerDescriptionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AnswerDescription nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AnswerDescriptionMutation) ResetField(name string) error {
+	switch name {
+	case answerdescription.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerDescription field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AnswerDescriptionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AnswerDescriptionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AnswerDescriptionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AnswerDescriptionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AnswerDescriptionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AnswerDescriptionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AnswerDescriptionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AnswerDescription unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AnswerDescriptionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AnswerDescription edge %s", name)
+}
+
+// AnswerMultiChoicesMutation represents an operation that mutates the AnswerMultiChoices nodes in the graph.
+type AnswerMultiChoicesMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	is_correct    *bool
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*AnswerMultiChoices, error)
+	predicates    []predicate.AnswerMultiChoices
+}
+
+var _ ent.Mutation = (*AnswerMultiChoicesMutation)(nil)
+
+// answermultichoicesOption allows management of the mutation configuration using functional options.
+type answermultichoicesOption func(*AnswerMultiChoicesMutation)
+
+// newAnswerMultiChoicesMutation creates new mutation for the AnswerMultiChoices entity.
+func newAnswerMultiChoicesMutation(c config, op Op, opts ...answermultichoicesOption) *AnswerMultiChoicesMutation {
+	m := &AnswerMultiChoicesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAnswerMultiChoices,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAnswerMultiChoicesID sets the ID field of the mutation.
+func withAnswerMultiChoicesID(id int) answermultichoicesOption {
+	return func(m *AnswerMultiChoicesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AnswerMultiChoices
+		)
+		m.oldValue = func(ctx context.Context) (*AnswerMultiChoices, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AnswerMultiChoices.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAnswerMultiChoices sets the old AnswerMultiChoices of the mutation.
+func withAnswerMultiChoices(node *AnswerMultiChoices) answermultichoicesOption {
+	return func(m *AnswerMultiChoicesMutation) {
+		m.oldValue = func(context.Context) (*AnswerMultiChoices, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AnswerMultiChoicesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AnswerMultiChoicesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AnswerMultiChoicesMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AnswerMultiChoicesMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AnswerMultiChoices.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *AnswerMultiChoicesMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *AnswerMultiChoicesMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the AnswerMultiChoices entity.
+// If the AnswerMultiChoices object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnswerMultiChoicesMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *AnswerMultiChoicesMutation) ResetName() {
+	m.name = nil
+}
+
+// SetIsCorrect sets the "is_correct" field.
+func (m *AnswerMultiChoicesMutation) SetIsCorrect(b bool) {
+	m.is_correct = &b
+}
+
+// IsCorrect returns the value of the "is_correct" field in the mutation.
+func (m *AnswerMultiChoicesMutation) IsCorrect() (r bool, exists bool) {
+	v := m.is_correct
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsCorrect returns the old "is_correct" field's value of the AnswerMultiChoices entity.
+// If the AnswerMultiChoices object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnswerMultiChoicesMutation) OldIsCorrect(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsCorrect is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsCorrect requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsCorrect: %w", err)
+	}
+	return oldValue.IsCorrect, nil
+}
+
+// ResetIsCorrect resets all changes to the "is_correct" field.
+func (m *AnswerMultiChoicesMutation) ResetIsCorrect() {
+	m.is_correct = nil
+}
+
+// Where appends a list predicates to the AnswerMultiChoicesMutation builder.
+func (m *AnswerMultiChoicesMutation) Where(ps ...predicate.AnswerMultiChoices) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AnswerMultiChoicesMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AnswerMultiChoicesMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AnswerMultiChoices, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AnswerMultiChoicesMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AnswerMultiChoicesMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AnswerMultiChoices).
+func (m *AnswerMultiChoicesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AnswerMultiChoicesMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.name != nil {
+		fields = append(fields, answermultichoices.FieldName)
+	}
+	if m.is_correct != nil {
+		fields = append(fields, answermultichoices.FieldIsCorrect)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AnswerMultiChoicesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case answermultichoices.FieldName:
+		return m.Name()
+	case answermultichoices.FieldIsCorrect:
+		return m.IsCorrect()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AnswerMultiChoicesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case answermultichoices.FieldName:
+		return m.OldName(ctx)
+	case answermultichoices.FieldIsCorrect:
+		return m.OldIsCorrect(ctx)
+	}
+	return nil, fmt.Errorf("unknown AnswerMultiChoices field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerMultiChoicesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case answermultichoices.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case answermultichoices.FieldIsCorrect:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsCorrect(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerMultiChoices field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AnswerMultiChoicesMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AnswerMultiChoicesMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerMultiChoicesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AnswerMultiChoices numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AnswerMultiChoicesMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AnswerMultiChoicesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AnswerMultiChoicesMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AnswerMultiChoices nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AnswerMultiChoicesMutation) ResetField(name string) error {
+	switch name {
+	case answermultichoices.FieldName:
+		m.ResetName()
+		return nil
+	case answermultichoices.FieldIsCorrect:
+		m.ResetIsCorrect()
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerMultiChoices field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AnswerMultiChoicesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AnswerMultiChoicesMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AnswerMultiChoicesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AnswerMultiChoicesMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AnswerMultiChoicesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AnswerMultiChoicesMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AnswerMultiChoicesMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AnswerMultiChoices unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AnswerMultiChoicesMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AnswerMultiChoices edge %s", name)
+}
+
+// AnswerTruthMutation represents an operation that mutates the AnswerTruth nodes in the graph.
+type AnswerTruthMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	truth         *bool
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*AnswerTruth, error)
+	predicates    []predicate.AnswerTruth
+}
+
+var _ ent.Mutation = (*AnswerTruthMutation)(nil)
+
+// answertruthOption allows management of the mutation configuration using functional options.
+type answertruthOption func(*AnswerTruthMutation)
+
+// newAnswerTruthMutation creates new mutation for the AnswerTruth entity.
+func newAnswerTruthMutation(c config, op Op, opts ...answertruthOption) *AnswerTruthMutation {
+	m := &AnswerTruthMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAnswerTruth,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAnswerTruthID sets the ID field of the mutation.
+func withAnswerTruthID(id int) answertruthOption {
+	return func(m *AnswerTruthMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AnswerTruth
+		)
+		m.oldValue = func(ctx context.Context) (*AnswerTruth, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AnswerTruth.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAnswerTruth sets the old AnswerTruth of the mutation.
+func withAnswerTruth(node *AnswerTruth) answertruthOption {
+	return func(m *AnswerTruthMutation) {
+		m.oldValue = func(context.Context) (*AnswerTruth, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AnswerTruthMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AnswerTruthMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AnswerTruthMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AnswerTruthMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AnswerTruth.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTruth sets the "truth" field.
+func (m *AnswerTruthMutation) SetTruth(b bool) {
+	m.truth = &b
+}
+
+// Truth returns the value of the "truth" field in the mutation.
+func (m *AnswerTruthMutation) Truth() (r bool, exists bool) {
+	v := m.truth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTruth returns the old "truth" field's value of the AnswerTruth entity.
+// If the AnswerTruth object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnswerTruthMutation) OldTruth(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTruth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTruth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTruth: %w", err)
+	}
+	return oldValue.Truth, nil
+}
+
+// ResetTruth resets all changes to the "truth" field.
+func (m *AnswerTruthMutation) ResetTruth() {
+	m.truth = nil
+}
+
+// Where appends a list predicates to the AnswerTruthMutation builder.
+func (m *AnswerTruthMutation) Where(ps ...predicate.AnswerTruth) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AnswerTruthMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AnswerTruthMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AnswerTruth, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AnswerTruthMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AnswerTruthMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AnswerTruth).
+func (m *AnswerTruthMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AnswerTruthMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.truth != nil {
+		fields = append(fields, answertruth.FieldTruth)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AnswerTruthMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case answertruth.FieldTruth:
+		return m.Truth()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AnswerTruthMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case answertruth.FieldTruth:
+		return m.OldTruth(ctx)
+	}
+	return nil, fmt.Errorf("unknown AnswerTruth field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerTruthMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case answertruth.FieldTruth:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTruth(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerTruth field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AnswerTruthMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AnswerTruthMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerTruthMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AnswerTruth numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AnswerTruthMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AnswerTruthMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AnswerTruthMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AnswerTruth nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AnswerTruthMutation) ResetField(name string) error {
+	switch name {
+	case answertruth.FieldTruth:
+		m.ResetTruth()
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerTruth field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AnswerTruthMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AnswerTruthMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AnswerTruthMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AnswerTruthMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AnswerTruthMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AnswerTruthMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AnswerTruthMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AnswerTruth unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AnswerTruthMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AnswerTruth edge %s", name)
+}
+
+// AnswerTypeMutation represents an operation that mutates the AnswerType nodes in the graph.
+type AnswerTypeMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	name            *string
+	clearedFields   map[string]struct{}
+	problems        map[int]struct{}
+	removedproblems map[int]struct{}
+	clearedproblems bool
+	done            bool
+	oldValue        func(context.Context) (*AnswerType, error)
+	predicates      []predicate.AnswerType
+}
+
+var _ ent.Mutation = (*AnswerTypeMutation)(nil)
+
+// answertypeOption allows management of the mutation configuration using functional options.
+type answertypeOption func(*AnswerTypeMutation)
+
+// newAnswerTypeMutation creates new mutation for the AnswerType entity.
+func newAnswerTypeMutation(c config, op Op, opts ...answertypeOption) *AnswerTypeMutation {
+	m := &AnswerTypeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAnswerType,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAnswerTypeID sets the ID field of the mutation.
+func withAnswerTypeID(id int) answertypeOption {
+	return func(m *AnswerTypeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AnswerType
+		)
+		m.oldValue = func(ctx context.Context) (*AnswerType, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AnswerType.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAnswerType sets the old AnswerType of the mutation.
+func withAnswerType(node *AnswerType) answertypeOption {
+	return func(m *AnswerTypeMutation) {
+		m.oldValue = func(context.Context) (*AnswerType, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AnswerTypeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AnswerTypeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AnswerTypeMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AnswerTypeMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AnswerType.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *AnswerTypeMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *AnswerTypeMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the AnswerType entity.
+// If the AnswerType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AnswerTypeMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *AnswerTypeMutation) ResetName() {
+	m.name = nil
+}
+
+// AddProblemIDs adds the "problems" edge to the Problem entity by ids.
+func (m *AnswerTypeMutation) AddProblemIDs(ids ...int) {
+	if m.problems == nil {
+		m.problems = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.problems[ids[i]] = struct{}{}
+	}
+}
+
+// ClearProblems clears the "problems" edge to the Problem entity.
+func (m *AnswerTypeMutation) ClearProblems() {
+	m.clearedproblems = true
+}
+
+// ProblemsCleared reports if the "problems" edge to the Problem entity was cleared.
+func (m *AnswerTypeMutation) ProblemsCleared() bool {
+	return m.clearedproblems
+}
+
+// RemoveProblemIDs removes the "problems" edge to the Problem entity by IDs.
+func (m *AnswerTypeMutation) RemoveProblemIDs(ids ...int) {
+	if m.removedproblems == nil {
+		m.removedproblems = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.problems, ids[i])
+		m.removedproblems[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedProblems returns the removed IDs of the "problems" edge to the Problem entity.
+func (m *AnswerTypeMutation) RemovedProblemsIDs() (ids []int) {
+	for id := range m.removedproblems {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ProblemsIDs returns the "problems" edge IDs in the mutation.
+func (m *AnswerTypeMutation) ProblemsIDs() (ids []int) {
+	for id := range m.problems {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetProblems resets all changes to the "problems" edge.
+func (m *AnswerTypeMutation) ResetProblems() {
+	m.problems = nil
+	m.clearedproblems = false
+	m.removedproblems = nil
+}
+
+// Where appends a list predicates to the AnswerTypeMutation builder.
+func (m *AnswerTypeMutation) Where(ps ...predicate.AnswerType) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AnswerTypeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AnswerTypeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AnswerType, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AnswerTypeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AnswerTypeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AnswerType).
+func (m *AnswerTypeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AnswerTypeMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, answertype.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AnswerTypeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case answertype.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AnswerTypeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case answertype.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown AnswerType field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerTypeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case answertype.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerType field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AnswerTypeMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AnswerTypeMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AnswerTypeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AnswerType numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AnswerTypeMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AnswerTypeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AnswerTypeMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AnswerType nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AnswerTypeMutation) ResetField(name string) error {
+	switch name {
+	case answertype.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerType field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AnswerTypeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.problems != nil {
+		edges = append(edges, answertype.EdgeProblems)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AnswerTypeMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case answertype.EdgeProblems:
+		ids := make([]ent.Value, 0, len(m.problems))
+		for id := range m.problems {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AnswerTypeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedproblems != nil {
+		edges = append(edges, answertype.EdgeProblems)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AnswerTypeMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case answertype.EdgeProblems:
+		ids := make([]ent.Value, 0, len(m.removedproblems))
+		for id := range m.removedproblems {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AnswerTypeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedproblems {
+		edges = append(edges, answertype.EdgeProblems)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AnswerTypeMutation) EdgeCleared(name string) bool {
+	switch name {
+	case answertype.EdgeProblems:
+		return m.clearedproblems
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AnswerTypeMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AnswerType unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AnswerTypeMutation) ResetEdge(name string) error {
+	switch name {
+	case answertype.EdgeProblems:
+		m.ResetProblems()
+		return nil
+	}
+	return fmt.Errorf("unknown AnswerType edge %s", name)
+}
 
 // ArticleMutation represents an operation that mutates the Article nodes in the graph.
 type ArticleMutation struct {
@@ -283,22 +1756,9 @@ func (m *ArticleMutation) OldPostID(ctx context.Context) (v int, err error) {
 	return oldValue.PostID, nil
 }
 
-// ClearPostID clears the value of the "post_id" field.
-func (m *ArticleMutation) ClearPostID() {
-	m.post = nil
-	m.clearedFields[article.FieldPostID] = struct{}{}
-}
-
-// PostIDCleared returns if the "post_id" field was cleared in this mutation.
-func (m *ArticleMutation) PostIDCleared() bool {
-	_, ok := m.clearedFields[article.FieldPostID]
-	return ok
-}
-
 // ResetPostID resets all changes to the "post_id" field.
 func (m *ArticleMutation) ResetPostID() {
 	m.post = nil
-	delete(m.clearedFields, article.FieldPostID)
 }
 
 // ClearPost clears the "post" edge to the User entity.
@@ -309,7 +1769,7 @@ func (m *ArticleMutation) ClearPost() {
 
 // PostCleared reports if the "post" edge to the User entity was cleared.
 func (m *ArticleMutation) PostCleared() bool {
-	return m.PostIDCleared() || m.clearedpost
+	return m.clearedpost
 }
 
 // PostIDs returns the "post" edge IDs in the mutation.
@@ -477,11 +1937,7 @@ func (m *ArticleMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ArticleMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(article.FieldPostID) {
-		fields = append(fields, article.FieldPostID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -494,11 +1950,6 @@ func (m *ArticleMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ArticleMutation) ClearField(name string) error {
-	switch name {
-	case article.FieldPostID:
-		m.ClearPostID()
-		return nil
-	}
 	return fmt.Errorf("unknown Article nullable field %s", name)
 }
 
@@ -596,25 +2047,1637 @@ func (m *ArticleMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Article edge %s", name)
 }
 
+// PermissionMutation represents an operation that mutates the Permission nodes in the graph.
+type PermissionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	clearedFields map[string]struct{}
+	roles         map[int]struct{}
+	removedroles  map[int]struct{}
+	clearedroles  bool
+	done          bool
+	oldValue      func(context.Context) (*Permission, error)
+	predicates    []predicate.Permission
+}
+
+var _ ent.Mutation = (*PermissionMutation)(nil)
+
+// permissionOption allows management of the mutation configuration using functional options.
+type permissionOption func(*PermissionMutation)
+
+// newPermissionMutation creates new mutation for the Permission entity.
+func newPermissionMutation(c config, op Op, opts ...permissionOption) *PermissionMutation {
+	m := &PermissionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePermission,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPermissionID sets the ID field of the mutation.
+func withPermissionID(id int) permissionOption {
+	return func(m *PermissionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Permission
+		)
+		m.oldValue = func(ctx context.Context) (*Permission, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Permission.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPermission sets the old Permission of the mutation.
+func withPermission(node *Permission) permissionOption {
+	return func(m *PermissionMutation) {
+		m.oldValue = func(context.Context) (*Permission, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PermissionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PermissionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PermissionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PermissionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Permission.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *PermissionMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PermissionMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Permission entity.
+// If the Permission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PermissionMutation) ResetName() {
+	m.name = nil
+}
+
+// AddRoleIDs adds the "roles" edge to the Role entity by ids.
+func (m *PermissionMutation) AddRoleIDs(ids ...int) {
+	if m.roles == nil {
+		m.roles = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.roles[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRoles clears the "roles" edge to the Role entity.
+func (m *PermissionMutation) ClearRoles() {
+	m.clearedroles = true
+}
+
+// RolesCleared reports if the "roles" edge to the Role entity was cleared.
+func (m *PermissionMutation) RolesCleared() bool {
+	return m.clearedroles
+}
+
+// RemoveRoleIDs removes the "roles" edge to the Role entity by IDs.
+func (m *PermissionMutation) RemoveRoleIDs(ids ...int) {
+	if m.removedroles == nil {
+		m.removedroles = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.roles, ids[i])
+		m.removedroles[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRoles returns the removed IDs of the "roles" edge to the Role entity.
+func (m *PermissionMutation) RemovedRolesIDs() (ids []int) {
+	for id := range m.removedroles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RolesIDs returns the "roles" edge IDs in the mutation.
+func (m *PermissionMutation) RolesIDs() (ids []int) {
+	for id := range m.roles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRoles resets all changes to the "roles" edge.
+func (m *PermissionMutation) ResetRoles() {
+	m.roles = nil
+	m.clearedroles = false
+	m.removedroles = nil
+}
+
+// Where appends a list predicates to the PermissionMutation builder.
+func (m *PermissionMutation) Where(ps ...predicate.Permission) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PermissionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PermissionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Permission, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PermissionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PermissionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Permission).
+func (m *PermissionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PermissionMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, permission.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PermissionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case permission.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PermissionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case permission.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Permission field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PermissionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case permission.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Permission field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PermissionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PermissionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PermissionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Permission numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PermissionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PermissionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PermissionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Permission nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PermissionMutation) ResetField(name string) error {
+	switch name {
+	case permission.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Permission field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PermissionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.roles != nil {
+		edges = append(edges, permission.EdgeRoles)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PermissionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case permission.EdgeRoles:
+		ids := make([]ent.Value, 0, len(m.roles))
+		for id := range m.roles {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PermissionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedroles != nil {
+		edges = append(edges, permission.EdgeRoles)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PermissionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case permission.EdgeRoles:
+		ids := make([]ent.Value, 0, len(m.removedroles))
+		for id := range m.removedroles {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PermissionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedroles {
+		edges = append(edges, permission.EdgeRoles)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PermissionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case permission.EdgeRoles:
+		return m.clearedroles
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PermissionMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Permission unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PermissionMutation) ResetEdge(name string) error {
+	switch name {
+	case permission.EdgeRoles:
+		m.ResetRoles()
+		return nil
+	}
+	return fmt.Errorf("unknown Permission edge %s", name)
+}
+
+// ProblemMutation represents an operation that mutates the Problem nodes in the graph.
+type ProblemMutation struct {
+	config
+	op                          Op
+	typ                         string
+	id                          *int
+	statement                   *string
+	clearedFields               map[string]struct{}
+	answer_type                 *int
+	clearedanswer_type          bool
+	answer_descriptions         map[int]struct{}
+	removedanswer_descriptions  map[int]struct{}
+	clearedanswer_descriptions  bool
+	answer_multi_choices        map[int]struct{}
+	removedanswer_multi_choices map[int]struct{}
+	clearedanswer_multi_choices bool
+	answer_truths               map[int]struct{}
+	removedanswer_truths        map[int]struct{}
+	clearedanswer_truths        bool
+	done                        bool
+	oldValue                    func(context.Context) (*Problem, error)
+	predicates                  []predicate.Problem
+}
+
+var _ ent.Mutation = (*ProblemMutation)(nil)
+
+// problemOption allows management of the mutation configuration using functional options.
+type problemOption func(*ProblemMutation)
+
+// newProblemMutation creates new mutation for the Problem entity.
+func newProblemMutation(c config, op Op, opts ...problemOption) *ProblemMutation {
+	m := &ProblemMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeProblem,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withProblemID sets the ID field of the mutation.
+func withProblemID(id int) problemOption {
+	return func(m *ProblemMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Problem
+		)
+		m.oldValue = func(ctx context.Context) (*Problem, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Problem.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withProblem sets the old Problem of the mutation.
+func withProblem(node *Problem) problemOption {
+	return func(m *ProblemMutation) {
+		m.oldValue = func(context.Context) (*Problem, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ProblemMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ProblemMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ProblemMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ProblemMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Problem.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAnswerTypeID sets the "answer_type_id" field.
+func (m *ProblemMutation) SetAnswerTypeID(i int) {
+	m.answer_type = &i
+}
+
+// AnswerTypeID returns the value of the "answer_type_id" field in the mutation.
+func (m *ProblemMutation) AnswerTypeID() (r int, exists bool) {
+	v := m.answer_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnswerTypeID returns the old "answer_type_id" field's value of the Problem entity.
+// If the Problem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProblemMutation) OldAnswerTypeID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnswerTypeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnswerTypeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnswerTypeID: %w", err)
+	}
+	return oldValue.AnswerTypeID, nil
+}
+
+// ResetAnswerTypeID resets all changes to the "answer_type_id" field.
+func (m *ProblemMutation) ResetAnswerTypeID() {
+	m.answer_type = nil
+}
+
+// SetStatement sets the "statement" field.
+func (m *ProblemMutation) SetStatement(s string) {
+	m.statement = &s
+}
+
+// Statement returns the value of the "statement" field in the mutation.
+func (m *ProblemMutation) Statement() (r string, exists bool) {
+	v := m.statement
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatement returns the old "statement" field's value of the Problem entity.
+// If the Problem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProblemMutation) OldStatement(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatement is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatement requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatement: %w", err)
+	}
+	return oldValue.Statement, nil
+}
+
+// ResetStatement resets all changes to the "statement" field.
+func (m *ProblemMutation) ResetStatement() {
+	m.statement = nil
+}
+
+// ClearAnswerType clears the "answer_type" edge to the AnswerType entity.
+func (m *ProblemMutation) ClearAnswerType() {
+	m.clearedanswer_type = true
+	m.clearedFields[problem.FieldAnswerTypeID] = struct{}{}
+}
+
+// AnswerTypeCleared reports if the "answer_type" edge to the AnswerType entity was cleared.
+func (m *ProblemMutation) AnswerTypeCleared() bool {
+	return m.clearedanswer_type
+}
+
+// AnswerTypeIDs returns the "answer_type" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AnswerTypeID instead. It exists only for internal usage by the builders.
+func (m *ProblemMutation) AnswerTypeIDs() (ids []int) {
+	if id := m.answer_type; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAnswerType resets all changes to the "answer_type" edge.
+func (m *ProblemMutation) ResetAnswerType() {
+	m.answer_type = nil
+	m.clearedanswer_type = false
+}
+
+// AddAnswerDescriptionIDs adds the "answer_descriptions" edge to the AnswerDescription entity by ids.
+func (m *ProblemMutation) AddAnswerDescriptionIDs(ids ...int) {
+	if m.answer_descriptions == nil {
+		m.answer_descriptions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.answer_descriptions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAnswerDescriptions clears the "answer_descriptions" edge to the AnswerDescription entity.
+func (m *ProblemMutation) ClearAnswerDescriptions() {
+	m.clearedanswer_descriptions = true
+}
+
+// AnswerDescriptionsCleared reports if the "answer_descriptions" edge to the AnswerDescription entity was cleared.
+func (m *ProblemMutation) AnswerDescriptionsCleared() bool {
+	return m.clearedanswer_descriptions
+}
+
+// RemoveAnswerDescriptionIDs removes the "answer_descriptions" edge to the AnswerDescription entity by IDs.
+func (m *ProblemMutation) RemoveAnswerDescriptionIDs(ids ...int) {
+	if m.removedanswer_descriptions == nil {
+		m.removedanswer_descriptions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.answer_descriptions, ids[i])
+		m.removedanswer_descriptions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAnswerDescriptions returns the removed IDs of the "answer_descriptions" edge to the AnswerDescription entity.
+func (m *ProblemMutation) RemovedAnswerDescriptionsIDs() (ids []int) {
+	for id := range m.removedanswer_descriptions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AnswerDescriptionsIDs returns the "answer_descriptions" edge IDs in the mutation.
+func (m *ProblemMutation) AnswerDescriptionsIDs() (ids []int) {
+	for id := range m.answer_descriptions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAnswerDescriptions resets all changes to the "answer_descriptions" edge.
+func (m *ProblemMutation) ResetAnswerDescriptions() {
+	m.answer_descriptions = nil
+	m.clearedanswer_descriptions = false
+	m.removedanswer_descriptions = nil
+}
+
+// AddAnswerMultiChoiceIDs adds the "answer_multi_choices" edge to the AnswerMultiChoices entity by ids.
+func (m *ProblemMutation) AddAnswerMultiChoiceIDs(ids ...int) {
+	if m.answer_multi_choices == nil {
+		m.answer_multi_choices = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.answer_multi_choices[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAnswerMultiChoices clears the "answer_multi_choices" edge to the AnswerMultiChoices entity.
+func (m *ProblemMutation) ClearAnswerMultiChoices() {
+	m.clearedanswer_multi_choices = true
+}
+
+// AnswerMultiChoicesCleared reports if the "answer_multi_choices" edge to the AnswerMultiChoices entity was cleared.
+func (m *ProblemMutation) AnswerMultiChoicesCleared() bool {
+	return m.clearedanswer_multi_choices
+}
+
+// RemoveAnswerMultiChoiceIDs removes the "answer_multi_choices" edge to the AnswerMultiChoices entity by IDs.
+func (m *ProblemMutation) RemoveAnswerMultiChoiceIDs(ids ...int) {
+	if m.removedanswer_multi_choices == nil {
+		m.removedanswer_multi_choices = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.answer_multi_choices, ids[i])
+		m.removedanswer_multi_choices[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAnswerMultiChoices returns the removed IDs of the "answer_multi_choices" edge to the AnswerMultiChoices entity.
+func (m *ProblemMutation) RemovedAnswerMultiChoicesIDs() (ids []int) {
+	for id := range m.removedanswer_multi_choices {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AnswerMultiChoicesIDs returns the "answer_multi_choices" edge IDs in the mutation.
+func (m *ProblemMutation) AnswerMultiChoicesIDs() (ids []int) {
+	for id := range m.answer_multi_choices {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAnswerMultiChoices resets all changes to the "answer_multi_choices" edge.
+func (m *ProblemMutation) ResetAnswerMultiChoices() {
+	m.answer_multi_choices = nil
+	m.clearedanswer_multi_choices = false
+	m.removedanswer_multi_choices = nil
+}
+
+// AddAnswerTruthIDs adds the "answer_truths" edge to the AnswerTruth entity by ids.
+func (m *ProblemMutation) AddAnswerTruthIDs(ids ...int) {
+	if m.answer_truths == nil {
+		m.answer_truths = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.answer_truths[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAnswerTruths clears the "answer_truths" edge to the AnswerTruth entity.
+func (m *ProblemMutation) ClearAnswerTruths() {
+	m.clearedanswer_truths = true
+}
+
+// AnswerTruthsCleared reports if the "answer_truths" edge to the AnswerTruth entity was cleared.
+func (m *ProblemMutation) AnswerTruthsCleared() bool {
+	return m.clearedanswer_truths
+}
+
+// RemoveAnswerTruthIDs removes the "answer_truths" edge to the AnswerTruth entity by IDs.
+func (m *ProblemMutation) RemoveAnswerTruthIDs(ids ...int) {
+	if m.removedanswer_truths == nil {
+		m.removedanswer_truths = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.answer_truths, ids[i])
+		m.removedanswer_truths[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAnswerTruths returns the removed IDs of the "answer_truths" edge to the AnswerTruth entity.
+func (m *ProblemMutation) RemovedAnswerTruthsIDs() (ids []int) {
+	for id := range m.removedanswer_truths {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AnswerTruthsIDs returns the "answer_truths" edge IDs in the mutation.
+func (m *ProblemMutation) AnswerTruthsIDs() (ids []int) {
+	for id := range m.answer_truths {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAnswerTruths resets all changes to the "answer_truths" edge.
+func (m *ProblemMutation) ResetAnswerTruths() {
+	m.answer_truths = nil
+	m.clearedanswer_truths = false
+	m.removedanswer_truths = nil
+}
+
+// Where appends a list predicates to the ProblemMutation builder.
+func (m *ProblemMutation) Where(ps ...predicate.Problem) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ProblemMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ProblemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Problem, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ProblemMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ProblemMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Problem).
+func (m *ProblemMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ProblemMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.answer_type != nil {
+		fields = append(fields, problem.FieldAnswerTypeID)
+	}
+	if m.statement != nil {
+		fields = append(fields, problem.FieldStatement)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ProblemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case problem.FieldAnswerTypeID:
+		return m.AnswerTypeID()
+	case problem.FieldStatement:
+		return m.Statement()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ProblemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case problem.FieldAnswerTypeID:
+		return m.OldAnswerTypeID(ctx)
+	case problem.FieldStatement:
+		return m.OldStatement(ctx)
+	}
+	return nil, fmt.Errorf("unknown Problem field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ProblemMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case problem.FieldAnswerTypeID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnswerTypeID(v)
+		return nil
+	case problem.FieldStatement:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatement(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Problem field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ProblemMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ProblemMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ProblemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Problem numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ProblemMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ProblemMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ProblemMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Problem nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ProblemMutation) ResetField(name string) error {
+	switch name {
+	case problem.FieldAnswerTypeID:
+		m.ResetAnswerTypeID()
+		return nil
+	case problem.FieldStatement:
+		m.ResetStatement()
+		return nil
+	}
+	return fmt.Errorf("unknown Problem field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ProblemMutation) AddedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.answer_type != nil {
+		edges = append(edges, problem.EdgeAnswerType)
+	}
+	if m.answer_descriptions != nil {
+		edges = append(edges, problem.EdgeAnswerDescriptions)
+	}
+	if m.answer_multi_choices != nil {
+		edges = append(edges, problem.EdgeAnswerMultiChoices)
+	}
+	if m.answer_truths != nil {
+		edges = append(edges, problem.EdgeAnswerTruths)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ProblemMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case problem.EdgeAnswerType:
+		if id := m.answer_type; id != nil {
+			return []ent.Value{*id}
+		}
+	case problem.EdgeAnswerDescriptions:
+		ids := make([]ent.Value, 0, len(m.answer_descriptions))
+		for id := range m.answer_descriptions {
+			ids = append(ids, id)
+		}
+		return ids
+	case problem.EdgeAnswerMultiChoices:
+		ids := make([]ent.Value, 0, len(m.answer_multi_choices))
+		for id := range m.answer_multi_choices {
+			ids = append(ids, id)
+		}
+		return ids
+	case problem.EdgeAnswerTruths:
+		ids := make([]ent.Value, 0, len(m.answer_truths))
+		for id := range m.answer_truths {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ProblemMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.removedanswer_descriptions != nil {
+		edges = append(edges, problem.EdgeAnswerDescriptions)
+	}
+	if m.removedanswer_multi_choices != nil {
+		edges = append(edges, problem.EdgeAnswerMultiChoices)
+	}
+	if m.removedanswer_truths != nil {
+		edges = append(edges, problem.EdgeAnswerTruths)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ProblemMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case problem.EdgeAnswerDescriptions:
+		ids := make([]ent.Value, 0, len(m.removedanswer_descriptions))
+		for id := range m.removedanswer_descriptions {
+			ids = append(ids, id)
+		}
+		return ids
+	case problem.EdgeAnswerMultiChoices:
+		ids := make([]ent.Value, 0, len(m.removedanswer_multi_choices))
+		for id := range m.removedanswer_multi_choices {
+			ids = append(ids, id)
+		}
+		return ids
+	case problem.EdgeAnswerTruths:
+		ids := make([]ent.Value, 0, len(m.removedanswer_truths))
+		for id := range m.removedanswer_truths {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ProblemMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.clearedanswer_type {
+		edges = append(edges, problem.EdgeAnswerType)
+	}
+	if m.clearedanswer_descriptions {
+		edges = append(edges, problem.EdgeAnswerDescriptions)
+	}
+	if m.clearedanswer_multi_choices {
+		edges = append(edges, problem.EdgeAnswerMultiChoices)
+	}
+	if m.clearedanswer_truths {
+		edges = append(edges, problem.EdgeAnswerTruths)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ProblemMutation) EdgeCleared(name string) bool {
+	switch name {
+	case problem.EdgeAnswerType:
+		return m.clearedanswer_type
+	case problem.EdgeAnswerDescriptions:
+		return m.clearedanswer_descriptions
+	case problem.EdgeAnswerMultiChoices:
+		return m.clearedanswer_multi_choices
+	case problem.EdgeAnswerTruths:
+		return m.clearedanswer_truths
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ProblemMutation) ClearEdge(name string) error {
+	switch name {
+	case problem.EdgeAnswerType:
+		m.ClearAnswerType()
+		return nil
+	}
+	return fmt.Errorf("unknown Problem unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ProblemMutation) ResetEdge(name string) error {
+	switch name {
+	case problem.EdgeAnswerType:
+		m.ResetAnswerType()
+		return nil
+	case problem.EdgeAnswerDescriptions:
+		m.ResetAnswerDescriptions()
+		return nil
+	case problem.EdgeAnswerMultiChoices:
+		m.ResetAnswerMultiChoices()
+		return nil
+	case problem.EdgeAnswerTruths:
+		m.ResetAnswerTruths()
+		return nil
+	}
+	return fmt.Errorf("unknown Problem edge %s", name)
+}
+
+// RoleMutation represents an operation that mutates the Role nodes in the graph.
+type RoleMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *int
+	name                    *string
+	clearedFields           map[string]struct{}
+	workbook_members        map[int]struct{}
+	removedworkbook_members map[int]struct{}
+	clearedworkbook_members bool
+	permissions             map[int]struct{}
+	removedpermissions      map[int]struct{}
+	clearedpermissions      bool
+	done                    bool
+	oldValue                func(context.Context) (*Role, error)
+	predicates              []predicate.Role
+}
+
+var _ ent.Mutation = (*RoleMutation)(nil)
+
+// roleOption allows management of the mutation configuration using functional options.
+type roleOption func(*RoleMutation)
+
+// newRoleMutation creates new mutation for the Role entity.
+func newRoleMutation(c config, op Op, opts ...roleOption) *RoleMutation {
+	m := &RoleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRole,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRoleID sets the ID field of the mutation.
+func withRoleID(id int) roleOption {
+	return func(m *RoleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Role
+		)
+		m.oldValue = func(ctx context.Context) (*Role, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Role.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRole sets the old Role of the mutation.
+func withRole(node *Role) roleOption {
+	return func(m *RoleMutation) {
+		m.oldValue = func(context.Context) (*Role, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RoleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RoleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RoleMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RoleMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Role.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *RoleMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *RoleMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Role entity.
+// If the Role object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *RoleMutation) ResetName() {
+	m.name = nil
+}
+
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by ids.
+func (m *RoleMutation) AddWorkbookMemberIDs(ids ...int) {
+	if m.workbook_members == nil {
+		m.workbook_members = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.workbook_members[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookMembers clears the "workbook_members" edge to the WorkbookMember entity.
+func (m *RoleMutation) ClearWorkbookMembers() {
+	m.clearedworkbook_members = true
+}
+
+// WorkbookMembersCleared reports if the "workbook_members" edge to the WorkbookMember entity was cleared.
+func (m *RoleMutation) WorkbookMembersCleared() bool {
+	return m.clearedworkbook_members
+}
+
+// RemoveWorkbookMemberIDs removes the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (m *RoleMutation) RemoveWorkbookMemberIDs(ids ...int) {
+	if m.removedworkbook_members == nil {
+		m.removedworkbook_members = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_members, ids[i])
+		m.removedworkbook_members[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookMembers returns the removed IDs of the "workbook_members" edge to the WorkbookMember entity.
+func (m *RoleMutation) RemovedWorkbookMembersIDs() (ids []int) {
+	for id := range m.removedworkbook_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookMembersIDs returns the "workbook_members" edge IDs in the mutation.
+func (m *RoleMutation) WorkbookMembersIDs() (ids []int) {
+	for id := range m.workbook_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookMembers resets all changes to the "workbook_members" edge.
+func (m *RoleMutation) ResetWorkbookMembers() {
+	m.workbook_members = nil
+	m.clearedworkbook_members = false
+	m.removedworkbook_members = nil
+}
+
+// AddPermissionIDs adds the "permissions" edge to the Permission entity by ids.
+func (m *RoleMutation) AddPermissionIDs(ids ...int) {
+	if m.permissions == nil {
+		m.permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.permissions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPermissions clears the "permissions" edge to the Permission entity.
+func (m *RoleMutation) ClearPermissions() {
+	m.clearedpermissions = true
+}
+
+// PermissionsCleared reports if the "permissions" edge to the Permission entity was cleared.
+func (m *RoleMutation) PermissionsCleared() bool {
+	return m.clearedpermissions
+}
+
+// RemovePermissionIDs removes the "permissions" edge to the Permission entity by IDs.
+func (m *RoleMutation) RemovePermissionIDs(ids ...int) {
+	if m.removedpermissions == nil {
+		m.removedpermissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.permissions, ids[i])
+		m.removedpermissions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPermissions returns the removed IDs of the "permissions" edge to the Permission entity.
+func (m *RoleMutation) RemovedPermissionsIDs() (ids []int) {
+	for id := range m.removedpermissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PermissionsIDs returns the "permissions" edge IDs in the mutation.
+func (m *RoleMutation) PermissionsIDs() (ids []int) {
+	for id := range m.permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPermissions resets all changes to the "permissions" edge.
+func (m *RoleMutation) ResetPermissions() {
+	m.permissions = nil
+	m.clearedpermissions = false
+	m.removedpermissions = nil
+}
+
+// Where appends a list predicates to the RoleMutation builder.
+func (m *RoleMutation) Where(ps ...predicate.Role) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the RoleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RoleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Role, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *RoleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RoleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Role).
+func (m *RoleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RoleMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, role.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RoleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case role.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RoleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case role.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Role field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RoleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case role.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Role field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RoleMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RoleMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RoleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Role numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RoleMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RoleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RoleMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Role nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RoleMutation) ResetField(name string) error {
+	switch name {
+	case role.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Role field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RoleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.workbook_members != nil {
+		edges = append(edges, role.EdgeWorkbookMembers)
+	}
+	if m.permissions != nil {
+		edges = append(edges, role.EdgePermissions)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RoleMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case role.EdgeWorkbookMembers:
+		ids := make([]ent.Value, 0, len(m.workbook_members))
+		for id := range m.workbook_members {
+			ids = append(ids, id)
+		}
+		return ids
+	case role.EdgePermissions:
+		ids := make([]ent.Value, 0, len(m.permissions))
+		for id := range m.permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RoleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedworkbook_members != nil {
+		edges = append(edges, role.EdgeWorkbookMembers)
+	}
+	if m.removedpermissions != nil {
+		edges = append(edges, role.EdgePermissions)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RoleMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case role.EdgeWorkbookMembers:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_members))
+		for id := range m.removedworkbook_members {
+			ids = append(ids, id)
+		}
+		return ids
+	case role.EdgePermissions:
+		ids := make([]ent.Value, 0, len(m.removedpermissions))
+		for id := range m.removedpermissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RoleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedworkbook_members {
+		edges = append(edges, role.EdgeWorkbookMembers)
+	}
+	if m.clearedpermissions {
+		edges = append(edges, role.EdgePermissions)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RoleMutation) EdgeCleared(name string) bool {
+	switch name {
+	case role.EdgeWorkbookMembers:
+		return m.clearedworkbook_members
+	case role.EdgePermissions:
+		return m.clearedpermissions
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RoleMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Role unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RoleMutation) ResetEdge(name string) error {
+	switch name {
+	case role.EdgeWorkbookMembers:
+		m.ResetWorkbookMembers()
+		return nil
+	case role.EdgePermissions:
+		m.ResetPermissions()
+		return nil
+	}
+	return fmt.Errorf("unknown Role edge %s", name)
+}
+
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	created_at      *time.Time
-	updated_at      *time.Time
-	email           *string
-	name            *string
-	nick_name       *string
-	password        *string
-	clearedFields   map[string]struct{}
-	articles        map[int]struct{}
-	removedarticles map[int]struct{}
-	clearedarticles bool
-	done            bool
-	oldValue        func(context.Context) (*User, error)
-	predicates      []predicate.User
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	email                   *string
+	name                    *string
+	nick_name               *string
+	password                *string
+	clearedFields           map[string]struct{}
+	articles                map[int]struct{}
+	removedarticles         map[int]struct{}
+	clearedarticles         bool
+	workbook_members        map[int]struct{}
+	removedworkbook_members map[int]struct{}
+	clearedworkbook_members bool
+	done                    bool
+	oldValue                func(context.Context) (*User, error)
+	predicates              []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -985,6 +4048,60 @@ func (m *UserMutation) ResetArticles() {
 	m.removedarticles = nil
 }
 
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by ids.
+func (m *UserMutation) AddWorkbookMemberIDs(ids ...int) {
+	if m.workbook_members == nil {
+		m.workbook_members = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.workbook_members[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookMembers clears the "workbook_members" edge to the WorkbookMember entity.
+func (m *UserMutation) ClearWorkbookMembers() {
+	m.clearedworkbook_members = true
+}
+
+// WorkbookMembersCleared reports if the "workbook_members" edge to the WorkbookMember entity was cleared.
+func (m *UserMutation) WorkbookMembersCleared() bool {
+	return m.clearedworkbook_members
+}
+
+// RemoveWorkbookMemberIDs removes the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (m *UserMutation) RemoveWorkbookMemberIDs(ids ...int) {
+	if m.removedworkbook_members == nil {
+		m.removedworkbook_members = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_members, ids[i])
+		m.removedworkbook_members[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookMembers returns the removed IDs of the "workbook_members" edge to the WorkbookMember entity.
+func (m *UserMutation) RemovedWorkbookMembersIDs() (ids []int) {
+	for id := range m.removedworkbook_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookMembersIDs returns the "workbook_members" edge IDs in the mutation.
+func (m *UserMutation) WorkbookMembersIDs() (ids []int) {
+	for id := range m.workbook_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookMembers resets all changes to the "workbook_members" edge.
+func (m *UserMutation) ResetWorkbookMembers() {
+	m.workbook_members = nil
+	m.clearedworkbook_members = false
+	m.removedworkbook_members = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -1203,9 +4320,12 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.articles != nil {
 		edges = append(edges, user.EdgeArticles)
+	}
+	if m.workbook_members != nil {
+		edges = append(edges, user.EdgeWorkbookMembers)
 	}
 	return edges
 }
@@ -1220,15 +4340,24 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWorkbookMembers:
+		ids := make([]ent.Value, 0, len(m.workbook_members))
+		for id := range m.workbook_members {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedarticles != nil {
 		edges = append(edges, user.EdgeArticles)
+	}
+	if m.removedworkbook_members != nil {
+		edges = append(edges, user.EdgeWorkbookMembers)
 	}
 	return edges
 }
@@ -1243,15 +4372,24 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWorkbookMembers:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_members))
+		for id := range m.removedworkbook_members {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedarticles {
 		edges = append(edges, user.EdgeArticles)
+	}
+	if m.clearedworkbook_members {
+		edges = append(edges, user.EdgeWorkbookMembers)
 	}
 	return edges
 }
@@ -1262,6 +4400,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeArticles:
 		return m.clearedarticles
+	case user.EdgeWorkbookMembers:
+		return m.clearedworkbook_members
 	}
 	return false
 }
@@ -1281,6 +4421,2508 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeArticles:
 		m.ResetArticles()
 		return nil
+	case user.EdgeWorkbookMembers:
+		m.ResetWorkbookMembers()
+		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
+}
+
+// WorkbookMutation represents an operation that mutates the Workbook nodes in the graph.
+type WorkbookMutation struct {
+	config
+	op                         Op
+	typ                        string
+	id                         *int
+	created_at                 *time.Time
+	updated_at                 *time.Time
+	created_id                 *int
+	addcreated_id              *int
+	description                *string
+	title                      *string
+	clearedFields              map[string]struct{}
+	workbook_categories        map[int]struct{}
+	removedworkbook_categories map[int]struct{}
+	clearedworkbook_categories bool
+	workbook_members           map[int]struct{}
+	removedworkbook_members    map[int]struct{}
+	clearedworkbook_members    bool
+	done                       bool
+	oldValue                   func(context.Context) (*Workbook, error)
+	predicates                 []predicate.Workbook
+}
+
+var _ ent.Mutation = (*WorkbookMutation)(nil)
+
+// workbookOption allows management of the mutation configuration using functional options.
+type workbookOption func(*WorkbookMutation)
+
+// newWorkbookMutation creates new mutation for the Workbook entity.
+func newWorkbookMutation(c config, op Op, opts ...workbookOption) *WorkbookMutation {
+	m := &WorkbookMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWorkbook,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWorkbookID sets the ID field of the mutation.
+func withWorkbookID(id int) workbookOption {
+	return func(m *WorkbookMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Workbook
+		)
+		m.oldValue = func(ctx context.Context) (*Workbook, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Workbook.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWorkbook sets the old Workbook of the mutation.
+func withWorkbook(node *Workbook) workbookOption {
+	return func(m *WorkbookMutation) {
+		m.oldValue = func(context.Context) (*Workbook, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WorkbookMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WorkbookMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WorkbookMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WorkbookMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Workbook.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *WorkbookMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *WorkbookMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Workbook entity.
+// If the Workbook object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *WorkbookMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *WorkbookMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *WorkbookMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Workbook entity.
+// If the Workbook object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *WorkbookMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetCreatedID sets the "created_id" field.
+func (m *WorkbookMutation) SetCreatedID(i int) {
+	m.created_id = &i
+	m.addcreated_id = nil
+}
+
+// CreatedID returns the value of the "created_id" field in the mutation.
+func (m *WorkbookMutation) CreatedID() (r int, exists bool) {
+	v := m.created_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedID returns the old "created_id" field's value of the Workbook entity.
+// If the Workbook object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMutation) OldCreatedID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedID: %w", err)
+	}
+	return oldValue.CreatedID, nil
+}
+
+// AddCreatedID adds i to the "created_id" field.
+func (m *WorkbookMutation) AddCreatedID(i int) {
+	if m.addcreated_id != nil {
+		*m.addcreated_id += i
+	} else {
+		m.addcreated_id = &i
+	}
+}
+
+// AddedCreatedID returns the value that was added to the "created_id" field in this mutation.
+func (m *WorkbookMutation) AddedCreatedID() (r int, exists bool) {
+	v := m.addcreated_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedID resets all changes to the "created_id" field.
+func (m *WorkbookMutation) ResetCreatedID() {
+	m.created_id = nil
+	m.addcreated_id = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *WorkbookMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *WorkbookMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Workbook entity.
+// If the Workbook object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMutation) OldDescription(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *WorkbookMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *WorkbookMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *WorkbookMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Workbook entity.
+// If the Workbook object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *WorkbookMutation) ResetTitle() {
+	m.title = nil
+}
+
+// AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by ids.
+func (m *WorkbookMutation) AddWorkbookCategoryIDs(ids ...int) {
+	if m.workbook_categories == nil {
+		m.workbook_categories = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.workbook_categories[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookCategories clears the "workbook_categories" edge to the WorkbookCategory entity.
+func (m *WorkbookMutation) ClearWorkbookCategories() {
+	m.clearedworkbook_categories = true
+}
+
+// WorkbookCategoriesCleared reports if the "workbook_categories" edge to the WorkbookCategory entity was cleared.
+func (m *WorkbookMutation) WorkbookCategoriesCleared() bool {
+	return m.clearedworkbook_categories
+}
+
+// RemoveWorkbookCategoryIDs removes the "workbook_categories" edge to the WorkbookCategory entity by IDs.
+func (m *WorkbookMutation) RemoveWorkbookCategoryIDs(ids ...int) {
+	if m.removedworkbook_categories == nil {
+		m.removedworkbook_categories = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_categories, ids[i])
+		m.removedworkbook_categories[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookCategories returns the removed IDs of the "workbook_categories" edge to the WorkbookCategory entity.
+func (m *WorkbookMutation) RemovedWorkbookCategoriesIDs() (ids []int) {
+	for id := range m.removedworkbook_categories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookCategoriesIDs returns the "workbook_categories" edge IDs in the mutation.
+func (m *WorkbookMutation) WorkbookCategoriesIDs() (ids []int) {
+	for id := range m.workbook_categories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookCategories resets all changes to the "workbook_categories" edge.
+func (m *WorkbookMutation) ResetWorkbookCategories() {
+	m.workbook_categories = nil
+	m.clearedworkbook_categories = false
+	m.removedworkbook_categories = nil
+}
+
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by ids.
+func (m *WorkbookMutation) AddWorkbookMemberIDs(ids ...int) {
+	if m.workbook_members == nil {
+		m.workbook_members = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.workbook_members[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookMembers clears the "workbook_members" edge to the WorkbookMember entity.
+func (m *WorkbookMutation) ClearWorkbookMembers() {
+	m.clearedworkbook_members = true
+}
+
+// WorkbookMembersCleared reports if the "workbook_members" edge to the WorkbookMember entity was cleared.
+func (m *WorkbookMutation) WorkbookMembersCleared() bool {
+	return m.clearedworkbook_members
+}
+
+// RemoveWorkbookMemberIDs removes the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (m *WorkbookMutation) RemoveWorkbookMemberIDs(ids ...int) {
+	if m.removedworkbook_members == nil {
+		m.removedworkbook_members = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_members, ids[i])
+		m.removedworkbook_members[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookMembers returns the removed IDs of the "workbook_members" edge to the WorkbookMember entity.
+func (m *WorkbookMutation) RemovedWorkbookMembersIDs() (ids []int) {
+	for id := range m.removedworkbook_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookMembersIDs returns the "workbook_members" edge IDs in the mutation.
+func (m *WorkbookMutation) WorkbookMembersIDs() (ids []int) {
+	for id := range m.workbook_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookMembers resets all changes to the "workbook_members" edge.
+func (m *WorkbookMutation) ResetWorkbookMembers() {
+	m.workbook_members = nil
+	m.clearedworkbook_members = false
+	m.removedworkbook_members = nil
+}
+
+// Where appends a list predicates to the WorkbookMutation builder.
+func (m *WorkbookMutation) Where(ps ...predicate.Workbook) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WorkbookMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WorkbookMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Workbook, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WorkbookMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WorkbookMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Workbook).
+func (m *WorkbookMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WorkbookMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.created_at != nil {
+		fields = append(fields, workbook.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, workbook.FieldUpdatedAt)
+	}
+	if m.created_id != nil {
+		fields = append(fields, workbook.FieldCreatedID)
+	}
+	if m.description != nil {
+		fields = append(fields, workbook.FieldDescription)
+	}
+	if m.title != nil {
+		fields = append(fields, workbook.FieldTitle)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WorkbookMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case workbook.FieldCreatedAt:
+		return m.CreatedAt()
+	case workbook.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case workbook.FieldCreatedID:
+		return m.CreatedID()
+	case workbook.FieldDescription:
+		return m.Description()
+	case workbook.FieldTitle:
+		return m.Title()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WorkbookMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case workbook.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case workbook.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case workbook.FieldCreatedID:
+		return m.OldCreatedID(ctx)
+	case workbook.FieldDescription:
+		return m.OldDescription(ctx)
+	case workbook.FieldTitle:
+		return m.OldTitle(ctx)
+	}
+	return nil, fmt.Errorf("unknown Workbook field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case workbook.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case workbook.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case workbook.FieldCreatedID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedID(v)
+		return nil
+	case workbook.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case workbook.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Workbook field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WorkbookMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreated_id != nil {
+		fields = append(fields, workbook.FieldCreatedID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WorkbookMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case workbook.FieldCreatedID:
+		return m.AddedCreatedID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case workbook.FieldCreatedID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Workbook numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WorkbookMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WorkbookMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WorkbookMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Workbook nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WorkbookMutation) ResetField(name string) error {
+	switch name {
+	case workbook.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case workbook.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case workbook.FieldCreatedID:
+		m.ResetCreatedID()
+		return nil
+	case workbook.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case workbook.FieldTitle:
+		m.ResetTitle()
+		return nil
+	}
+	return fmt.Errorf("unknown Workbook field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WorkbookMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.workbook_categories != nil {
+		edges = append(edges, workbook.EdgeWorkbookCategories)
+	}
+	if m.workbook_members != nil {
+		edges = append(edges, workbook.EdgeWorkbookMembers)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WorkbookMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case workbook.EdgeWorkbookCategories:
+		ids := make([]ent.Value, 0, len(m.workbook_categories))
+		for id := range m.workbook_categories {
+			ids = append(ids, id)
+		}
+		return ids
+	case workbook.EdgeWorkbookMembers:
+		ids := make([]ent.Value, 0, len(m.workbook_members))
+		for id := range m.workbook_members {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WorkbookMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedworkbook_categories != nil {
+		edges = append(edges, workbook.EdgeWorkbookCategories)
+	}
+	if m.removedworkbook_members != nil {
+		edges = append(edges, workbook.EdgeWorkbookMembers)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WorkbookMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case workbook.EdgeWorkbookCategories:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_categories))
+		for id := range m.removedworkbook_categories {
+			ids = append(ids, id)
+		}
+		return ids
+	case workbook.EdgeWorkbookMembers:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_members))
+		for id := range m.removedworkbook_members {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WorkbookMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedworkbook_categories {
+		edges = append(edges, workbook.EdgeWorkbookCategories)
+	}
+	if m.clearedworkbook_members {
+		edges = append(edges, workbook.EdgeWorkbookMembers)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WorkbookMutation) EdgeCleared(name string) bool {
+	switch name {
+	case workbook.EdgeWorkbookCategories:
+		return m.clearedworkbook_categories
+	case workbook.EdgeWorkbookMembers:
+		return m.clearedworkbook_members
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WorkbookMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Workbook unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WorkbookMutation) ResetEdge(name string) error {
+	switch name {
+	case workbook.EdgeWorkbookCategories:
+		m.ResetWorkbookCategories()
+		return nil
+	case workbook.EdgeWorkbookMembers:
+		m.ResetWorkbookMembers()
+		return nil
+	}
+	return fmt.Errorf("unknown Workbook edge %s", name)
+}
+
+// WorkbookCategoryMutation represents an operation that mutates the WorkbookCategory nodes in the graph.
+type WorkbookCategoryMutation struct {
+	config
+	op                                Op
+	typ                               string
+	id                                *int
+	created_at                        *time.Time
+	updated_at                        *time.Time
+	name                              *string
+	clearedFields                     map[string]struct{}
+	problems                          map[int]struct{}
+	removedproblems                   map[int]struct{}
+	clearedproblems                   bool
+	workbook                          *int
+	clearedworkbook                   bool
+	workbook_category_closures        map[int]struct{}
+	removedworkbook_category_closures map[int]struct{}
+	clearedworkbook_category_closures bool
+	done                              bool
+	oldValue                          func(context.Context) (*WorkbookCategory, error)
+	predicates                        []predicate.WorkbookCategory
+}
+
+var _ ent.Mutation = (*WorkbookCategoryMutation)(nil)
+
+// workbookcategoryOption allows management of the mutation configuration using functional options.
+type workbookcategoryOption func(*WorkbookCategoryMutation)
+
+// newWorkbookCategoryMutation creates new mutation for the WorkbookCategory entity.
+func newWorkbookCategoryMutation(c config, op Op, opts ...workbookcategoryOption) *WorkbookCategoryMutation {
+	m := &WorkbookCategoryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWorkbookCategory,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWorkbookCategoryID sets the ID field of the mutation.
+func withWorkbookCategoryID(id int) workbookcategoryOption {
+	return func(m *WorkbookCategoryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WorkbookCategory
+		)
+		m.oldValue = func(ctx context.Context) (*WorkbookCategory, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WorkbookCategory.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWorkbookCategory sets the old WorkbookCategory of the mutation.
+func withWorkbookCategory(node *WorkbookCategory) workbookcategoryOption {
+	return func(m *WorkbookCategoryMutation) {
+		m.oldValue = func(context.Context) (*WorkbookCategory, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WorkbookCategoryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WorkbookCategoryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WorkbookCategoryMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WorkbookCategoryMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WorkbookCategory.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *WorkbookCategoryMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *WorkbookCategoryMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the WorkbookCategory entity.
+// If the WorkbookCategory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookCategoryMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *WorkbookCategoryMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *WorkbookCategoryMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *WorkbookCategoryMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the WorkbookCategory entity.
+// If the WorkbookCategory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookCategoryMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *WorkbookCategoryMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetName sets the "name" field.
+func (m *WorkbookCategoryMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *WorkbookCategoryMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the WorkbookCategory entity.
+// If the WorkbookCategory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookCategoryMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *WorkbookCategoryMutation) ResetName() {
+	m.name = nil
+}
+
+// SetWorkbookID sets the "workbook_id" field.
+func (m *WorkbookCategoryMutation) SetWorkbookID(i int) {
+	m.workbook = &i
+}
+
+// WorkbookID returns the value of the "workbook_id" field in the mutation.
+func (m *WorkbookCategoryMutation) WorkbookID() (r int, exists bool) {
+	v := m.workbook
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkbookID returns the old "workbook_id" field's value of the WorkbookCategory entity.
+// If the WorkbookCategory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookCategoryMutation) OldWorkbookID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWorkbookID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWorkbookID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkbookID: %w", err)
+	}
+	return oldValue.WorkbookID, nil
+}
+
+// ResetWorkbookID resets all changes to the "workbook_id" field.
+func (m *WorkbookCategoryMutation) ResetWorkbookID() {
+	m.workbook = nil
+}
+
+// AddProblemIDs adds the "problems" edge to the Problem entity by ids.
+func (m *WorkbookCategoryMutation) AddProblemIDs(ids ...int) {
+	if m.problems == nil {
+		m.problems = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.problems[ids[i]] = struct{}{}
+	}
+}
+
+// ClearProblems clears the "problems" edge to the Problem entity.
+func (m *WorkbookCategoryMutation) ClearProblems() {
+	m.clearedproblems = true
+}
+
+// ProblemsCleared reports if the "problems" edge to the Problem entity was cleared.
+func (m *WorkbookCategoryMutation) ProblemsCleared() bool {
+	return m.clearedproblems
+}
+
+// RemoveProblemIDs removes the "problems" edge to the Problem entity by IDs.
+func (m *WorkbookCategoryMutation) RemoveProblemIDs(ids ...int) {
+	if m.removedproblems == nil {
+		m.removedproblems = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.problems, ids[i])
+		m.removedproblems[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedProblems returns the removed IDs of the "problems" edge to the Problem entity.
+func (m *WorkbookCategoryMutation) RemovedProblemsIDs() (ids []int) {
+	for id := range m.removedproblems {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ProblemsIDs returns the "problems" edge IDs in the mutation.
+func (m *WorkbookCategoryMutation) ProblemsIDs() (ids []int) {
+	for id := range m.problems {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetProblems resets all changes to the "problems" edge.
+func (m *WorkbookCategoryMutation) ResetProblems() {
+	m.problems = nil
+	m.clearedproblems = false
+	m.removedproblems = nil
+}
+
+// ClearWorkbook clears the "workbook" edge to the Workbook entity.
+func (m *WorkbookCategoryMutation) ClearWorkbook() {
+	m.clearedworkbook = true
+	m.clearedFields[workbookcategory.FieldWorkbookID] = struct{}{}
+}
+
+// WorkbookCleared reports if the "workbook" edge to the Workbook entity was cleared.
+func (m *WorkbookCategoryMutation) WorkbookCleared() bool {
+	return m.clearedworkbook
+}
+
+// WorkbookIDs returns the "workbook" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// WorkbookID instead. It exists only for internal usage by the builders.
+func (m *WorkbookCategoryMutation) WorkbookIDs() (ids []int) {
+	if id := m.workbook; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetWorkbook resets all changes to the "workbook" edge.
+func (m *WorkbookCategoryMutation) ResetWorkbook() {
+	m.workbook = nil
+	m.clearedworkbook = false
+}
+
+// AddWorkbookCategoryClosureIDs adds the "workbook_category_closures" edge to the WorkbookCategoryClosure entity by ids.
+func (m *WorkbookCategoryMutation) AddWorkbookCategoryClosureIDs(ids ...int) {
+	if m.workbook_category_closures == nil {
+		m.workbook_category_closures = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.workbook_category_closures[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookCategoryClosures clears the "workbook_category_closures" edge to the WorkbookCategoryClosure entity.
+func (m *WorkbookCategoryMutation) ClearWorkbookCategoryClosures() {
+	m.clearedworkbook_category_closures = true
+}
+
+// WorkbookCategoryClosuresCleared reports if the "workbook_category_closures" edge to the WorkbookCategoryClosure entity was cleared.
+func (m *WorkbookCategoryMutation) WorkbookCategoryClosuresCleared() bool {
+	return m.clearedworkbook_category_closures
+}
+
+// RemoveWorkbookCategoryClosureIDs removes the "workbook_category_closures" edge to the WorkbookCategoryClosure entity by IDs.
+func (m *WorkbookCategoryMutation) RemoveWorkbookCategoryClosureIDs(ids ...int) {
+	if m.removedworkbook_category_closures == nil {
+		m.removedworkbook_category_closures = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_category_closures, ids[i])
+		m.removedworkbook_category_closures[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookCategoryClosures returns the removed IDs of the "workbook_category_closures" edge to the WorkbookCategoryClosure entity.
+func (m *WorkbookCategoryMutation) RemovedWorkbookCategoryClosuresIDs() (ids []int) {
+	for id := range m.removedworkbook_category_closures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookCategoryClosuresIDs returns the "workbook_category_closures" edge IDs in the mutation.
+func (m *WorkbookCategoryMutation) WorkbookCategoryClosuresIDs() (ids []int) {
+	for id := range m.workbook_category_closures {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookCategoryClosures resets all changes to the "workbook_category_closures" edge.
+func (m *WorkbookCategoryMutation) ResetWorkbookCategoryClosures() {
+	m.workbook_category_closures = nil
+	m.clearedworkbook_category_closures = false
+	m.removedworkbook_category_closures = nil
+}
+
+// Where appends a list predicates to the WorkbookCategoryMutation builder.
+func (m *WorkbookCategoryMutation) Where(ps ...predicate.WorkbookCategory) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WorkbookCategoryMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WorkbookCategoryMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WorkbookCategory, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WorkbookCategoryMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WorkbookCategoryMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (WorkbookCategory).
+func (m *WorkbookCategoryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WorkbookCategoryMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, workbookcategory.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, workbookcategory.FieldUpdatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, workbookcategory.FieldName)
+	}
+	if m.workbook != nil {
+		fields = append(fields, workbookcategory.FieldWorkbookID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WorkbookCategoryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case workbookcategory.FieldCreatedAt:
+		return m.CreatedAt()
+	case workbookcategory.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case workbookcategory.FieldName:
+		return m.Name()
+	case workbookcategory.FieldWorkbookID:
+		return m.WorkbookID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WorkbookCategoryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case workbookcategory.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case workbookcategory.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case workbookcategory.FieldName:
+		return m.OldName(ctx)
+	case workbookcategory.FieldWorkbookID:
+		return m.OldWorkbookID(ctx)
+	}
+	return nil, fmt.Errorf("unknown WorkbookCategory field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookCategoryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case workbookcategory.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case workbookcategory.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case workbookcategory.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case workbookcategory.FieldWorkbookID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkbookID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategory field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WorkbookCategoryMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WorkbookCategoryMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookCategoryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown WorkbookCategory numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WorkbookCategoryMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WorkbookCategoryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WorkbookCategoryMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown WorkbookCategory nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WorkbookCategoryMutation) ResetField(name string) error {
+	switch name {
+	case workbookcategory.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case workbookcategory.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case workbookcategory.FieldName:
+		m.ResetName()
+		return nil
+	case workbookcategory.FieldWorkbookID:
+		m.ResetWorkbookID()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategory field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WorkbookCategoryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.problems != nil {
+		edges = append(edges, workbookcategory.EdgeProblems)
+	}
+	if m.workbook != nil {
+		edges = append(edges, workbookcategory.EdgeWorkbook)
+	}
+	if m.workbook_category_closures != nil {
+		edges = append(edges, workbookcategory.EdgeWorkbookCategoryClosures)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WorkbookCategoryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case workbookcategory.EdgeProblems:
+		ids := make([]ent.Value, 0, len(m.problems))
+		for id := range m.problems {
+			ids = append(ids, id)
+		}
+		return ids
+	case workbookcategory.EdgeWorkbook:
+		if id := m.workbook; id != nil {
+			return []ent.Value{*id}
+		}
+	case workbookcategory.EdgeWorkbookCategoryClosures:
+		ids := make([]ent.Value, 0, len(m.workbook_category_closures))
+		for id := range m.workbook_category_closures {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WorkbookCategoryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedproblems != nil {
+		edges = append(edges, workbookcategory.EdgeProblems)
+	}
+	if m.removedworkbook_category_closures != nil {
+		edges = append(edges, workbookcategory.EdgeWorkbookCategoryClosures)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WorkbookCategoryMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case workbookcategory.EdgeProblems:
+		ids := make([]ent.Value, 0, len(m.removedproblems))
+		for id := range m.removedproblems {
+			ids = append(ids, id)
+		}
+		return ids
+	case workbookcategory.EdgeWorkbookCategoryClosures:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_category_closures))
+		for id := range m.removedworkbook_category_closures {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WorkbookCategoryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedproblems {
+		edges = append(edges, workbookcategory.EdgeProblems)
+	}
+	if m.clearedworkbook {
+		edges = append(edges, workbookcategory.EdgeWorkbook)
+	}
+	if m.clearedworkbook_category_closures {
+		edges = append(edges, workbookcategory.EdgeWorkbookCategoryClosures)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WorkbookCategoryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case workbookcategory.EdgeProblems:
+		return m.clearedproblems
+	case workbookcategory.EdgeWorkbook:
+		return m.clearedworkbook
+	case workbookcategory.EdgeWorkbookCategoryClosures:
+		return m.clearedworkbook_category_closures
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WorkbookCategoryMutation) ClearEdge(name string) error {
+	switch name {
+	case workbookcategory.EdgeWorkbook:
+		m.ClearWorkbook()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategory unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WorkbookCategoryMutation) ResetEdge(name string) error {
+	switch name {
+	case workbookcategory.EdgeProblems:
+		m.ResetProblems()
+		return nil
+	case workbookcategory.EdgeWorkbook:
+		m.ResetWorkbook()
+		return nil
+	case workbookcategory.EdgeWorkbookCategoryClosures:
+		m.ResetWorkbookCategoryClosures()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategory edge %s", name)
+}
+
+// WorkbookCategoryClosureMutation represents an operation that mutates the WorkbookCategoryClosure nodes in the graph.
+type WorkbookCategoryClosureMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	child_id      *int
+	addchild_id   *int
+	parent_id     *int
+	addparent_id  *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*WorkbookCategoryClosure, error)
+	predicates    []predicate.WorkbookCategoryClosure
+}
+
+var _ ent.Mutation = (*WorkbookCategoryClosureMutation)(nil)
+
+// workbookcategoryclosureOption allows management of the mutation configuration using functional options.
+type workbookcategoryclosureOption func(*WorkbookCategoryClosureMutation)
+
+// newWorkbookCategoryClosureMutation creates new mutation for the WorkbookCategoryClosure entity.
+func newWorkbookCategoryClosureMutation(c config, op Op, opts ...workbookcategoryclosureOption) *WorkbookCategoryClosureMutation {
+	m := &WorkbookCategoryClosureMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWorkbookCategoryClosure,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWorkbookCategoryClosureID sets the ID field of the mutation.
+func withWorkbookCategoryClosureID(id int) workbookcategoryclosureOption {
+	return func(m *WorkbookCategoryClosureMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WorkbookCategoryClosure
+		)
+		m.oldValue = func(ctx context.Context) (*WorkbookCategoryClosure, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WorkbookCategoryClosure.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWorkbookCategoryClosure sets the old WorkbookCategoryClosure of the mutation.
+func withWorkbookCategoryClosure(node *WorkbookCategoryClosure) workbookcategoryclosureOption {
+	return func(m *WorkbookCategoryClosureMutation) {
+		m.oldValue = func(context.Context) (*WorkbookCategoryClosure, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WorkbookCategoryClosureMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WorkbookCategoryClosureMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WorkbookCategoryClosureMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WorkbookCategoryClosureMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WorkbookCategoryClosure.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetChildID sets the "child_id" field.
+func (m *WorkbookCategoryClosureMutation) SetChildID(i int) {
+	m.child_id = &i
+	m.addchild_id = nil
+}
+
+// ChildID returns the value of the "child_id" field in the mutation.
+func (m *WorkbookCategoryClosureMutation) ChildID() (r int, exists bool) {
+	v := m.child_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChildID returns the old "child_id" field's value of the WorkbookCategoryClosure entity.
+// If the WorkbookCategoryClosure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookCategoryClosureMutation) OldChildID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChildID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChildID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChildID: %w", err)
+	}
+	return oldValue.ChildID, nil
+}
+
+// AddChildID adds i to the "child_id" field.
+func (m *WorkbookCategoryClosureMutation) AddChildID(i int) {
+	if m.addchild_id != nil {
+		*m.addchild_id += i
+	} else {
+		m.addchild_id = &i
+	}
+}
+
+// AddedChildID returns the value that was added to the "child_id" field in this mutation.
+func (m *WorkbookCategoryClosureMutation) AddedChildID() (r int, exists bool) {
+	v := m.addchild_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChildID resets all changes to the "child_id" field.
+func (m *WorkbookCategoryClosureMutation) ResetChildID() {
+	m.child_id = nil
+	m.addchild_id = nil
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *WorkbookCategoryClosureMutation) SetParentID(i int) {
+	m.parent_id = &i
+	m.addparent_id = nil
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *WorkbookCategoryClosureMutation) ParentID() (r int, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the WorkbookCategoryClosure entity.
+// If the WorkbookCategoryClosure object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookCategoryClosureMutation) OldParentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (m *WorkbookCategoryClosureMutation) AddParentID(i int) {
+	if m.addparent_id != nil {
+		*m.addparent_id += i
+	} else {
+		m.addparent_id = &i
+	}
+}
+
+// AddedParentID returns the value that was added to the "parent_id" field in this mutation.
+func (m *WorkbookCategoryClosureMutation) AddedParentID() (r int, exists bool) {
+	v := m.addparent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *WorkbookCategoryClosureMutation) ResetParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+}
+
+// Where appends a list predicates to the WorkbookCategoryClosureMutation builder.
+func (m *WorkbookCategoryClosureMutation) Where(ps ...predicate.WorkbookCategoryClosure) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WorkbookCategoryClosureMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WorkbookCategoryClosureMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WorkbookCategoryClosure, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WorkbookCategoryClosureMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WorkbookCategoryClosureMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (WorkbookCategoryClosure).
+func (m *WorkbookCategoryClosureMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WorkbookCategoryClosureMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.child_id != nil {
+		fields = append(fields, workbookcategoryclosure.FieldChildID)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, workbookcategoryclosure.FieldParentID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WorkbookCategoryClosureMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case workbookcategoryclosure.FieldChildID:
+		return m.ChildID()
+	case workbookcategoryclosure.FieldParentID:
+		return m.ParentID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WorkbookCategoryClosureMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case workbookcategoryclosure.FieldChildID:
+		return m.OldChildID(ctx)
+	case workbookcategoryclosure.FieldParentID:
+		return m.OldParentID(ctx)
+	}
+	return nil, fmt.Errorf("unknown WorkbookCategoryClosure field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookCategoryClosureMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case workbookcategoryclosure.FieldChildID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChildID(v)
+		return nil
+	case workbookcategoryclosure.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategoryClosure field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WorkbookCategoryClosureMutation) AddedFields() []string {
+	var fields []string
+	if m.addchild_id != nil {
+		fields = append(fields, workbookcategoryclosure.FieldChildID)
+	}
+	if m.addparent_id != nil {
+		fields = append(fields, workbookcategoryclosure.FieldParentID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WorkbookCategoryClosureMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case workbookcategoryclosure.FieldChildID:
+		return m.AddedChildID()
+	case workbookcategoryclosure.FieldParentID:
+		return m.AddedParentID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookCategoryClosureMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case workbookcategoryclosure.FieldChildID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChildID(v)
+		return nil
+	case workbookcategoryclosure.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddParentID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategoryClosure numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WorkbookCategoryClosureMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WorkbookCategoryClosureMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WorkbookCategoryClosureMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown WorkbookCategoryClosure nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WorkbookCategoryClosureMutation) ResetField(name string) error {
+	switch name {
+	case workbookcategoryclosure.FieldChildID:
+		m.ResetChildID()
+		return nil
+	case workbookcategoryclosure.FieldParentID:
+		m.ResetParentID()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookCategoryClosure field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WorkbookCategoryClosureMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WorkbookCategoryClosureMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WorkbookCategoryClosureMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WorkbookCategoryClosureMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WorkbookCategoryClosureMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WorkbookCategoryClosureMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WorkbookCategoryClosureMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown WorkbookCategoryClosure unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WorkbookCategoryClosureMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown WorkbookCategoryClosure edge %s", name)
+}
+
+// WorkbookMemberMutation represents an operation that mutates the WorkbookMember nodes in the graph.
+type WorkbookMemberMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	clearedFields   map[string]struct{}
+	role            *int
+	clearedrole     bool
+	member          *int
+	clearedmember   bool
+	workbook        *int
+	clearedworkbook bool
+	done            bool
+	oldValue        func(context.Context) (*WorkbookMember, error)
+	predicates      []predicate.WorkbookMember
+}
+
+var _ ent.Mutation = (*WorkbookMemberMutation)(nil)
+
+// workbookmemberOption allows management of the mutation configuration using functional options.
+type workbookmemberOption func(*WorkbookMemberMutation)
+
+// newWorkbookMemberMutation creates new mutation for the WorkbookMember entity.
+func newWorkbookMemberMutation(c config, op Op, opts ...workbookmemberOption) *WorkbookMemberMutation {
+	m := &WorkbookMemberMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWorkbookMember,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWorkbookMemberID sets the ID field of the mutation.
+func withWorkbookMemberID(id int) workbookmemberOption {
+	return func(m *WorkbookMemberMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WorkbookMember
+		)
+		m.oldValue = func(ctx context.Context) (*WorkbookMember, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WorkbookMember.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWorkbookMember sets the old WorkbookMember of the mutation.
+func withWorkbookMember(node *WorkbookMember) workbookmemberOption {
+	return func(m *WorkbookMemberMutation) {
+		m.oldValue = func(context.Context) (*WorkbookMember, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WorkbookMemberMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WorkbookMemberMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WorkbookMemberMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WorkbookMemberMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WorkbookMember.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetRoleID sets the "role_id" field.
+func (m *WorkbookMemberMutation) SetRoleID(i int) {
+	m.role = &i
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *WorkbookMemberMutation) RoleID() (r int, exists bool) {
+	v := m.role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the WorkbookMember entity.
+// If the WorkbookMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMemberMutation) OldRoleID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *WorkbookMemberMutation) ResetRoleID() {
+	m.role = nil
+}
+
+// SetMemberID sets the "member_id" field.
+func (m *WorkbookMemberMutation) SetMemberID(i int) {
+	m.member = &i
+}
+
+// MemberID returns the value of the "member_id" field in the mutation.
+func (m *WorkbookMemberMutation) MemberID() (r int, exists bool) {
+	v := m.member
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberID returns the old "member_id" field's value of the WorkbookMember entity.
+// If the WorkbookMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMemberMutation) OldMemberID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberID: %w", err)
+	}
+	return oldValue.MemberID, nil
+}
+
+// ResetMemberID resets all changes to the "member_id" field.
+func (m *WorkbookMemberMutation) ResetMemberID() {
+	m.member = nil
+}
+
+// SetWorkbookID sets the "workbook_id" field.
+func (m *WorkbookMemberMutation) SetWorkbookID(i int) {
+	m.workbook = &i
+}
+
+// WorkbookID returns the value of the "workbook_id" field in the mutation.
+func (m *WorkbookMemberMutation) WorkbookID() (r int, exists bool) {
+	v := m.workbook
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkbookID returns the old "workbook_id" field's value of the WorkbookMember entity.
+// If the WorkbookMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookMemberMutation) OldWorkbookID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWorkbookID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWorkbookID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkbookID: %w", err)
+	}
+	return oldValue.WorkbookID, nil
+}
+
+// ResetWorkbookID resets all changes to the "workbook_id" field.
+func (m *WorkbookMemberMutation) ResetWorkbookID() {
+	m.workbook = nil
+}
+
+// ClearRole clears the "role" edge to the Role entity.
+func (m *WorkbookMemberMutation) ClearRole() {
+	m.clearedrole = true
+	m.clearedFields[workbookmember.FieldRoleID] = struct{}{}
+}
+
+// RoleCleared reports if the "role" edge to the Role entity was cleared.
+func (m *WorkbookMemberMutation) RoleCleared() bool {
+	return m.clearedrole
+}
+
+// RoleIDs returns the "role" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RoleID instead. It exists only for internal usage by the builders.
+func (m *WorkbookMemberMutation) RoleIDs() (ids []int) {
+	if id := m.role; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRole resets all changes to the "role" edge.
+func (m *WorkbookMemberMutation) ResetRole() {
+	m.role = nil
+	m.clearedrole = false
+}
+
+// ClearMember clears the "member" edge to the User entity.
+func (m *WorkbookMemberMutation) ClearMember() {
+	m.clearedmember = true
+	m.clearedFields[workbookmember.FieldMemberID] = struct{}{}
+}
+
+// MemberCleared reports if the "member" edge to the User entity was cleared.
+func (m *WorkbookMemberMutation) MemberCleared() bool {
+	return m.clearedmember
+}
+
+// MemberIDs returns the "member" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MemberID instead. It exists only for internal usage by the builders.
+func (m *WorkbookMemberMutation) MemberIDs() (ids []int) {
+	if id := m.member; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMember resets all changes to the "member" edge.
+func (m *WorkbookMemberMutation) ResetMember() {
+	m.member = nil
+	m.clearedmember = false
+}
+
+// ClearWorkbook clears the "workbook" edge to the Workbook entity.
+func (m *WorkbookMemberMutation) ClearWorkbook() {
+	m.clearedworkbook = true
+	m.clearedFields[workbookmember.FieldWorkbookID] = struct{}{}
+}
+
+// WorkbookCleared reports if the "workbook" edge to the Workbook entity was cleared.
+func (m *WorkbookMemberMutation) WorkbookCleared() bool {
+	return m.clearedworkbook
+}
+
+// WorkbookIDs returns the "workbook" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// WorkbookID instead. It exists only for internal usage by the builders.
+func (m *WorkbookMemberMutation) WorkbookIDs() (ids []int) {
+	if id := m.workbook; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetWorkbook resets all changes to the "workbook" edge.
+func (m *WorkbookMemberMutation) ResetWorkbook() {
+	m.workbook = nil
+	m.clearedworkbook = false
+}
+
+// Where appends a list predicates to the WorkbookMemberMutation builder.
+func (m *WorkbookMemberMutation) Where(ps ...predicate.WorkbookMember) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WorkbookMemberMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WorkbookMemberMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WorkbookMember, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WorkbookMemberMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WorkbookMemberMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (WorkbookMember).
+func (m *WorkbookMemberMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WorkbookMemberMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.role != nil {
+		fields = append(fields, workbookmember.FieldRoleID)
+	}
+	if m.member != nil {
+		fields = append(fields, workbookmember.FieldMemberID)
+	}
+	if m.workbook != nil {
+		fields = append(fields, workbookmember.FieldWorkbookID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WorkbookMemberMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case workbookmember.FieldRoleID:
+		return m.RoleID()
+	case workbookmember.FieldMemberID:
+		return m.MemberID()
+	case workbookmember.FieldWorkbookID:
+		return m.WorkbookID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WorkbookMemberMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case workbookmember.FieldRoleID:
+		return m.OldRoleID(ctx)
+	case workbookmember.FieldMemberID:
+		return m.OldMemberID(ctx)
+	case workbookmember.FieldWorkbookID:
+		return m.OldWorkbookID(ctx)
+	}
+	return nil, fmt.Errorf("unknown WorkbookMember field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookMemberMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case workbookmember.FieldRoleID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
+		return nil
+	case workbookmember.FieldMemberID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberID(v)
+		return nil
+	case workbookmember.FieldWorkbookID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkbookID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookMember field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WorkbookMemberMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WorkbookMemberMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookMemberMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown WorkbookMember numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WorkbookMemberMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WorkbookMemberMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WorkbookMemberMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown WorkbookMember nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WorkbookMemberMutation) ResetField(name string) error {
+	switch name {
+	case workbookmember.FieldRoleID:
+		m.ResetRoleID()
+		return nil
+	case workbookmember.FieldMemberID:
+		m.ResetMemberID()
+		return nil
+	case workbookmember.FieldWorkbookID:
+		m.ResetWorkbookID()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookMember field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WorkbookMemberMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.role != nil {
+		edges = append(edges, workbookmember.EdgeRole)
+	}
+	if m.member != nil {
+		edges = append(edges, workbookmember.EdgeMember)
+	}
+	if m.workbook != nil {
+		edges = append(edges, workbookmember.EdgeWorkbook)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WorkbookMemberMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case workbookmember.EdgeRole:
+		if id := m.role; id != nil {
+			return []ent.Value{*id}
+		}
+	case workbookmember.EdgeMember:
+		if id := m.member; id != nil {
+			return []ent.Value{*id}
+		}
+	case workbookmember.EdgeWorkbook:
+		if id := m.workbook; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WorkbookMemberMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WorkbookMemberMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WorkbookMemberMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedrole {
+		edges = append(edges, workbookmember.EdgeRole)
+	}
+	if m.clearedmember {
+		edges = append(edges, workbookmember.EdgeMember)
+	}
+	if m.clearedworkbook {
+		edges = append(edges, workbookmember.EdgeWorkbook)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WorkbookMemberMutation) EdgeCleared(name string) bool {
+	switch name {
+	case workbookmember.EdgeRole:
+		return m.clearedrole
+	case workbookmember.EdgeMember:
+		return m.clearedmember
+	case workbookmember.EdgeWorkbook:
+		return m.clearedworkbook
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WorkbookMemberMutation) ClearEdge(name string) error {
+	switch name {
+	case workbookmember.EdgeRole:
+		m.ClearRole()
+		return nil
+	case workbookmember.EdgeMember:
+		m.ClearMember()
+		return nil
+	case workbookmember.EdgeWorkbook:
+		m.ClearWorkbook()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookMember unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WorkbookMemberMutation) ResetEdge(name string) error {
+	switch name {
+	case workbookmember.EdgeRole:
+		m.ResetRole()
+		return nil
+	case workbookmember.EdgeMember:
+		m.ResetMember()
+		return nil
+	case workbookmember.EdgeWorkbook:
+		m.ResetWorkbook()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookMember edge %s", name)
 }

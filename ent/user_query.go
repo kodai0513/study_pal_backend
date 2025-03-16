@@ -10,6 +10,7 @@ import (
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -20,11 +21,12 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx          *QueryContext
-	order        []user.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.User
-	withArticles *ArticleQuery
+	ctx                 *QueryContext
+	order               []user.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.User
+	withArticles        *ArticleQuery
+	withWorkbookMembers *WorkbookMemberQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +78,28 @@ func (uq *UserQuery) QueryArticles() *ArticleQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(article.Table, article.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ArticlesTable, user.ArticlesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWorkbookMembers chains the current query on the "workbook_members" edge.
+func (uq *UserQuery) QueryWorkbookMembers() *WorkbookMemberQuery {
+	query := (&WorkbookMemberClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(workbookmember.Table, workbookmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WorkbookMembersTable, user.WorkbookMembersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +294,13 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:       uq.config,
-		ctx:          uq.ctx.Clone(),
-		order:        append([]user.OrderOption{}, uq.order...),
-		inters:       append([]Interceptor{}, uq.inters...),
-		predicates:   append([]predicate.User{}, uq.predicates...),
-		withArticles: uq.withArticles.Clone(),
+		config:              uq.config,
+		ctx:                 uq.ctx.Clone(),
+		order:               append([]user.OrderOption{}, uq.order...),
+		inters:              append([]Interceptor{}, uq.inters...),
+		predicates:          append([]predicate.User{}, uq.predicates...),
+		withArticles:        uq.withArticles.Clone(),
+		withWorkbookMembers: uq.withWorkbookMembers.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -290,6 +315,17 @@ func (uq *UserQuery) WithArticles(opts ...func(*ArticleQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withArticles = query
+	return uq
+}
+
+// WithWorkbookMembers tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_members" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithWorkbookMembers(opts ...func(*WorkbookMemberQuery)) *UserQuery {
+	query := (&WorkbookMemberClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withWorkbookMembers = query
 	return uq
 }
 
@@ -371,8 +407,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withArticles != nil,
+			uq.withWorkbookMembers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -397,6 +434,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadArticles(ctx, query, nodes,
 			func(n *User) { n.Edges.Articles = []*Article{} },
 			func(n *User, e *Article) { n.Edges.Articles = append(n.Edges.Articles, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withWorkbookMembers; query != nil {
+		if err := uq.loadWorkbookMembers(ctx, query, nodes,
+			func(n *User) { n.Edges.WorkbookMembers = []*WorkbookMember{} },
+			func(n *User, e *WorkbookMember) { n.Edges.WorkbookMembers = append(n.Edges.WorkbookMembers, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +472,36 @@ func (uq *UserQuery) loadArticles(ctx context.Context, query *ArticleQuery, node
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "post_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadWorkbookMembers(ctx context.Context, query *WorkbookMemberQuery, nodes []*User, init func(*User), assign func(*User, *WorkbookMember)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(workbookmember.FieldMemberID)
+	}
+	query.Where(predicate.WorkbookMember(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.WorkbookMembersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MemberID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "member_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
