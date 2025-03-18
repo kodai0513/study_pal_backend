@@ -9,6 +9,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,6 +20,10 @@ type WorkbookMember struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// RoleID holds the value of the "role_id" field.
 	RoleID int `json:"role_id,omitempty"`
 	// MemberID holds the value of the "member_id" field.
@@ -84,6 +89,8 @@ func (*WorkbookMember) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case workbookmember.FieldID, workbookmember.FieldRoleID, workbookmember.FieldMemberID, workbookmember.FieldWorkbookID:
 			values[i] = new(sql.NullInt64)
+		case workbookmember.FieldCreatedAt, workbookmember.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -105,6 +112,18 @@ func (wm *WorkbookMember) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			wm.ID = int(value.Int64)
+		case workbookmember.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				wm.CreatedAt = value.Time
+			}
+		case workbookmember.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				wm.UpdatedAt = value.Time
+			}
 		case workbookmember.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
@@ -174,6 +193,12 @@ func (wm *WorkbookMember) String() string {
 	var builder strings.Builder
 	builder.WriteString("WorkbookMember(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", wm.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(wm.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(wm.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", wm.RoleID))
 	builder.WriteString(", ")

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"study-pal-backend/ent/answermultichoices"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +29,26 @@ func (amcu *AnswerMultiChoicesUpdate) Where(ps ...predicate.AnswerMultiChoices) 
 	return amcu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (amcu *AnswerMultiChoicesUpdate) SetCreatedAt(t time.Time) *AnswerMultiChoicesUpdate {
+	amcu.mutation.SetCreatedAt(t)
+	return amcu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (amcu *AnswerMultiChoicesUpdate) SetNillableCreatedAt(t *time.Time) *AnswerMultiChoicesUpdate {
+	if t != nil {
+		amcu.SetCreatedAt(*t)
+	}
+	return amcu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (amcu *AnswerMultiChoicesUpdate) SetUpdatedAt(t time.Time) *AnswerMultiChoicesUpdate {
+	amcu.mutation.SetUpdatedAt(t)
+	return amcu
+}
+
 // SetName sets the "name" field.
 func (amcu *AnswerMultiChoicesUpdate) SetName(s string) *AnswerMultiChoicesUpdate {
 	amcu.mutation.SetName(s)
@@ -37,6 +59,20 @@ func (amcu *AnswerMultiChoicesUpdate) SetName(s string) *AnswerMultiChoicesUpdat
 func (amcu *AnswerMultiChoicesUpdate) SetNillableName(s *string) *AnswerMultiChoicesUpdate {
 	if s != nil {
 		amcu.SetName(*s)
+	}
+	return amcu
+}
+
+// SetProblemID sets the "problem_id" field.
+func (amcu *AnswerMultiChoicesUpdate) SetProblemID(i int) *AnswerMultiChoicesUpdate {
+	amcu.mutation.SetProblemID(i)
+	return amcu
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (amcu *AnswerMultiChoicesUpdate) SetNillableProblemID(i *int) *AnswerMultiChoicesUpdate {
+	if i != nil {
+		amcu.SetProblemID(*i)
 	}
 	return amcu
 }
@@ -55,13 +91,25 @@ func (amcu *AnswerMultiChoicesUpdate) SetNillableIsCorrect(b *bool) *AnswerMulti
 	return amcu
 }
 
+// SetProblem sets the "problem" edge to the Problem entity.
+func (amcu *AnswerMultiChoicesUpdate) SetProblem(p *Problem) *AnswerMultiChoicesUpdate {
+	return amcu.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerMultiChoicesMutation object of the builder.
 func (amcu *AnswerMultiChoicesUpdate) Mutation() *AnswerMultiChoicesMutation {
 	return amcu.mutation
 }
 
+// ClearProblem clears the "problem" edge to the Problem entity.
+func (amcu *AnswerMultiChoicesUpdate) ClearProblem() *AnswerMultiChoicesUpdate {
+	amcu.mutation.ClearProblem()
+	return amcu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (amcu *AnswerMultiChoicesUpdate) Save(ctx context.Context) (int, error) {
+	amcu.defaults()
 	return withHooks(ctx, amcu.sqlSave, amcu.mutation, amcu.hooks)
 }
 
@@ -87,12 +135,23 @@ func (amcu *AnswerMultiChoicesUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (amcu *AnswerMultiChoicesUpdate) defaults() {
+	if _, ok := amcu.mutation.UpdatedAt(); !ok {
+		v := answermultichoices.UpdateDefaultUpdatedAt()
+		amcu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (amcu *AnswerMultiChoicesUpdate) check() error {
 	if v, ok := amcu.mutation.Name(); ok {
 		if err := answermultichoices.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerMultiChoices.name": %w`, err)}
 		}
+	}
+	if amcu.mutation.ProblemCleared() && len(amcu.mutation.ProblemIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "AnswerMultiChoices.problem"`)
 	}
 	return nil
 }
@@ -109,11 +168,46 @@ func (amcu *AnswerMultiChoicesUpdate) sqlSave(ctx context.Context) (n int, err e
 			}
 		}
 	}
+	if value, ok := amcu.mutation.CreatedAt(); ok {
+		_spec.SetField(answermultichoices.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := amcu.mutation.UpdatedAt(); ok {
+		_spec.SetField(answermultichoices.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := amcu.mutation.Name(); ok {
 		_spec.SetField(answermultichoices.FieldName, field.TypeString, value)
 	}
 	if value, ok := amcu.mutation.IsCorrect(); ok {
 		_spec.SetField(answermultichoices.FieldIsCorrect, field.TypeBool, value)
+	}
+	if amcu.mutation.ProblemCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answermultichoices.ProblemTable,
+			Columns: []string{answermultichoices.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := amcu.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answermultichoices.ProblemTable,
+			Columns: []string{answermultichoices.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, amcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -135,6 +229,26 @@ type AnswerMultiChoicesUpdateOne struct {
 	mutation *AnswerMultiChoicesMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetCreatedAt(t time.Time) *AnswerMultiChoicesUpdateOne {
+	amcuo.mutation.SetCreatedAt(t)
+	return amcuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableCreatedAt(t *time.Time) *AnswerMultiChoicesUpdateOne {
+	if t != nil {
+		amcuo.SetCreatedAt(*t)
+	}
+	return amcuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetUpdatedAt(t time.Time) *AnswerMultiChoicesUpdateOne {
+	amcuo.mutation.SetUpdatedAt(t)
+	return amcuo
+}
+
 // SetName sets the "name" field.
 func (amcuo *AnswerMultiChoicesUpdateOne) SetName(s string) *AnswerMultiChoicesUpdateOne {
 	amcuo.mutation.SetName(s)
@@ -145,6 +259,20 @@ func (amcuo *AnswerMultiChoicesUpdateOne) SetName(s string) *AnswerMultiChoicesU
 func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableName(s *string) *AnswerMultiChoicesUpdateOne {
 	if s != nil {
 		amcuo.SetName(*s)
+	}
+	return amcuo
+}
+
+// SetProblemID sets the "problem_id" field.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetProblemID(i int) *AnswerMultiChoicesUpdateOne {
+	amcuo.mutation.SetProblemID(i)
+	return amcuo
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableProblemID(i *int) *AnswerMultiChoicesUpdateOne {
+	if i != nil {
+		amcuo.SetProblemID(*i)
 	}
 	return amcuo
 }
@@ -163,9 +291,20 @@ func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableIsCorrect(b *bool) *AnswerM
 	return amcuo
 }
 
+// SetProblem sets the "problem" edge to the Problem entity.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetProblem(p *Problem) *AnswerMultiChoicesUpdateOne {
+	return amcuo.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerMultiChoicesMutation object of the builder.
 func (amcuo *AnswerMultiChoicesUpdateOne) Mutation() *AnswerMultiChoicesMutation {
 	return amcuo.mutation
+}
+
+// ClearProblem clears the "problem" edge to the Problem entity.
+func (amcuo *AnswerMultiChoicesUpdateOne) ClearProblem() *AnswerMultiChoicesUpdateOne {
+	amcuo.mutation.ClearProblem()
+	return amcuo
 }
 
 // Where appends a list predicates to the AnswerMultiChoicesUpdate builder.
@@ -183,6 +322,7 @@ func (amcuo *AnswerMultiChoicesUpdateOne) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated AnswerMultiChoices entity.
 func (amcuo *AnswerMultiChoicesUpdateOne) Save(ctx context.Context) (*AnswerMultiChoices, error) {
+	amcuo.defaults()
 	return withHooks(ctx, amcuo.sqlSave, amcuo.mutation, amcuo.hooks)
 }
 
@@ -208,12 +348,23 @@ func (amcuo *AnswerMultiChoicesUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (amcuo *AnswerMultiChoicesUpdateOne) defaults() {
+	if _, ok := amcuo.mutation.UpdatedAt(); !ok {
+		v := answermultichoices.UpdateDefaultUpdatedAt()
+		amcuo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (amcuo *AnswerMultiChoicesUpdateOne) check() error {
 	if v, ok := amcuo.mutation.Name(); ok {
 		if err := answermultichoices.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerMultiChoices.name": %w`, err)}
 		}
+	}
+	if amcuo.mutation.ProblemCleared() && len(amcuo.mutation.ProblemIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "AnswerMultiChoices.problem"`)
 	}
 	return nil
 }
@@ -247,11 +398,46 @@ func (amcuo *AnswerMultiChoicesUpdateOne) sqlSave(ctx context.Context) (_node *A
 			}
 		}
 	}
+	if value, ok := amcuo.mutation.CreatedAt(); ok {
+		_spec.SetField(answermultichoices.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := amcuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(answermultichoices.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := amcuo.mutation.Name(); ok {
 		_spec.SetField(answermultichoices.FieldName, field.TypeString, value)
 	}
 	if value, ok := amcuo.mutation.IsCorrect(); ok {
 		_spec.SetField(answermultichoices.FieldIsCorrect, field.TypeBool, value)
+	}
+	if amcuo.mutation.ProblemCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answermultichoices.ProblemTable,
+			Columns: []string{answermultichoices.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := amcuo.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answermultichoices.ProblemTable,
+			Columns: []string{answermultichoices.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &AnswerMultiChoices{config: amcuo.config}
 	_spec.Assign = _node.assignValues

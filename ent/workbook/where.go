@@ -330,6 +330,29 @@ func TitleContainsFold(v string) predicate.Workbook {
 	return predicate.Workbook(sql.FieldContainsFold(FieldTitle, v))
 }
 
+// HasProblems applies the HasEdge predicate on the "problems" edge.
+func HasProblems() predicate.Workbook {
+	return predicate.Workbook(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ProblemsTable, ProblemsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasProblemsWith applies the HasEdge predicate on the "problems" edge with a given conditions (other predicates).
+func HasProblemsWith(preds ...predicate.Problem) predicate.Workbook {
+	return predicate.Workbook(func(s *sql.Selector) {
+		step := newProblemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasWorkbookCategories applies the HasEdge predicate on the "workbook_categories" edge.
 func HasWorkbookCategories() predicate.Workbook {
 	return predicate.Workbook(func(s *sql.Selector) {

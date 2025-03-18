@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"study-pal-backend/ent/answermultichoices"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -19,9 +21,43 @@ type AnswerMultiChoicesCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (amcc *AnswerMultiChoicesCreate) SetCreatedAt(t time.Time) *AnswerMultiChoicesCreate {
+	amcc.mutation.SetCreatedAt(t)
+	return amcc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (amcc *AnswerMultiChoicesCreate) SetNillableCreatedAt(t *time.Time) *AnswerMultiChoicesCreate {
+	if t != nil {
+		amcc.SetCreatedAt(*t)
+	}
+	return amcc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (amcc *AnswerMultiChoicesCreate) SetUpdatedAt(t time.Time) *AnswerMultiChoicesCreate {
+	amcc.mutation.SetUpdatedAt(t)
+	return amcc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (amcc *AnswerMultiChoicesCreate) SetNillableUpdatedAt(t *time.Time) *AnswerMultiChoicesCreate {
+	if t != nil {
+		amcc.SetUpdatedAt(*t)
+	}
+	return amcc
+}
+
 // SetName sets the "name" field.
 func (amcc *AnswerMultiChoicesCreate) SetName(s string) *AnswerMultiChoicesCreate {
 	amcc.mutation.SetName(s)
+	return amcc
+}
+
+// SetProblemID sets the "problem_id" field.
+func (amcc *AnswerMultiChoicesCreate) SetProblemID(i int) *AnswerMultiChoicesCreate {
+	amcc.mutation.SetProblemID(i)
 	return amcc
 }
 
@@ -31,6 +67,11 @@ func (amcc *AnswerMultiChoicesCreate) SetIsCorrect(b bool) *AnswerMultiChoicesCr
 	return amcc
 }
 
+// SetProblem sets the "problem" edge to the Problem entity.
+func (amcc *AnswerMultiChoicesCreate) SetProblem(p *Problem) *AnswerMultiChoicesCreate {
+	return amcc.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerMultiChoicesMutation object of the builder.
 func (amcc *AnswerMultiChoicesCreate) Mutation() *AnswerMultiChoicesMutation {
 	return amcc.mutation
@@ -38,6 +79,7 @@ func (amcc *AnswerMultiChoicesCreate) Mutation() *AnswerMultiChoicesMutation {
 
 // Save creates the AnswerMultiChoices in the database.
 func (amcc *AnswerMultiChoicesCreate) Save(ctx context.Context) (*AnswerMultiChoices, error) {
+	amcc.defaults()
 	return withHooks(ctx, amcc.sqlSave, amcc.mutation, amcc.hooks)
 }
 
@@ -63,8 +105,26 @@ func (amcc *AnswerMultiChoicesCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (amcc *AnswerMultiChoicesCreate) defaults() {
+	if _, ok := amcc.mutation.CreatedAt(); !ok {
+		v := answermultichoices.DefaultCreatedAt()
+		amcc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := amcc.mutation.UpdatedAt(); !ok {
+		v := answermultichoices.DefaultUpdatedAt()
+		amcc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (amcc *AnswerMultiChoicesCreate) check() error {
+	if _, ok := amcc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AnswerMultiChoices.created_at"`)}
+	}
+	if _, ok := amcc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AnswerMultiChoices.updated_at"`)}
+	}
 	if _, ok := amcc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "AnswerMultiChoices.name"`)}
 	}
@@ -73,8 +133,14 @@ func (amcc *AnswerMultiChoicesCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerMultiChoices.name": %w`, err)}
 		}
 	}
+	if _, ok := amcc.mutation.ProblemID(); !ok {
+		return &ValidationError{Name: "problem_id", err: errors.New(`ent: missing required field "AnswerMultiChoices.problem_id"`)}
+	}
 	if _, ok := amcc.mutation.IsCorrect(); !ok {
 		return &ValidationError{Name: "is_correct", err: errors.New(`ent: missing required field "AnswerMultiChoices.is_correct"`)}
+	}
+	if len(amcc.mutation.ProblemIDs()) == 0 {
+		return &ValidationError{Name: "problem", err: errors.New(`ent: missing required edge "AnswerMultiChoices.problem"`)}
 	}
 	return nil
 }
@@ -102,6 +168,14 @@ func (amcc *AnswerMultiChoicesCreate) createSpec() (*AnswerMultiChoices, *sqlgra
 		_node = &AnswerMultiChoices{config: amcc.config}
 		_spec = sqlgraph.NewCreateSpec(answermultichoices.Table, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt))
 	)
+	if value, ok := amcc.mutation.CreatedAt(); ok {
+		_spec.SetField(answermultichoices.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := amcc.mutation.UpdatedAt(); ok {
+		_spec.SetField(answermultichoices.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := amcc.mutation.Name(); ok {
 		_spec.SetField(answermultichoices.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -109,6 +183,23 @@ func (amcc *AnswerMultiChoicesCreate) createSpec() (*AnswerMultiChoices, *sqlgra
 	if value, ok := amcc.mutation.IsCorrect(); ok {
 		_spec.SetField(answermultichoices.FieldIsCorrect, field.TypeBool, value)
 		_node.IsCorrect = value
+	}
+	if nodes := amcc.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answermultichoices.ProblemTable,
+			Columns: []string{answermultichoices.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ProblemID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -131,6 +222,7 @@ func (amccb *AnswerMultiChoicesCreateBulk) Save(ctx context.Context) ([]*AnswerM
 	for i := range amccb.builders {
 		func(i int, root context.Context) {
 			builder := amccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AnswerMultiChoicesMutation)
 				if !ok {

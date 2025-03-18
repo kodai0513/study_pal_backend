@@ -35,19 +35,30 @@ type Workbook struct {
 
 // WorkbookEdges holds the relations/edges for other nodes in the graph.
 type WorkbookEdges struct {
+	// Problems holds the value of the problems edge.
+	Problems []*Problem `json:"problems,omitempty"`
 	// WorkbookCategories holds the value of the workbook_categories edge.
 	WorkbookCategories []*WorkbookCategory `json:"workbook_categories,omitempty"`
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
+}
+
+// ProblemsOrErr returns the Problems value or an error if the edge
+// was not loaded in eager-loading.
+func (e WorkbookEdges) ProblemsOrErr() ([]*Problem, error) {
+	if e.loadedTypes[0] {
+		return e.Problems, nil
+	}
+	return nil, &NotLoadedError{edge: "problems"}
 }
 
 // WorkbookCategoriesOrErr returns the WorkbookCategories value or an error if the edge
 // was not loaded in eager-loading.
 func (e WorkbookEdges) WorkbookCategoriesOrErr() ([]*WorkbookCategory, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.WorkbookCategories, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_categories"}
@@ -56,7 +67,7 @@ func (e WorkbookEdges) WorkbookCategoriesOrErr() ([]*WorkbookCategory, error) {
 // WorkbookMembersOrErr returns the WorkbookMembers value or an error if the edge
 // was not loaded in eager-loading.
 func (e WorkbookEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.WorkbookMembers, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_members"}
@@ -136,6 +147,11 @@ func (w *Workbook) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (w *Workbook) Value(name string) (ent.Value, error) {
 	return w.selectValues.Get(name)
+}
+
+// QueryProblems queries the "problems" edge of the Workbook entity.
+func (w *Workbook) QueryProblems() *ProblemQuery {
+	return NewWorkbookClient(w.config).QueryProblems(w)
 }
 
 // QueryWorkbookCategories queries the "workbook_categories" edge of the Workbook entity.

@@ -3,7 +3,10 @@
 package answerdescription
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -11,22 +14,34 @@ const (
 	Label = "answer_description"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldProblemID holds the string denoting the problem_id field in the database.
+	FieldProblemID = "problem_id"
+	// EdgeProblem holds the string denoting the problem edge name in mutations.
+	EdgeProblem = "problem"
 	// Table holds the table name of the answerdescription in the database.
 	Table = "answer_descriptions"
+	// ProblemTable is the table that holds the problem relation/edge.
+	ProblemTable = "answer_descriptions"
+	// ProblemInverseTable is the table name for the Problem entity.
+	// It exists in this package in order to avoid circular dependency with the "problem" package.
+	ProblemInverseTable = "problems"
+	// ProblemColumn is the table column denoting the problem relation/edge.
+	ProblemColumn = "problem_id"
 )
 
 // Columns holds all SQL columns for answerdescription fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldName,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "answer_descriptions"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"problem_answer_descriptions",
+	FieldProblemID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -36,15 +51,16 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 )
@@ -57,7 +73,36 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByProblemID orders the results by the problem_id field.
+func ByProblemID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProblemID, opts...).ToFunc()
+}
+
+// ByProblemField orders the results by problem field.
+func ByProblemField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newProblemStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newProblemStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ProblemInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ProblemTable, ProblemColumn),
+	)
 }

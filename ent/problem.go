@@ -7,6 +7,9 @@ import (
 	"strings"
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookcategory"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,15 +20,22 @@ type Problem struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// AnswerTypeID holds the value of the "answer_type_id" field.
 	AnswerTypeID int `json:"answer_type_id,omitempty"`
 	// Statement holds the value of the "statement" field.
 	Statement string `json:"statement,omitempty"`
+	// WorkbookID holds the value of the "workbook_id" field.
+	WorkbookID int `json:"workbook_id,omitempty"`
+	// WorkbookCategoryID holds the value of the "workbook_category_id" field.
+	WorkbookCategoryID int `json:"workbook_category_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProblemQuery when eager-loading is set.
-	Edges                      ProblemEdges `json:"edges"`
-	workbook_category_problems *int
-	selectValues               sql.SelectValues
+	Edges        ProblemEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // ProblemEdges holds the relations/edges for other nodes in the graph.
@@ -38,9 +48,13 @@ type ProblemEdges struct {
 	AnswerMultiChoices []*AnswerMultiChoices `json:"answer_multi_choices,omitempty"`
 	// AnswerTruths holds the value of the answer_truths edge.
 	AnswerTruths []*AnswerTruth `json:"answer_truths,omitempty"`
+	// Workbook holds the value of the workbook edge.
+	Workbook *Workbook `json:"workbook,omitempty"`
+	// WorkbookCategory holds the value of the workbook_category edge.
+	WorkbookCategory *WorkbookCategory `json:"workbook_category,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [6]bool
 }
 
 // AnswerTypeOrErr returns the AnswerType value or an error if the edge
@@ -81,17 +95,39 @@ func (e ProblemEdges) AnswerTruthsOrErr() ([]*AnswerTruth, error) {
 	return nil, &NotLoadedError{edge: "answer_truths"}
 }
 
+// WorkbookOrErr returns the Workbook value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProblemEdges) WorkbookOrErr() (*Workbook, error) {
+	if e.Workbook != nil {
+		return e.Workbook, nil
+	} else if e.loadedTypes[4] {
+		return nil, &NotFoundError{label: workbook.Label}
+	}
+	return nil, &NotLoadedError{edge: "workbook"}
+}
+
+// WorkbookCategoryOrErr returns the WorkbookCategory value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProblemEdges) WorkbookCategoryOrErr() (*WorkbookCategory, error) {
+	if e.WorkbookCategory != nil {
+		return e.WorkbookCategory, nil
+	} else if e.loadedTypes[5] {
+		return nil, &NotFoundError{label: workbookcategory.Label}
+	}
+	return nil, &NotLoadedError{edge: "workbook_category"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Problem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case problem.FieldID, problem.FieldAnswerTypeID:
+		case problem.FieldID, problem.FieldAnswerTypeID, problem.FieldWorkbookID, problem.FieldWorkbookCategoryID:
 			values[i] = new(sql.NullInt64)
 		case problem.FieldStatement:
 			values[i] = new(sql.NullString)
-		case problem.ForeignKeys[0]: // workbook_category_problems
-			values[i] = new(sql.NullInt64)
+		case problem.FieldCreatedAt, problem.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -113,6 +149,18 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pr.ID = int(value.Int64)
+		case problem.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pr.CreatedAt = value.Time
+			}
+		case problem.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				pr.UpdatedAt = value.Time
+			}
 		case problem.FieldAnswerTypeID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field answer_type_id", values[i])
@@ -125,12 +173,17 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pr.Statement = value.String
 			}
-		case problem.ForeignKeys[0]:
+		case problem.FieldWorkbookID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field workbook_category_problems", value)
+				return fmt.Errorf("unexpected type %T for field workbook_id", values[i])
 			} else if value.Valid {
-				pr.workbook_category_problems = new(int)
-				*pr.workbook_category_problems = int(value.Int64)
+				pr.WorkbookID = int(value.Int64)
+			}
+		case problem.FieldWorkbookCategoryID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field workbook_category_id", values[i])
+			} else if value.Valid {
+				pr.WorkbookCategoryID = int(value.Int64)
 			}
 		default:
 			pr.selectValues.Set(columns[i], values[i])
@@ -165,6 +218,16 @@ func (pr *Problem) QueryAnswerTruths() *AnswerTruthQuery {
 	return NewProblemClient(pr.config).QueryAnswerTruths(pr)
 }
 
+// QueryWorkbook queries the "workbook" edge of the Problem entity.
+func (pr *Problem) QueryWorkbook() *WorkbookQuery {
+	return NewProblemClient(pr.config).QueryWorkbook(pr)
+}
+
+// QueryWorkbookCategory queries the "workbook_category" edge of the Problem entity.
+func (pr *Problem) QueryWorkbookCategory() *WorkbookCategoryQuery {
+	return NewProblemClient(pr.config).QueryWorkbookCategory(pr)
+}
+
 // Update returns a builder for updating this Problem.
 // Note that you need to call Problem.Unwrap() before calling this method if this Problem
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -188,11 +251,23 @@ func (pr *Problem) String() string {
 	var builder strings.Builder
 	builder.WriteString("Problem(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pr.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("answer_type_id=")
 	builder.WriteString(fmt.Sprintf("%v", pr.AnswerTypeID))
 	builder.WriteString(", ")
 	builder.WriteString("statement=")
 	builder.WriteString(pr.Statement)
+	builder.WriteString(", ")
+	builder.WriteString("workbook_id=")
+	builder.WriteString(fmt.Sprintf("%v", pr.WorkbookID))
+	builder.WriteString(", ")
+	builder.WriteString("workbook_category_id=")
+	builder.WriteString(fmt.Sprintf("%v", pr.WorkbookCategoryID))
 	builder.WriteByte(')')
 	return builder.String()
 }

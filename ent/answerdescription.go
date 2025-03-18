@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"study-pal-backend/ent/answerdescription"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,10 +18,38 @@ type AnswerDescription struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
-	Name                        string `json:"name,omitempty"`
-	problem_answer_descriptions *int
-	selectValues                sql.SelectValues
+	Name string `json:"name,omitempty"`
+	// ProblemID holds the value of the "problem_id" field.
+	ProblemID int `json:"problem_id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the AnswerDescriptionQuery when eager-loading is set.
+	Edges        AnswerDescriptionEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// AnswerDescriptionEdges holds the relations/edges for other nodes in the graph.
+type AnswerDescriptionEdges struct {
+	// Problem holds the value of the problem edge.
+	Problem *Problem `json:"problem,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ProblemOrErr returns the Problem value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AnswerDescriptionEdges) ProblemOrErr() (*Problem, error) {
+	if e.Problem != nil {
+		return e.Problem, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: problem.Label}
+	}
+	return nil, &NotLoadedError{edge: "problem"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -27,12 +57,12 @@ func (*AnswerDescription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case answerdescription.FieldID:
+		case answerdescription.FieldID, answerdescription.FieldProblemID:
 			values[i] = new(sql.NullInt64)
 		case answerdescription.FieldName:
 			values[i] = new(sql.NullString)
-		case answerdescription.ForeignKeys[0]: // problem_answer_descriptions
-			values[i] = new(sql.NullInt64)
+		case answerdescription.FieldCreatedAt, answerdescription.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -54,18 +84,29 @@ func (ad *AnswerDescription) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			ad.ID = int(value.Int64)
+		case answerdescription.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				ad.CreatedAt = value.Time
+			}
+		case answerdescription.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				ad.UpdatedAt = value.Time
+			}
 		case answerdescription.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				ad.Name = value.String
 			}
-		case answerdescription.ForeignKeys[0]:
+		case answerdescription.FieldProblemID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field problem_answer_descriptions", value)
+				return fmt.Errorf("unexpected type %T for field problem_id", values[i])
 			} else if value.Valid {
-				ad.problem_answer_descriptions = new(int)
-				*ad.problem_answer_descriptions = int(value.Int64)
+				ad.ProblemID = int(value.Int64)
 			}
 		default:
 			ad.selectValues.Set(columns[i], values[i])
@@ -78,6 +119,11 @@ func (ad *AnswerDescription) assignValues(columns []string, values []any) error 
 // This includes values selected through modifiers, order, etc.
 func (ad *AnswerDescription) Value(name string) (ent.Value, error) {
 	return ad.selectValues.Get(name)
+}
+
+// QueryProblem queries the "problem" edge of the AnswerDescription entity.
+func (ad *AnswerDescription) QueryProblem() *ProblemQuery {
+	return NewAnswerDescriptionClient(ad.config).QueryProblem(ad)
 }
 
 // Update returns a builder for updating this AnswerDescription.
@@ -103,8 +149,17 @@ func (ad *AnswerDescription) String() string {
 	var builder strings.Builder
 	builder.WriteString("AnswerDescription(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ad.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(ad.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(ad.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(ad.Name)
+	builder.WriteString(", ")
+	builder.WriteString("problem_id=")
+	builder.WriteString(fmt.Sprintf("%v", ad.ProblemID))
 	builder.WriteByte(')')
 	return builder.String()
 }

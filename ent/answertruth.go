@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"study-pal-backend/ent/answertruth"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,10 +18,38 @@ type AnswerTruth struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// ProblemID holds the value of the "problem_id" field.
+	ProblemID int `json:"problem_id,omitempty"`
 	// Truth holds the value of the "truth" field.
-	Truth                 bool `json:"truth,omitempty"`
-	problem_answer_truths *int
-	selectValues          sql.SelectValues
+	Truth bool `json:"truth,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the AnswerTruthQuery when eager-loading is set.
+	Edges        AnswerTruthEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// AnswerTruthEdges holds the relations/edges for other nodes in the graph.
+type AnswerTruthEdges struct {
+	// Problem holds the value of the problem edge.
+	Problem *Problem `json:"problem,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ProblemOrErr returns the Problem value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AnswerTruthEdges) ProblemOrErr() (*Problem, error) {
+	if e.Problem != nil {
+		return e.Problem, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: problem.Label}
+	}
+	return nil, &NotLoadedError{edge: "problem"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -29,10 +59,10 @@ func (*AnswerTruth) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case answertruth.FieldTruth:
 			values[i] = new(sql.NullBool)
-		case answertruth.FieldID:
+		case answertruth.FieldID, answertruth.FieldProblemID:
 			values[i] = new(sql.NullInt64)
-		case answertruth.ForeignKeys[0]: // problem_answer_truths
-			values[i] = new(sql.NullInt64)
+		case answertruth.FieldCreatedAt, answertruth.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -54,18 +84,29 @@ func (at *AnswerTruth) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			at.ID = int(value.Int64)
+		case answertruth.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				at.CreatedAt = value.Time
+			}
+		case answertruth.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				at.UpdatedAt = value.Time
+			}
+		case answertruth.FieldProblemID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field problem_id", values[i])
+			} else if value.Valid {
+				at.ProblemID = int(value.Int64)
+			}
 		case answertruth.FieldTruth:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field truth", values[i])
 			} else if value.Valid {
 				at.Truth = value.Bool
-			}
-		case answertruth.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field problem_answer_truths", value)
-			} else if value.Valid {
-				at.problem_answer_truths = new(int)
-				*at.problem_answer_truths = int(value.Int64)
 			}
 		default:
 			at.selectValues.Set(columns[i], values[i])
@@ -78,6 +119,11 @@ func (at *AnswerTruth) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (at *AnswerTruth) Value(name string) (ent.Value, error) {
 	return at.selectValues.Get(name)
+}
+
+// QueryProblem queries the "problem" edge of the AnswerTruth entity.
+func (at *AnswerTruth) QueryProblem() *ProblemQuery {
+	return NewAnswerTruthClient(at.config).QueryProblem(at)
 }
 
 // Update returns a builder for updating this AnswerTruth.
@@ -103,6 +149,15 @@ func (at *AnswerTruth) String() string {
 	var builder strings.Builder
 	builder.WriteString("AnswerTruth(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", at.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(at.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(at.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("problem_id=")
+	builder.WriteString(fmt.Sprintf("%v", at.ProblemID))
+	builder.WriteString(", ")
 	builder.WriteString("truth=")
 	builder.WriteString(fmt.Sprintf("%v", at.Truth))
 	builder.WriteByte(')')

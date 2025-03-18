@@ -8,6 +8,7 @@ import (
 	"math"
 	"study-pal-backend/ent/answermultichoices"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,11 +19,11 @@ import (
 // AnswerMultiChoicesQuery is the builder for querying AnswerMultiChoices entities.
 type AnswerMultiChoicesQuery struct {
 	config
-	ctx        *QueryContext
-	order      []answermultichoices.OrderOption
-	inters     []Interceptor
-	predicates []predicate.AnswerMultiChoices
-	withFKs    bool
+	ctx         *QueryContext
+	order       []answermultichoices.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.AnswerMultiChoices
+	withProblem *ProblemQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +58,28 @@ func (amcq *AnswerMultiChoicesQuery) Unique(unique bool) *AnswerMultiChoicesQuer
 func (amcq *AnswerMultiChoicesQuery) Order(o ...answermultichoices.OrderOption) *AnswerMultiChoicesQuery {
 	amcq.order = append(amcq.order, o...)
 	return amcq
+}
+
+// QueryProblem chains the current query on the "problem" edge.
+func (amcq *AnswerMultiChoicesQuery) QueryProblem() *ProblemQuery {
+	query := (&ProblemClient{config: amcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := amcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := amcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(answermultichoices.Table, answermultichoices.FieldID, selector),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, answermultichoices.ProblemTable, answermultichoices.ProblemColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(amcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first AnswerMultiChoices entity from the query.
@@ -246,15 +269,27 @@ func (amcq *AnswerMultiChoicesQuery) Clone() *AnswerMultiChoicesQuery {
 		return nil
 	}
 	return &AnswerMultiChoicesQuery{
-		config:     amcq.config,
-		ctx:        amcq.ctx.Clone(),
-		order:      append([]answermultichoices.OrderOption{}, amcq.order...),
-		inters:     append([]Interceptor{}, amcq.inters...),
-		predicates: append([]predicate.AnswerMultiChoices{}, amcq.predicates...),
+		config:      amcq.config,
+		ctx:         amcq.ctx.Clone(),
+		order:       append([]answermultichoices.OrderOption{}, amcq.order...),
+		inters:      append([]Interceptor{}, amcq.inters...),
+		predicates:  append([]predicate.AnswerMultiChoices{}, amcq.predicates...),
+		withProblem: amcq.withProblem.Clone(),
 		// clone intermediate query.
 		sql:  amcq.sql.Clone(),
 		path: amcq.path,
 	}
+}
+
+// WithProblem tells the query-builder to eager-load the nodes that are connected to
+// the "problem" edge. The optional arguments are used to configure the query builder of the edge.
+func (amcq *AnswerMultiChoicesQuery) WithProblem(opts ...func(*ProblemQuery)) *AnswerMultiChoicesQuery {
+	query := (&ProblemClient{config: amcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	amcq.withProblem = query
+	return amcq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -263,12 +298,12 @@ func (amcq *AnswerMultiChoicesQuery) Clone() *AnswerMultiChoicesQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.AnswerMultiChoices.Query().
-//		GroupBy(answermultichoices.FieldName).
+//		GroupBy(answermultichoices.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (amcq *AnswerMultiChoicesQuery) GroupBy(field string, fields ...string) *AnswerMultiChoicesGroupBy {
@@ -286,11 +321,11 @@ func (amcq *AnswerMultiChoicesQuery) GroupBy(field string, fields ...string) *An
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.AnswerMultiChoices.Query().
-//		Select(answermultichoices.FieldName).
+//		Select(answermultichoices.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (amcq *AnswerMultiChoicesQuery) Select(fields ...string) *AnswerMultiChoicesSelect {
 	amcq.ctx.Fields = append(amcq.ctx.Fields, fields...)
@@ -333,19 +368,19 @@ func (amcq *AnswerMultiChoicesQuery) prepareQuery(ctx context.Context) error {
 
 func (amcq *AnswerMultiChoicesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AnswerMultiChoices, error) {
 	var (
-		nodes   = []*AnswerMultiChoices{}
-		withFKs = amcq.withFKs
-		_spec   = amcq.querySpec()
+		nodes       = []*AnswerMultiChoices{}
+		_spec       = amcq.querySpec()
+		loadedTypes = [1]bool{
+			amcq.withProblem != nil,
+		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, answermultichoices.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*AnswerMultiChoices).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &AnswerMultiChoices{config: amcq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -357,7 +392,43 @@ func (amcq *AnswerMultiChoicesQuery) sqlAll(ctx context.Context, hooks ...queryH
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := amcq.withProblem; query != nil {
+		if err := amcq.loadProblem(ctx, query, nodes, nil,
+			func(n *AnswerMultiChoices, e *Problem) { n.Edges.Problem = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (amcq *AnswerMultiChoicesQuery) loadProblem(ctx context.Context, query *ProblemQuery, nodes []*AnswerMultiChoices, init func(*AnswerMultiChoices), assign func(*AnswerMultiChoices, *Problem)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AnswerMultiChoices)
+	for i := range nodes {
+		fk := nodes[i].ProblemID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(problem.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "problem_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (amcq *AnswerMultiChoicesQuery) sqlCount(ctx context.Context) (int, error) {
@@ -384,6 +455,9 @@ func (amcq *AnswerMultiChoicesQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != answermultichoices.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if amcq.withProblem != nil {
+			_spec.Node.AddColumnOnce(answermultichoices.FieldProblemID)
 		}
 	}
 	if ps := amcq.predicates; len(ps) > 0 {

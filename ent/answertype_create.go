@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -18,6 +19,34 @@ type AnswerTypeCreate struct {
 	config
 	mutation *AnswerTypeMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (atc *AnswerTypeCreate) SetCreatedAt(t time.Time) *AnswerTypeCreate {
+	atc.mutation.SetCreatedAt(t)
+	return atc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (atc *AnswerTypeCreate) SetNillableCreatedAt(t *time.Time) *AnswerTypeCreate {
+	if t != nil {
+		atc.SetCreatedAt(*t)
+	}
+	return atc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (atc *AnswerTypeCreate) SetUpdatedAt(t time.Time) *AnswerTypeCreate {
+	atc.mutation.SetUpdatedAt(t)
+	return atc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (atc *AnswerTypeCreate) SetNillableUpdatedAt(t *time.Time) *AnswerTypeCreate {
+	if t != nil {
+		atc.SetUpdatedAt(*t)
+	}
+	return atc
 }
 
 // SetName sets the "name" field.
@@ -48,6 +77,7 @@ func (atc *AnswerTypeCreate) Mutation() *AnswerTypeMutation {
 
 // Save creates the AnswerType in the database.
 func (atc *AnswerTypeCreate) Save(ctx context.Context) (*AnswerType, error) {
+	atc.defaults()
 	return withHooks(ctx, atc.sqlSave, atc.mutation, atc.hooks)
 }
 
@@ -73,8 +103,26 @@ func (atc *AnswerTypeCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (atc *AnswerTypeCreate) defaults() {
+	if _, ok := atc.mutation.CreatedAt(); !ok {
+		v := answertype.DefaultCreatedAt()
+		atc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := atc.mutation.UpdatedAt(); !ok {
+		v := answertype.DefaultUpdatedAt()
+		atc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (atc *AnswerTypeCreate) check() error {
+	if _, ok := atc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AnswerType.created_at"`)}
+	}
+	if _, ok := atc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AnswerType.updated_at"`)}
+	}
 	if _, ok := atc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "AnswerType.name"`)}
 	}
@@ -109,6 +157,14 @@ func (atc *AnswerTypeCreate) createSpec() (*AnswerType, *sqlgraph.CreateSpec) {
 		_node = &AnswerType{config: atc.config}
 		_spec = sqlgraph.NewCreateSpec(answertype.Table, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeInt))
 	)
+	if value, ok := atc.mutation.CreatedAt(); ok {
+		_spec.SetField(answertype.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := atc.mutation.UpdatedAt(); ok {
+		_spec.SetField(answertype.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := atc.mutation.Name(); ok {
 		_spec.SetField(answertype.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -150,6 +206,7 @@ func (atcb *AnswerTypeCreateBulk) Save(ctx context.Context) ([]*AnswerType, erro
 	for i := range atcb.builders {
 		func(i int, root context.Context) {
 			builder := atcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AnswerTypeMutation)
 				if !ok {

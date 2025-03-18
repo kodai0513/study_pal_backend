@@ -11,6 +11,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +28,26 @@ type WorkbookMemberUpdate struct {
 // Where appends a list predicates to the WorkbookMemberUpdate builder.
 func (wmu *WorkbookMemberUpdate) Where(ps ...predicate.WorkbookMember) *WorkbookMemberUpdate {
 	wmu.mutation.Where(ps...)
+	return wmu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (wmu *WorkbookMemberUpdate) SetCreatedAt(t time.Time) *WorkbookMemberUpdate {
+	wmu.mutation.SetCreatedAt(t)
+	return wmu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (wmu *WorkbookMemberUpdate) SetNillableCreatedAt(t *time.Time) *WorkbookMemberUpdate {
+	if t != nil {
+		wmu.SetCreatedAt(*t)
+	}
+	return wmu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (wmu *WorkbookMemberUpdate) SetUpdatedAt(t time.Time) *WorkbookMemberUpdate {
+	wmu.mutation.SetUpdatedAt(t)
 	return wmu
 }
 
@@ -112,6 +133,7 @@ func (wmu *WorkbookMemberUpdate) ClearWorkbook() *WorkbookMemberUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wmu *WorkbookMemberUpdate) Save(ctx context.Context) (int, error) {
+	wmu.defaults()
 	return withHooks(ctx, wmu.sqlSave, wmu.mutation, wmu.hooks)
 }
 
@@ -134,6 +156,14 @@ func (wmu *WorkbookMemberUpdate) Exec(ctx context.Context) error {
 func (wmu *WorkbookMemberUpdate) ExecX(ctx context.Context) {
 	if err := wmu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wmu *WorkbookMemberUpdate) defaults() {
+	if _, ok := wmu.mutation.UpdatedAt(); !ok {
+		v := workbookmember.UpdateDefaultUpdatedAt()
+		wmu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -162,6 +192,12 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := wmu.mutation.CreatedAt(); ok {
+		_spec.SetField(workbookmember.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := wmu.mutation.UpdatedAt(); ok {
+		_spec.SetField(workbookmember.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if wmu.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -270,6 +306,26 @@ type WorkbookMemberUpdateOne struct {
 	mutation *WorkbookMemberMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (wmuo *WorkbookMemberUpdateOne) SetCreatedAt(t time.Time) *WorkbookMemberUpdateOne {
+	wmuo.mutation.SetCreatedAt(t)
+	return wmuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (wmuo *WorkbookMemberUpdateOne) SetNillableCreatedAt(t *time.Time) *WorkbookMemberUpdateOne {
+	if t != nil {
+		wmuo.SetCreatedAt(*t)
+	}
+	return wmuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (wmuo *WorkbookMemberUpdateOne) SetUpdatedAt(t time.Time) *WorkbookMemberUpdateOne {
+	wmuo.mutation.SetUpdatedAt(t)
+	return wmuo
+}
+
 // SetRoleID sets the "role_id" field.
 func (wmuo *WorkbookMemberUpdateOne) SetRoleID(i int) *WorkbookMemberUpdateOne {
 	wmuo.mutation.SetRoleID(i)
@@ -365,6 +421,7 @@ func (wmuo *WorkbookMemberUpdateOne) Select(field string, fields ...string) *Wor
 
 // Save executes the query and returns the updated WorkbookMember entity.
 func (wmuo *WorkbookMemberUpdateOne) Save(ctx context.Context) (*WorkbookMember, error) {
+	wmuo.defaults()
 	return withHooks(ctx, wmuo.sqlSave, wmuo.mutation, wmuo.hooks)
 }
 
@@ -387,6 +444,14 @@ func (wmuo *WorkbookMemberUpdateOne) Exec(ctx context.Context) error {
 func (wmuo *WorkbookMemberUpdateOne) ExecX(ctx context.Context) {
 	if err := wmuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wmuo *WorkbookMemberUpdateOne) defaults() {
+	if _, ok := wmuo.mutation.UpdatedAt(); !ok {
+		v := workbookmember.UpdateDefaultUpdatedAt()
+		wmuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -432,6 +497,12 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := wmuo.mutation.CreatedAt(); ok {
+		_spec.SetField(workbookmember.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := wmuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(workbookmember.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if wmuo.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{

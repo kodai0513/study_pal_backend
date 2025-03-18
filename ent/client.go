@@ -414,6 +414,22 @@ func (c *AnswerDescriptionClient) GetX(ctx context.Context, id int) *AnswerDescr
 	return obj
 }
 
+// QueryProblem queries the problem edge of a AnswerDescription.
+func (c *AnswerDescriptionClient) QueryProblem(ad *AnswerDescription) *ProblemQuery {
+	query := (&ProblemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ad.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(answerdescription.Table, answerdescription.FieldID, id),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, answerdescription.ProblemTable, answerdescription.ProblemColumn),
+		)
+		fromV = sqlgraph.Neighbors(ad.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AnswerDescriptionClient) Hooks() []Hook {
 	return c.hooks.AnswerDescription
@@ -547,6 +563,22 @@ func (c *AnswerMultiChoicesClient) GetX(ctx context.Context, id int) *AnswerMult
 	return obj
 }
 
+// QueryProblem queries the problem edge of a AnswerMultiChoices.
+func (c *AnswerMultiChoicesClient) QueryProblem(amc *AnswerMultiChoices) *ProblemQuery {
+	query := (&ProblemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := amc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(answermultichoices.Table, answermultichoices.FieldID, id),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, answermultichoices.ProblemTable, answermultichoices.ProblemColumn),
+		)
+		fromV = sqlgraph.Neighbors(amc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AnswerMultiChoicesClient) Hooks() []Hook {
 	return c.hooks.AnswerMultiChoices
@@ -678,6 +710,22 @@ func (c *AnswerTruthClient) GetX(ctx context.Context, id int) *AnswerTruth {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryProblem queries the problem edge of a AnswerTruth.
+func (c *AnswerTruthClient) QueryProblem(at *AnswerTruth) *ProblemQuery {
+	query := (&ProblemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(answertruth.Table, answertruth.FieldID, id),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, answertruth.ProblemTable, answertruth.ProblemColumn),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -1324,6 +1372,38 @@ func (c *ProblemClient) QueryAnswerTruths(pr *Problem) *AnswerTruthQuery {
 	return query
 }
 
+// QueryWorkbook queries the workbook edge of a Problem.
+func (c *ProblemClient) QueryWorkbook(pr *Problem) *WorkbookQuery {
+	query := (&WorkbookClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(problem.Table, problem.FieldID, id),
+			sqlgraph.To(workbook.Table, workbook.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookTable, problem.WorkbookColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWorkbookCategory queries the workbook_category edge of a Problem.
+func (c *ProblemClient) QueryWorkbookCategory(pr *Problem) *WorkbookCategoryQuery {
+	query := (&WorkbookCategoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(problem.Table, problem.FieldID, id),
+			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryTable, problem.WorkbookCategoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ProblemClient) Hooks() []Hook {
 	return c.hooks.Problem
@@ -1785,6 +1865,22 @@ func (c *WorkbookClient) GetX(ctx context.Context, id int) *Workbook {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryProblems queries the problems edge of a Workbook.
+func (c *WorkbookClient) QueryProblems(w *Workbook) *ProblemQuery {
+	query := (&ProblemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, id),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbook.ProblemsTable, workbook.ProblemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // QueryWorkbookCategories queries the workbook_categories edge of a Workbook.

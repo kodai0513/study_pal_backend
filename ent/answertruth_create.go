@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"study-pal-backend/ent/answertruth"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -19,10 +21,49 @@ type AnswerTruthCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (atc *AnswerTruthCreate) SetCreatedAt(t time.Time) *AnswerTruthCreate {
+	atc.mutation.SetCreatedAt(t)
+	return atc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (atc *AnswerTruthCreate) SetNillableCreatedAt(t *time.Time) *AnswerTruthCreate {
+	if t != nil {
+		atc.SetCreatedAt(*t)
+	}
+	return atc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (atc *AnswerTruthCreate) SetUpdatedAt(t time.Time) *AnswerTruthCreate {
+	atc.mutation.SetUpdatedAt(t)
+	return atc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (atc *AnswerTruthCreate) SetNillableUpdatedAt(t *time.Time) *AnswerTruthCreate {
+	if t != nil {
+		atc.SetUpdatedAt(*t)
+	}
+	return atc
+}
+
+// SetProblemID sets the "problem_id" field.
+func (atc *AnswerTruthCreate) SetProblemID(i int) *AnswerTruthCreate {
+	atc.mutation.SetProblemID(i)
+	return atc
+}
+
 // SetTruth sets the "truth" field.
 func (atc *AnswerTruthCreate) SetTruth(b bool) *AnswerTruthCreate {
 	atc.mutation.SetTruth(b)
 	return atc
+}
+
+// SetProblem sets the "problem" edge to the Problem entity.
+func (atc *AnswerTruthCreate) SetProblem(p *Problem) *AnswerTruthCreate {
+	return atc.SetProblemID(p.ID)
 }
 
 // Mutation returns the AnswerTruthMutation object of the builder.
@@ -32,6 +73,7 @@ func (atc *AnswerTruthCreate) Mutation() *AnswerTruthMutation {
 
 // Save creates the AnswerTruth in the database.
 func (atc *AnswerTruthCreate) Save(ctx context.Context) (*AnswerTruth, error) {
+	atc.defaults()
 	return withHooks(ctx, atc.sqlSave, atc.mutation, atc.hooks)
 }
 
@@ -57,10 +99,34 @@ func (atc *AnswerTruthCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (atc *AnswerTruthCreate) defaults() {
+	if _, ok := atc.mutation.CreatedAt(); !ok {
+		v := answertruth.DefaultCreatedAt()
+		atc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := atc.mutation.UpdatedAt(); !ok {
+		v := answertruth.DefaultUpdatedAt()
+		atc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (atc *AnswerTruthCreate) check() error {
+	if _, ok := atc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AnswerTruth.created_at"`)}
+	}
+	if _, ok := atc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AnswerTruth.updated_at"`)}
+	}
+	if _, ok := atc.mutation.ProblemID(); !ok {
+		return &ValidationError{Name: "problem_id", err: errors.New(`ent: missing required field "AnswerTruth.problem_id"`)}
+	}
 	if _, ok := atc.mutation.Truth(); !ok {
 		return &ValidationError{Name: "truth", err: errors.New(`ent: missing required field "AnswerTruth.truth"`)}
+	}
+	if len(atc.mutation.ProblemIDs()) == 0 {
+		return &ValidationError{Name: "problem", err: errors.New(`ent: missing required edge "AnswerTruth.problem"`)}
 	}
 	return nil
 }
@@ -88,9 +154,34 @@ func (atc *AnswerTruthCreate) createSpec() (*AnswerTruth, *sqlgraph.CreateSpec) 
 		_node = &AnswerTruth{config: atc.config}
 		_spec = sqlgraph.NewCreateSpec(answertruth.Table, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
 	)
+	if value, ok := atc.mutation.CreatedAt(); ok {
+		_spec.SetField(answertruth.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := atc.mutation.UpdatedAt(); ok {
+		_spec.SetField(answertruth.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := atc.mutation.Truth(); ok {
 		_spec.SetField(answertruth.FieldTruth, field.TypeBool, value)
 		_node.Truth = value
+	}
+	if nodes := atc.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answertruth.ProblemTable,
+			Columns: []string{answertruth.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ProblemID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -113,6 +204,7 @@ func (atcb *AnswerTruthCreateBulk) Save(ctx context.Context) ([]*AnswerTruth, er
 	for i := range atcb.builders {
 		func(i int, root context.Context) {
 			builder := atcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AnswerTruthMutation)
 				if !ok {

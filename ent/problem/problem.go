@@ -3,6 +3,8 @@
 package problem
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -12,10 +14,18 @@ const (
 	Label = "problem"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldAnswerTypeID holds the string denoting the answer_type_id field in the database.
 	FieldAnswerTypeID = "answer_type_id"
 	// FieldStatement holds the string denoting the statement field in the database.
 	FieldStatement = "statement"
+	// FieldWorkbookID holds the string denoting the workbook_id field in the database.
+	FieldWorkbookID = "workbook_id"
+	// FieldWorkbookCategoryID holds the string denoting the workbook_category_id field in the database.
+	FieldWorkbookCategoryID = "workbook_category_id"
 	// EdgeAnswerType holds the string denoting the answer_type edge name in mutations.
 	EdgeAnswerType = "answer_type"
 	// EdgeAnswerDescriptions holds the string denoting the answer_descriptions edge name in mutations.
@@ -24,6 +34,10 @@ const (
 	EdgeAnswerMultiChoices = "answer_multi_choices"
 	// EdgeAnswerTruths holds the string denoting the answer_truths edge name in mutations.
 	EdgeAnswerTruths = "answer_truths"
+	// EdgeWorkbook holds the string denoting the workbook edge name in mutations.
+	EdgeWorkbook = "workbook"
+	// EdgeWorkbookCategory holds the string denoting the workbook_category edge name in mutations.
+	EdgeWorkbookCategory = "workbook_category"
 	// Table holds the table name of the problem in the database.
 	Table = "problems"
 	// AnswerTypeTable is the table that holds the answer_type relation/edge.
@@ -39,34 +53,46 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "answerdescription" package.
 	AnswerDescriptionsInverseTable = "answer_descriptions"
 	// AnswerDescriptionsColumn is the table column denoting the answer_descriptions relation/edge.
-	AnswerDescriptionsColumn = "problem_answer_descriptions"
+	AnswerDescriptionsColumn = "problem_id"
 	// AnswerMultiChoicesTable is the table that holds the answer_multi_choices relation/edge.
 	AnswerMultiChoicesTable = "answer_multi_choices"
 	// AnswerMultiChoicesInverseTable is the table name for the AnswerMultiChoices entity.
 	// It exists in this package in order to avoid circular dependency with the "answermultichoices" package.
 	AnswerMultiChoicesInverseTable = "answer_multi_choices"
 	// AnswerMultiChoicesColumn is the table column denoting the answer_multi_choices relation/edge.
-	AnswerMultiChoicesColumn = "problem_answer_multi_choices"
+	AnswerMultiChoicesColumn = "problem_id"
 	// AnswerTruthsTable is the table that holds the answer_truths relation/edge.
 	AnswerTruthsTable = "answer_truths"
 	// AnswerTruthsInverseTable is the table name for the AnswerTruth entity.
 	// It exists in this package in order to avoid circular dependency with the "answertruth" package.
 	AnswerTruthsInverseTable = "answer_truths"
 	// AnswerTruthsColumn is the table column denoting the answer_truths relation/edge.
-	AnswerTruthsColumn = "problem_answer_truths"
+	AnswerTruthsColumn = "problem_id"
+	// WorkbookTable is the table that holds the workbook relation/edge.
+	WorkbookTable = "problems"
+	// WorkbookInverseTable is the table name for the Workbook entity.
+	// It exists in this package in order to avoid circular dependency with the "workbook" package.
+	WorkbookInverseTable = "workbooks"
+	// WorkbookColumn is the table column denoting the workbook relation/edge.
+	WorkbookColumn = "workbook_id"
+	// WorkbookCategoryTable is the table that holds the workbook_category relation/edge.
+	WorkbookCategoryTable = "problems"
+	// WorkbookCategoryInverseTable is the table name for the WorkbookCategory entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookcategory" package.
+	WorkbookCategoryInverseTable = "workbook_categories"
+	// WorkbookCategoryColumn is the table column denoting the workbook_category relation/edge.
+	WorkbookCategoryColumn = "workbook_category_id"
 )
 
 // Columns holds all SQL columns for problem fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldAnswerTypeID,
 	FieldStatement,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "problems"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"workbook_category_problems",
+	FieldWorkbookID,
+	FieldWorkbookCategoryID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -76,15 +102,16 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// StatementValidator is a validator for the "statement" field. It is called by the builders before save.
 	StatementValidator func(string) error
 )
@@ -97,6 +124,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
 // ByAnswerTypeID orders the results by the answer_type_id field.
 func ByAnswerTypeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAnswerTypeID, opts...).ToFunc()
@@ -105,6 +142,16 @@ func ByAnswerTypeID(opts ...sql.OrderTermOption) OrderOption {
 // ByStatement orders the results by the statement field.
 func ByStatement(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatement, opts...).ToFunc()
+}
+
+// ByWorkbookID orders the results by the workbook_id field.
+func ByWorkbookID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorkbookID, opts...).ToFunc()
+}
+
+// ByWorkbookCategoryID orders the results by the workbook_category_id field.
+func ByWorkbookCategoryID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorkbookCategoryID, opts...).ToFunc()
 }
 
 // ByAnswerTypeField orders the results by answer_type field.
@@ -155,6 +202,20 @@ func ByAnswerTruths(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAnswerTruthsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByWorkbookField orders the results by workbook field.
+func ByWorkbookField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByWorkbookCategoryField orders the results by workbook_category field.
+func ByWorkbookCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newAnswerTypeStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -181,5 +242,19 @@ func newAnswerTruthsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AnswerTruthsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AnswerTruthsTable, AnswerTruthsColumn),
+	)
+}
+func newWorkbookStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkbookInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookTable, WorkbookColumn),
+	)
+}
+func newWorkbookCategoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkbookCategoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryTable, WorkbookCategoryColumn),
 	)
 }

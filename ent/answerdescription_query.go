@@ -8,6 +8,7 @@ import (
 	"math"
 	"study-pal-backend/ent/answerdescription"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,11 +19,11 @@ import (
 // AnswerDescriptionQuery is the builder for querying AnswerDescription entities.
 type AnswerDescriptionQuery struct {
 	config
-	ctx        *QueryContext
-	order      []answerdescription.OrderOption
-	inters     []Interceptor
-	predicates []predicate.AnswerDescription
-	withFKs    bool
+	ctx         *QueryContext
+	order       []answerdescription.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.AnswerDescription
+	withProblem *ProblemQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +58,28 @@ func (adq *AnswerDescriptionQuery) Unique(unique bool) *AnswerDescriptionQuery {
 func (adq *AnswerDescriptionQuery) Order(o ...answerdescription.OrderOption) *AnswerDescriptionQuery {
 	adq.order = append(adq.order, o...)
 	return adq
+}
+
+// QueryProblem chains the current query on the "problem" edge.
+func (adq *AnswerDescriptionQuery) QueryProblem() *ProblemQuery {
+	query := (&ProblemClient{config: adq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := adq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := adq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(answerdescription.Table, answerdescription.FieldID, selector),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, answerdescription.ProblemTable, answerdescription.ProblemColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(adq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first AnswerDescription entity from the query.
@@ -246,15 +269,27 @@ func (adq *AnswerDescriptionQuery) Clone() *AnswerDescriptionQuery {
 		return nil
 	}
 	return &AnswerDescriptionQuery{
-		config:     adq.config,
-		ctx:        adq.ctx.Clone(),
-		order:      append([]answerdescription.OrderOption{}, adq.order...),
-		inters:     append([]Interceptor{}, adq.inters...),
-		predicates: append([]predicate.AnswerDescription{}, adq.predicates...),
+		config:      adq.config,
+		ctx:         adq.ctx.Clone(),
+		order:       append([]answerdescription.OrderOption{}, adq.order...),
+		inters:      append([]Interceptor{}, adq.inters...),
+		predicates:  append([]predicate.AnswerDescription{}, adq.predicates...),
+		withProblem: adq.withProblem.Clone(),
 		// clone intermediate query.
 		sql:  adq.sql.Clone(),
 		path: adq.path,
 	}
+}
+
+// WithProblem tells the query-builder to eager-load the nodes that are connected to
+// the "problem" edge. The optional arguments are used to configure the query builder of the edge.
+func (adq *AnswerDescriptionQuery) WithProblem(opts ...func(*ProblemQuery)) *AnswerDescriptionQuery {
+	query := (&ProblemClient{config: adq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	adq.withProblem = query
+	return adq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -263,12 +298,12 @@ func (adq *AnswerDescriptionQuery) Clone() *AnswerDescriptionQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.AnswerDescription.Query().
-//		GroupBy(answerdescription.FieldName).
+//		GroupBy(answerdescription.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (adq *AnswerDescriptionQuery) GroupBy(field string, fields ...string) *AnswerDescriptionGroupBy {
@@ -286,11 +321,11 @@ func (adq *AnswerDescriptionQuery) GroupBy(field string, fields ...string) *Answ
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.AnswerDescription.Query().
-//		Select(answerdescription.FieldName).
+//		Select(answerdescription.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (adq *AnswerDescriptionQuery) Select(fields ...string) *AnswerDescriptionSelect {
 	adq.ctx.Fields = append(adq.ctx.Fields, fields...)
@@ -333,19 +368,19 @@ func (adq *AnswerDescriptionQuery) prepareQuery(ctx context.Context) error {
 
 func (adq *AnswerDescriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AnswerDescription, error) {
 	var (
-		nodes   = []*AnswerDescription{}
-		withFKs = adq.withFKs
-		_spec   = adq.querySpec()
+		nodes       = []*AnswerDescription{}
+		_spec       = adq.querySpec()
+		loadedTypes = [1]bool{
+			adq.withProblem != nil,
+		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, answerdescription.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*AnswerDescription).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &AnswerDescription{config: adq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -357,7 +392,43 @@ func (adq *AnswerDescriptionQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := adq.withProblem; query != nil {
+		if err := adq.loadProblem(ctx, query, nodes, nil,
+			func(n *AnswerDescription, e *Problem) { n.Edges.Problem = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (adq *AnswerDescriptionQuery) loadProblem(ctx context.Context, query *ProblemQuery, nodes []*AnswerDescription, init func(*AnswerDescription), assign func(*AnswerDescription, *Problem)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AnswerDescription)
+	for i := range nodes {
+		fk := nodes[i].ProblemID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(problem.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "problem_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (adq *AnswerDescriptionQuery) sqlCount(ctx context.Context) (int, error) {
@@ -384,6 +455,9 @@ func (adq *AnswerDescriptionQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != answerdescription.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if adq.withProblem != nil {
+			_spec.Node.AddColumnOnce(answerdescription.FieldProblemID)
 		}
 	}
 	if ps := adq.predicates; len(ps) > 0 {

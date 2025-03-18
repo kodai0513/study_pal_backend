@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/role"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
@@ -13,6 +14,12 @@ import (
 // WorkbookMember holds the schema definition for the WorkbookMember entity.
 type WorkbookMember struct {
 	ent.Schema
+}
+
+func (WorkbookMember) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.TimeMixin{},
+	}
 }
 
 // Fields of the WorkbookMember.

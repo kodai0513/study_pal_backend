@@ -13,6 +13,8 @@ import (
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookcategory"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,7 +33,8 @@ type ProblemQuery struct {
 	withAnswerDescriptions *AnswerDescriptionQuery
 	withAnswerMultiChoices *AnswerMultiChoicesQuery
 	withAnswerTruths       *AnswerTruthQuery
-	withFKs                bool
+	withWorkbook           *WorkbookQuery
+	withWorkbookCategory   *WorkbookCategoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -149,6 +152,50 @@ func (pq *ProblemQuery) QueryAnswerTruths() *AnswerTruthQuery {
 			sqlgraph.From(problem.Table, problem.FieldID, selector),
 			sqlgraph.To(answertruth.Table, answertruth.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, problem.AnswerTruthsTable, problem.AnswerTruthsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWorkbook chains the current query on the "workbook" edge.
+func (pq *ProblemQuery) QueryWorkbook() *WorkbookQuery {
+	query := (&WorkbookClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(problem.Table, problem.FieldID, selector),
+			sqlgraph.To(workbook.Table, workbook.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookTable, problem.WorkbookColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWorkbookCategory chains the current query on the "workbook_category" edge.
+func (pq *ProblemQuery) QueryWorkbookCategory() *WorkbookCategoryQuery {
+	query := (&WorkbookCategoryClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(problem.Table, problem.FieldID, selector),
+			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryTable, problem.WorkbookCategoryColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -352,6 +399,8 @@ func (pq *ProblemQuery) Clone() *ProblemQuery {
 		withAnswerDescriptions: pq.withAnswerDescriptions.Clone(),
 		withAnswerMultiChoices: pq.withAnswerMultiChoices.Clone(),
 		withAnswerTruths:       pq.withAnswerTruths.Clone(),
+		withWorkbook:           pq.withWorkbook.Clone(),
+		withWorkbookCategory:   pq.withWorkbookCategory.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -402,18 +451,40 @@ func (pq *ProblemQuery) WithAnswerTruths(opts ...func(*AnswerTruthQuery)) *Probl
 	return pq
 }
 
+// WithWorkbook tells the query-builder to eager-load the nodes that are connected to
+// the "workbook" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProblemQuery) WithWorkbook(opts ...func(*WorkbookQuery)) *ProblemQuery {
+	query := (&WorkbookClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withWorkbook = query
+	return pq
+}
+
+// WithWorkbookCategory tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_category" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProblemQuery) WithWorkbookCategory(opts ...func(*WorkbookCategoryQuery)) *ProblemQuery {
+	query := (&WorkbookCategoryClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withWorkbookCategory = query
+	return pq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		AnswerTypeID int `json:"answer_type_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Problem.Query().
-//		GroupBy(problem.FieldAnswerTypeID).
+//		GroupBy(problem.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *ProblemQuery) GroupBy(field string, fields ...string) *ProblemGroupBy {
@@ -431,11 +502,11 @@ func (pq *ProblemQuery) GroupBy(field string, fields ...string) *ProblemGroupBy 
 // Example:
 //
 //	var v []struct {
-//		AnswerTypeID int `json:"answer_type_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Problem.Query().
-//		Select(problem.FieldAnswerTypeID).
+//		Select(problem.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (pq *ProblemQuery) Select(fields ...string) *ProblemSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
@@ -479,18 +550,16 @@ func (pq *ProblemQuery) prepareQuery(ctx context.Context) error {
 func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Problem, error) {
 	var (
 		nodes       = []*Problem{}
-		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [6]bool{
 			pq.withAnswerType != nil,
 			pq.withAnswerDescriptions != nil,
 			pq.withAnswerMultiChoices != nil,
 			pq.withAnswerTruths != nil,
+			pq.withWorkbook != nil,
+			pq.withWorkbookCategory != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, problem.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Problem).scanValues(nil, columns)
 	}
@@ -540,6 +609,18 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 			return nil, err
 		}
 	}
+	if query := pq.withWorkbook; query != nil {
+		if err := pq.loadWorkbook(ctx, query, nodes, nil,
+			func(n *Problem, e *Workbook) { n.Edges.Workbook = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pq.withWorkbookCategory; query != nil {
+		if err := pq.loadWorkbookCategory(ctx, query, nodes, nil,
+			func(n *Problem, e *WorkbookCategory) { n.Edges.WorkbookCategory = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -582,7 +663,9 @@ func (pq *ProblemQuery) loadAnswerDescriptions(ctx context.Context, query *Answe
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(answerdescription.FieldProblemID)
+	}
 	query.Where(predicate.AnswerDescription(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(problem.AnswerDescriptionsColumn), fks...))
 	}))
@@ -591,13 +674,10 @@ func (pq *ProblemQuery) loadAnswerDescriptions(ctx context.Context, query *Answe
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.problem_answer_descriptions
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "problem_answer_descriptions" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.ProblemID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "problem_answer_descriptions" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "problem_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -613,7 +693,9 @@ func (pq *ProblemQuery) loadAnswerMultiChoices(ctx context.Context, query *Answe
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(answermultichoices.FieldProblemID)
+	}
 	query.Where(predicate.AnswerMultiChoices(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(problem.AnswerMultiChoicesColumn), fks...))
 	}))
@@ -622,13 +704,10 @@ func (pq *ProblemQuery) loadAnswerMultiChoices(ctx context.Context, query *Answe
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.problem_answer_multi_choices
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "problem_answer_multi_choices" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.ProblemID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "problem_answer_multi_choices" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "problem_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -644,7 +723,9 @@ func (pq *ProblemQuery) loadAnswerTruths(ctx context.Context, query *AnswerTruth
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(answertruth.FieldProblemID)
+	}
 	query.Where(predicate.AnswerTruth(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(problem.AnswerTruthsColumn), fks...))
 	}))
@@ -653,15 +734,70 @@ func (pq *ProblemQuery) loadAnswerTruths(ctx context.Context, query *AnswerTruth
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.problem_answer_truths
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "problem_answer_truths" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.ProblemID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "problem_answer_truths" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "problem_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (pq *ProblemQuery) loadWorkbook(ctx context.Context, query *WorkbookQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *Workbook)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Problem)
+	for i := range nodes {
+		fk := nodes[i].WorkbookID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(workbook.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "workbook_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (pq *ProblemQuery) loadWorkbookCategory(ctx context.Context, query *WorkbookCategoryQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *WorkbookCategory)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Problem)
+	for i := range nodes {
+		fk := nodes[i].WorkbookCategoryID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(workbookcategory.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "workbook_category_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -693,6 +829,12 @@ func (pq *ProblemQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if pq.withAnswerType != nil {
 			_spec.Node.AddColumnOnce(problem.FieldAnswerTypeID)
+		}
+		if pq.withWorkbook != nil {
+			_spec.Node.AddColumnOnce(problem.FieldWorkbookID)
+		}
+		if pq.withWorkbookCategory != nil {
+			_spec.Node.AddColumnOnce(problem.FieldWorkbookCategoryID)
 		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {

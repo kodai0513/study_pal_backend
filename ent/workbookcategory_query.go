@@ -502,7 +502,9 @@ func (wcq *WorkbookCategoryQuery) loadProblems(ctx context.Context, query *Probl
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(problem.FieldWorkbookCategoryID)
+	}
 	query.Where(predicate.Problem(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(workbookcategory.ProblemsColumn), fks...))
 	}))
@@ -511,13 +513,10 @@ func (wcq *WorkbookCategoryQuery) loadProblems(ctx context.Context, query *Probl
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.workbook_category_problems
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "workbook_category_problems" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.WorkbookCategoryID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_problems" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

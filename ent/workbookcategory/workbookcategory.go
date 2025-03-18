@@ -36,7 +36,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "problem" package.
 	ProblemsInverseTable = "problems"
 	// ProblemsColumn is the table column denoting the problems relation/edge.
-	ProblemsColumn = "workbook_category_problems"
+	ProblemsColumn = "workbook_category_id"
 	// WorkbookTable is the table that holds the workbook relation/edge.
 	WorkbookTable = "workbook_categories"
 	// WorkbookInverseTable is the table name for the Workbook entity.

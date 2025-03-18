@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"study-pal-backend/app/domains/models/shared"
 	"study-pal-backend/app/domains/models/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
@@ -31,7 +30,7 @@ func (u *UserRepositoryImpl) FindByName(name string) *users.User {
 		return nil
 	}
 
-	id, _ := shared.NewId(result.ID)
+	id, _ := users.NewUserId(result.ID)
 	email, _ := users.NewEmail(result.Email)
 	resultName, _ := users.NewName(result.Name)
 	nickName, _ := users.NewNickName(result.NickName)

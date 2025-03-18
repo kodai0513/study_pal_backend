@@ -12,8 +12,10 @@ var (
 	// AnswerDescriptionsColumns holds the columns for the "answer_descriptions" table.
 	AnswerDescriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 255},
-		{Name: "problem_answer_descriptions", Type: field.TypeInt, Nullable: true},
+		{Name: "problem_id", Type: field.TypeInt},
 	}
 	// AnswerDescriptionsTable holds the schema information for the "answer_descriptions" table.
 	AnswerDescriptionsTable = &schema.Table{
@@ -23,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "answer_descriptions_problems_answer_descriptions",
-				Columns:    []*schema.Column{AnswerDescriptionsColumns[2]},
+				Columns:    []*schema.Column{AnswerDescriptionsColumns[4]},
 				RefColumns: []*schema.Column{ProblemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -32,9 +34,11 @@ var (
 	// AnswerMultiChoicesColumns holds the columns for the "answer_multi_choices" table.
 	AnswerMultiChoicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 255},
 		{Name: "is_correct", Type: field.TypeBool},
-		{Name: "problem_answer_multi_choices", Type: field.TypeInt, Nullable: true},
+		{Name: "problem_id", Type: field.TypeInt},
 	}
 	// AnswerMultiChoicesTable holds the schema information for the "answer_multi_choices" table.
 	AnswerMultiChoicesTable = &schema.Table{
@@ -44,7 +48,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "answer_multi_choices_problems_answer_multi_choices",
-				Columns:    []*schema.Column{AnswerMultiChoicesColumns[3]},
+				Columns:    []*schema.Column{AnswerMultiChoicesColumns[5]},
 				RefColumns: []*schema.Column{ProblemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -53,8 +57,10 @@ var (
 	// AnswerTruthsColumns holds the columns for the "answer_truths" table.
 	AnswerTruthsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "truth", Type: field.TypeBool},
-		{Name: "problem_answer_truths", Type: field.TypeInt, Nullable: true},
+		{Name: "problem_id", Type: field.TypeInt},
 	}
 	// AnswerTruthsTable holds the schema information for the "answer_truths" table.
 	AnswerTruthsTable = &schema.Table{
@@ -64,7 +70,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "answer_truths_problems_answer_truths",
-				Columns:    []*schema.Column{AnswerTruthsColumns[2]},
+				Columns:    []*schema.Column{AnswerTruthsColumns[4]},
 				RefColumns: []*schema.Column{ProblemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -73,6 +79,8 @@ var (
 	// AnswerTypesColumns holds the columns for the "answer_types" table.
 	AnswerTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 255},
 	}
 	// AnswerTypesTable holds the schema information for the "answer_types" table.
@@ -106,6 +114,8 @@ var (
 	// PermissionsColumns holds the columns for the "permissions" table.
 	PermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 255},
 	}
 	// PermissionsTable holds the schema information for the "permissions" table.
@@ -117,9 +127,12 @@ var (
 	// ProblemsColumns holds the columns for the "problems" table.
 	ProblemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "statement", Type: field.TypeString, Size: 1000},
 		{Name: "answer_type_id", Type: field.TypeInt},
-		{Name: "workbook_category_problems", Type: field.TypeInt, Nullable: true},
+		{Name: "workbook_id", Type: field.TypeInt},
+		{Name: "workbook_category_id", Type: field.TypeInt},
 	}
 	// ProblemsTable holds the schema information for the "problems" table.
 	ProblemsTable = &schema.Table{
@@ -129,13 +142,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "problems_answer_types_problems",
-				Columns:    []*schema.Column{ProblemsColumns[2]},
+				Columns:    []*schema.Column{ProblemsColumns[4]},
 				RefColumns: []*schema.Column{AnswerTypesColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
 			{
+				Symbol:     "problems_workbooks_problems",
+				Columns:    []*schema.Column{ProblemsColumns[5]},
+				RefColumns: []*schema.Column{WorkbooksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
 				Symbol:     "problems_workbook_categories_problems",
-				Columns:    []*schema.Column{ProblemsColumns[3]},
+				Columns:    []*schema.Column{ProblemsColumns[6]},
 				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -144,6 +163,8 @@ var (
 	// RolesColumns holds the columns for the "roles" table.
 	RolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 255},
 	}
 	// RolesTable holds the schema information for the "roles" table.
@@ -229,6 +250,8 @@ var (
 	// WorkbookMembersColumns holds the columns for the "workbook_members" table.
 	WorkbookMembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "role_id", Type: field.TypeInt},
 		{Name: "member_id", Type: field.TypeInt},
 		{Name: "workbook_id", Type: field.TypeInt},
@@ -241,19 +264,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "workbook_members_roles_workbook_members",
-				Columns:    []*schema.Column{WorkbookMembersColumns[1]},
+				Columns:    []*schema.Column{WorkbookMembersColumns[3]},
 				RefColumns: []*schema.Column{RolesColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
 			{
 				Symbol:     "workbook_members_users_workbook_members",
-				Columns:    []*schema.Column{WorkbookMembersColumns[2]},
+				Columns:    []*schema.Column{WorkbookMembersColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "workbook_members_workbooks_workbook_members",
-				Columns:    []*schema.Column{WorkbookMembersColumns[3]},
+				Columns:    []*schema.Column{WorkbookMembersColumns[5]},
 				RefColumns: []*schema.Column{WorkbooksColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -309,7 +332,8 @@ func init() {
 	AnswerTruthsTable.ForeignKeys[0].RefTable = ProblemsTable
 	ArticlesTable.ForeignKeys[0].RefTable = UsersTable
 	ProblemsTable.ForeignKeys[0].RefTable = AnswerTypesTable
-	ProblemsTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
+	ProblemsTable.ForeignKeys[1].RefTable = WorkbooksTable
+	ProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoriesTable
 	WorkbookCategoriesTable.ForeignKeys[0].RefTable = WorkbooksTable
 	WorkbookCategoryClosuresTable.ForeignKeys[0].RefTable = WorkbookCategoriesTable
 	WorkbookMembersTable.ForeignKeys[0].RefTable = RolesTable

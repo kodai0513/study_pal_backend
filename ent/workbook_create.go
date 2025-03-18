@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
@@ -66,6 +67,21 @@ func (wc *WorkbookCreate) SetDescription(s string) *WorkbookCreate {
 func (wc *WorkbookCreate) SetTitle(s string) *WorkbookCreate {
 	wc.mutation.SetTitle(s)
 	return wc
+}
+
+// AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
+func (wc *WorkbookCreate) AddProblemIDs(ids ...int) *WorkbookCreate {
+	wc.mutation.AddProblemIDs(ids...)
+	return wc
+}
+
+// AddProblems adds the "problems" edges to the Problem entity.
+func (wc *WorkbookCreate) AddProblems(p ...*Problem) *WorkbookCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return wc.AddProblemIDs(ids...)
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
@@ -215,6 +231,22 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 	if value, ok := wc.mutation.Title(); ok {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
 		_node.Title = value
+	}
+	if nodes := wc.mutation.ProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.ProblemsTable,
+			Columns: []string{workbook.ProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := wc.mutation.WorkbookCategoriesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

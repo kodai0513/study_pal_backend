@@ -370,12 +370,12 @@ func (wmq *WorkbookMemberQuery) WithWorkbook(opts ...func(*WorkbookQuery)) *Work
 // Example:
 //
 //	var v []struct {
-//		RoleID int `json:"role_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.WorkbookMember.Query().
-//		GroupBy(workbookmember.FieldRoleID).
+//		GroupBy(workbookmember.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (wmq *WorkbookMemberQuery) GroupBy(field string, fields ...string) *WorkbookMemberGroupBy {
@@ -393,11 +393,11 @@ func (wmq *WorkbookMemberQuery) GroupBy(field string, fields ...string) *Workboo
 // Example:
 //
 //	var v []struct {
-//		RoleID int `json:"role_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.WorkbookMember.Query().
-//		Select(workbookmember.FieldRoleID).
+//		Select(workbookmember.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (wmq *WorkbookMemberQuery) Select(fields ...string) *WorkbookMemberSelect {
 	wmq.ctx.Fields = append(wmq.ctx.Fields, fields...)

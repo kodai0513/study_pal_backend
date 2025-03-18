@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"study-pal-backend/ent/answertype"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,6 +17,10 @@ type AnswerType struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -51,6 +56,8 @@ func (*AnswerType) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case answertype.FieldName:
 			values[i] = new(sql.NullString)
+		case answertype.FieldCreatedAt, answertype.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -72,6 +79,18 @@ func (at *AnswerType) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			at.ID = int(value.Int64)
+		case answertype.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				at.CreatedAt = value.Time
+			}
+		case answertype.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				at.UpdatedAt = value.Time
+			}
 		case answertype.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -119,6 +138,12 @@ func (at *AnswerType) String() string {
 	var builder strings.Builder
 	builder.WriteString("AnswerType(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", at.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(at.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(at.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(at.Name)
 	builder.WriteByte(')')

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"study-pal-backend/ent/answermultichoices"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,12 +18,40 @@ type AnswerMultiChoices struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// ProblemID holds the value of the "problem_id" field.
+	ProblemID int `json:"problem_id,omitempty"`
 	// IsCorrect holds the value of the "is_correct" field.
-	IsCorrect                    bool `json:"is_correct,omitempty"`
-	problem_answer_multi_choices *int
-	selectValues                 sql.SelectValues
+	IsCorrect bool `json:"is_correct,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the AnswerMultiChoicesQuery when eager-loading is set.
+	Edges        AnswerMultiChoicesEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// AnswerMultiChoicesEdges holds the relations/edges for other nodes in the graph.
+type AnswerMultiChoicesEdges struct {
+	// Problem holds the value of the problem edge.
+	Problem *Problem `json:"problem,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ProblemOrErr returns the Problem value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AnswerMultiChoicesEdges) ProblemOrErr() (*Problem, error) {
+	if e.Problem != nil {
+		return e.Problem, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: problem.Label}
+	}
+	return nil, &NotLoadedError{edge: "problem"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -31,12 +61,12 @@ func (*AnswerMultiChoices) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case answermultichoices.FieldIsCorrect:
 			values[i] = new(sql.NullBool)
-		case answermultichoices.FieldID:
+		case answermultichoices.FieldID, answermultichoices.FieldProblemID:
 			values[i] = new(sql.NullInt64)
 		case answermultichoices.FieldName:
 			values[i] = new(sql.NullString)
-		case answermultichoices.ForeignKeys[0]: // problem_answer_multi_choices
-			values[i] = new(sql.NullInt64)
+		case answermultichoices.FieldCreatedAt, answermultichoices.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -58,24 +88,35 @@ func (amc *AnswerMultiChoices) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			amc.ID = int(value.Int64)
+		case answermultichoices.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				amc.CreatedAt = value.Time
+			}
+		case answermultichoices.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				amc.UpdatedAt = value.Time
+			}
 		case answermultichoices.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				amc.Name = value.String
 			}
+		case answermultichoices.FieldProblemID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field problem_id", values[i])
+			} else if value.Valid {
+				amc.ProblemID = int(value.Int64)
+			}
 		case answermultichoices.FieldIsCorrect:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field is_correct", values[i])
 			} else if value.Valid {
 				amc.IsCorrect = value.Bool
-			}
-		case answermultichoices.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field problem_answer_multi_choices", value)
-			} else if value.Valid {
-				amc.problem_answer_multi_choices = new(int)
-				*amc.problem_answer_multi_choices = int(value.Int64)
 			}
 		default:
 			amc.selectValues.Set(columns[i], values[i])
@@ -88,6 +129,11 @@ func (amc *AnswerMultiChoices) assignValues(columns []string, values []any) erro
 // This includes values selected through modifiers, order, etc.
 func (amc *AnswerMultiChoices) Value(name string) (ent.Value, error) {
 	return amc.selectValues.Get(name)
+}
+
+// QueryProblem queries the "problem" edge of the AnswerMultiChoices entity.
+func (amc *AnswerMultiChoices) QueryProblem() *ProblemQuery {
+	return NewAnswerMultiChoicesClient(amc.config).QueryProblem(amc)
 }
 
 // Update returns a builder for updating this AnswerMultiChoices.
@@ -113,8 +159,17 @@ func (amc *AnswerMultiChoices) String() string {
 	var builder strings.Builder
 	builder.WriteString("AnswerMultiChoices(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", amc.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(amc.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(amc.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(amc.Name)
+	builder.WriteString(", ")
+	builder.WriteString("problem_id=")
+	builder.WriteString(fmt.Sprintf("%v", amc.ProblemID))
 	builder.WriteString(", ")
 	builder.WriteString("is_correct=")
 	builder.WriteString(fmt.Sprintf("%v", amc.IsCorrect))

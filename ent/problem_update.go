@@ -12,6 +12,9 @@ import (
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookcategory"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,6 +31,26 @@ type ProblemUpdate struct {
 // Where appends a list predicates to the ProblemUpdate builder.
 func (pu *ProblemUpdate) Where(ps ...predicate.Problem) *ProblemUpdate {
 	pu.mutation.Where(ps...)
+	return pu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pu *ProblemUpdate) SetCreatedAt(t time.Time) *ProblemUpdate {
+	pu.mutation.SetCreatedAt(t)
+	return pu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pu *ProblemUpdate) SetNillableCreatedAt(t *time.Time) *ProblemUpdate {
+	if t != nil {
+		pu.SetCreatedAt(*t)
+	}
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *ProblemUpdate) SetUpdatedAt(t time.Time) *ProblemUpdate {
+	pu.mutation.SetUpdatedAt(t)
 	return pu
 }
 
@@ -55,6 +78,34 @@ func (pu *ProblemUpdate) SetStatement(s string) *ProblemUpdate {
 func (pu *ProblemUpdate) SetNillableStatement(s *string) *ProblemUpdate {
 	if s != nil {
 		pu.SetStatement(*s)
+	}
+	return pu
+}
+
+// SetWorkbookID sets the "workbook_id" field.
+func (pu *ProblemUpdate) SetWorkbookID(i int) *ProblemUpdate {
+	pu.mutation.SetWorkbookID(i)
+	return pu
+}
+
+// SetNillableWorkbookID sets the "workbook_id" field if the given value is not nil.
+func (pu *ProblemUpdate) SetNillableWorkbookID(i *int) *ProblemUpdate {
+	if i != nil {
+		pu.SetWorkbookID(*i)
+	}
+	return pu
+}
+
+// SetWorkbookCategoryID sets the "workbook_category_id" field.
+func (pu *ProblemUpdate) SetWorkbookCategoryID(i int) *ProblemUpdate {
+	pu.mutation.SetWorkbookCategoryID(i)
+	return pu
+}
+
+// SetNillableWorkbookCategoryID sets the "workbook_category_id" field if the given value is not nil.
+func (pu *ProblemUpdate) SetNillableWorkbookCategoryID(i *int) *ProblemUpdate {
+	if i != nil {
+		pu.SetWorkbookCategoryID(*i)
 	}
 	return pu
 }
@@ -107,6 +158,16 @@ func (pu *ProblemUpdate) AddAnswerTruths(a ...*AnswerTruth) *ProblemUpdate {
 		ids[i] = a[i].ID
 	}
 	return pu.AddAnswerTruthIDs(ids...)
+}
+
+// SetWorkbook sets the "workbook" edge to the Workbook entity.
+func (pu *ProblemUpdate) SetWorkbook(w *Workbook) *ProblemUpdate {
+	return pu.SetWorkbookID(w.ID)
+}
+
+// SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
+func (pu *ProblemUpdate) SetWorkbookCategory(w *WorkbookCategory) *ProblemUpdate {
+	return pu.SetWorkbookCategoryID(w.ID)
 }
 
 // Mutation returns the ProblemMutation object of the builder.
@@ -183,8 +244,21 @@ func (pu *ProblemUpdate) RemoveAnswerTruths(a ...*AnswerTruth) *ProblemUpdate {
 	return pu.RemoveAnswerTruthIDs(ids...)
 }
 
+// ClearWorkbook clears the "workbook" edge to the Workbook entity.
+func (pu *ProblemUpdate) ClearWorkbook() *ProblemUpdate {
+	pu.mutation.ClearWorkbook()
+	return pu
+}
+
+// ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
+func (pu *ProblemUpdate) ClearWorkbookCategory() *ProblemUpdate {
+	pu.mutation.ClearWorkbookCategory()
+	return pu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *ProblemUpdate) Save(ctx context.Context) (int, error) {
+	pu.defaults()
 	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
@@ -210,6 +284,14 @@ func (pu *ProblemUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pu *ProblemUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := problem.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pu *ProblemUpdate) check() error {
 	if v, ok := pu.mutation.Statement(); ok {
@@ -219,6 +301,12 @@ func (pu *ProblemUpdate) check() error {
 	}
 	if pu.mutation.AnswerTypeCleared() && len(pu.mutation.AnswerTypeIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Problem.answer_type"`)
+	}
+	if pu.mutation.WorkbookCleared() && len(pu.mutation.WorkbookIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Problem.workbook"`)
+	}
+	if pu.mutation.WorkbookCategoryCleared() && len(pu.mutation.WorkbookCategoryIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Problem.workbook_category"`)
 	}
 	return nil
 }
@@ -234,6 +322,12 @@ func (pu *ProblemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.CreatedAt(); ok {
+		_spec.SetField(problem.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.SetField(problem.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := pu.mutation.Statement(); ok {
 		_spec.SetField(problem.FieldStatement, field.TypeString, value)
@@ -402,6 +496,64 @@ func (pu *ProblemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.WorkbookCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookTable,
+			Columns: []string{problem.WorkbookColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.WorkbookIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookTable,
+			Columns: []string{problem.WorkbookColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pu.mutation.WorkbookCategoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookCategoryTable,
+			Columns: []string{problem.WorkbookCategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.WorkbookCategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookCategoryTable,
+			Columns: []string{problem.WorkbookCategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{problem.Label}
@@ -420,6 +572,26 @@ type ProblemUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProblemMutation
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (puo *ProblemUpdateOne) SetCreatedAt(t time.Time) *ProblemUpdateOne {
+	puo.mutation.SetCreatedAt(t)
+	return puo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (puo *ProblemUpdateOne) SetNillableCreatedAt(t *time.Time) *ProblemUpdateOne {
+	if t != nil {
+		puo.SetCreatedAt(*t)
+	}
+	return puo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *ProblemUpdateOne) SetUpdatedAt(t time.Time) *ProblemUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
 }
 
 // SetAnswerTypeID sets the "answer_type_id" field.
@@ -446,6 +618,34 @@ func (puo *ProblemUpdateOne) SetStatement(s string) *ProblemUpdateOne {
 func (puo *ProblemUpdateOne) SetNillableStatement(s *string) *ProblemUpdateOne {
 	if s != nil {
 		puo.SetStatement(*s)
+	}
+	return puo
+}
+
+// SetWorkbookID sets the "workbook_id" field.
+func (puo *ProblemUpdateOne) SetWorkbookID(i int) *ProblemUpdateOne {
+	puo.mutation.SetWorkbookID(i)
+	return puo
+}
+
+// SetNillableWorkbookID sets the "workbook_id" field if the given value is not nil.
+func (puo *ProblemUpdateOne) SetNillableWorkbookID(i *int) *ProblemUpdateOne {
+	if i != nil {
+		puo.SetWorkbookID(*i)
+	}
+	return puo
+}
+
+// SetWorkbookCategoryID sets the "workbook_category_id" field.
+func (puo *ProblemUpdateOne) SetWorkbookCategoryID(i int) *ProblemUpdateOne {
+	puo.mutation.SetWorkbookCategoryID(i)
+	return puo
+}
+
+// SetNillableWorkbookCategoryID sets the "workbook_category_id" field if the given value is not nil.
+func (puo *ProblemUpdateOne) SetNillableWorkbookCategoryID(i *int) *ProblemUpdateOne {
+	if i != nil {
+		puo.SetWorkbookCategoryID(*i)
 	}
 	return puo
 }
@@ -498,6 +698,16 @@ func (puo *ProblemUpdateOne) AddAnswerTruths(a ...*AnswerTruth) *ProblemUpdateOn
 		ids[i] = a[i].ID
 	}
 	return puo.AddAnswerTruthIDs(ids...)
+}
+
+// SetWorkbook sets the "workbook" edge to the Workbook entity.
+func (puo *ProblemUpdateOne) SetWorkbook(w *Workbook) *ProblemUpdateOne {
+	return puo.SetWorkbookID(w.ID)
+}
+
+// SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
+func (puo *ProblemUpdateOne) SetWorkbookCategory(w *WorkbookCategory) *ProblemUpdateOne {
+	return puo.SetWorkbookCategoryID(w.ID)
 }
 
 // Mutation returns the ProblemMutation object of the builder.
@@ -574,6 +784,18 @@ func (puo *ProblemUpdateOne) RemoveAnswerTruths(a ...*AnswerTruth) *ProblemUpdat
 	return puo.RemoveAnswerTruthIDs(ids...)
 }
 
+// ClearWorkbook clears the "workbook" edge to the Workbook entity.
+func (puo *ProblemUpdateOne) ClearWorkbook() *ProblemUpdateOne {
+	puo.mutation.ClearWorkbook()
+	return puo
+}
+
+// ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
+func (puo *ProblemUpdateOne) ClearWorkbookCategory() *ProblemUpdateOne {
+	puo.mutation.ClearWorkbookCategory()
+	return puo
+}
+
 // Where appends a list predicates to the ProblemUpdate builder.
 func (puo *ProblemUpdateOne) Where(ps ...predicate.Problem) *ProblemUpdateOne {
 	puo.mutation.Where(ps...)
@@ -589,6 +811,7 @@ func (puo *ProblemUpdateOne) Select(field string, fields ...string) *ProblemUpda
 
 // Save executes the query and returns the updated Problem entity.
 func (puo *ProblemUpdateOne) Save(ctx context.Context) (*Problem, error) {
+	puo.defaults()
 	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
@@ -614,6 +837,14 @@ func (puo *ProblemUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (puo *ProblemUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := problem.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (puo *ProblemUpdateOne) check() error {
 	if v, ok := puo.mutation.Statement(); ok {
@@ -623,6 +854,12 @@ func (puo *ProblemUpdateOne) check() error {
 	}
 	if puo.mutation.AnswerTypeCleared() && len(puo.mutation.AnswerTypeIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Problem.answer_type"`)
+	}
+	if puo.mutation.WorkbookCleared() && len(puo.mutation.WorkbookIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Problem.workbook"`)
+	}
+	if puo.mutation.WorkbookCategoryCleared() && len(puo.mutation.WorkbookCategoryIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Problem.workbook_category"`)
 	}
 	return nil
 }
@@ -655,6 +892,12 @@ func (puo *ProblemUpdateOne) sqlSave(ctx context.Context) (_node *Problem, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.CreatedAt(); ok {
+		_spec.SetField(problem.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.SetField(problem.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := puo.mutation.Statement(); ok {
 		_spec.SetField(problem.FieldStatement, field.TypeString, value)
@@ -816,6 +1059,64 @@ func (puo *ProblemUpdateOne) sqlSave(ctx context.Context) (_node *Problem, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.WorkbookCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookTable,
+			Columns: []string{problem.WorkbookColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.WorkbookIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookTable,
+			Columns: []string{problem.WorkbookColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.WorkbookCategoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookCategoryTable,
+			Columns: []string{problem.WorkbookCategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.WorkbookCategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookCategoryTable,
+			Columns: []string{problem.WorkbookCategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

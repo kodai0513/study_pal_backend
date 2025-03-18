@@ -10,6 +10,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,6 +21,34 @@ type WorkbookMemberCreate struct {
 	config
 	mutation *WorkbookMemberMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (wmc *WorkbookMemberCreate) SetCreatedAt(t time.Time) *WorkbookMemberCreate {
+	wmc.mutation.SetCreatedAt(t)
+	return wmc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (wmc *WorkbookMemberCreate) SetNillableCreatedAt(t *time.Time) *WorkbookMemberCreate {
+	if t != nil {
+		wmc.SetCreatedAt(*t)
+	}
+	return wmc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (wmc *WorkbookMemberCreate) SetUpdatedAt(t time.Time) *WorkbookMemberCreate {
+	wmc.mutation.SetUpdatedAt(t)
+	return wmc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (wmc *WorkbookMemberCreate) SetNillableUpdatedAt(t *time.Time) *WorkbookMemberCreate {
+	if t != nil {
+		wmc.SetUpdatedAt(*t)
+	}
+	return wmc
 }
 
 // SetRoleID sets the "role_id" field.
@@ -62,6 +91,7 @@ func (wmc *WorkbookMemberCreate) Mutation() *WorkbookMemberMutation {
 
 // Save creates the WorkbookMember in the database.
 func (wmc *WorkbookMemberCreate) Save(ctx context.Context) (*WorkbookMember, error) {
+	wmc.defaults()
 	return withHooks(ctx, wmc.sqlSave, wmc.mutation, wmc.hooks)
 }
 
@@ -87,8 +117,26 @@ func (wmc *WorkbookMemberCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (wmc *WorkbookMemberCreate) defaults() {
+	if _, ok := wmc.mutation.CreatedAt(); !ok {
+		v := workbookmember.DefaultCreatedAt()
+		wmc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := wmc.mutation.UpdatedAt(); !ok {
+		v := workbookmember.DefaultUpdatedAt()
+		wmc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (wmc *WorkbookMemberCreate) check() error {
+	if _, ok := wmc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "WorkbookMember.created_at"`)}
+	}
+	if _, ok := wmc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "WorkbookMember.updated_at"`)}
+	}
 	if _, ok := wmc.mutation.RoleID(); !ok {
 		return &ValidationError{Name: "role_id", err: errors.New(`ent: missing required field "WorkbookMember.role_id"`)}
 	}
@@ -133,6 +181,14 @@ func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.Create
 		_node = &WorkbookMember{config: wmc.config}
 		_spec = sqlgraph.NewCreateSpec(workbookmember.Table, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt))
 	)
+	if value, ok := wmc.mutation.CreatedAt(); ok {
+		_spec.SetField(workbookmember.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := wmc.mutation.UpdatedAt(); ok {
+		_spec.SetField(workbookmember.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if nodes := wmc.mutation.RoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -205,6 +261,7 @@ func (wmcb *WorkbookMemberCreateBulk) Save(ctx context.Context) ([]*WorkbookMemb
 	for i := range wmcb.builders {
 		func(i int, root context.Context) {
 			builder := wmcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*WorkbookMemberMutation)
 				if !ok {

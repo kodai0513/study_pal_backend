@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"study-pal-backend/ent/answertruth"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +29,40 @@ func (atu *AnswerTruthUpdate) Where(ps ...predicate.AnswerTruth) *AnswerTruthUpd
 	return atu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (atu *AnswerTruthUpdate) SetCreatedAt(t time.Time) *AnswerTruthUpdate {
+	atu.mutation.SetCreatedAt(t)
+	return atu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (atu *AnswerTruthUpdate) SetNillableCreatedAt(t *time.Time) *AnswerTruthUpdate {
+	if t != nil {
+		atu.SetCreatedAt(*t)
+	}
+	return atu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (atu *AnswerTruthUpdate) SetUpdatedAt(t time.Time) *AnswerTruthUpdate {
+	atu.mutation.SetUpdatedAt(t)
+	return atu
+}
+
+// SetProblemID sets the "problem_id" field.
+func (atu *AnswerTruthUpdate) SetProblemID(i int) *AnswerTruthUpdate {
+	atu.mutation.SetProblemID(i)
+	return atu
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (atu *AnswerTruthUpdate) SetNillableProblemID(i *int) *AnswerTruthUpdate {
+	if i != nil {
+		atu.SetProblemID(*i)
+	}
+	return atu
+}
+
 // SetTruth sets the "truth" field.
 func (atu *AnswerTruthUpdate) SetTruth(b bool) *AnswerTruthUpdate {
 	atu.mutation.SetTruth(b)
@@ -41,13 +77,25 @@ func (atu *AnswerTruthUpdate) SetNillableTruth(b *bool) *AnswerTruthUpdate {
 	return atu
 }
 
+// SetProblem sets the "problem" edge to the Problem entity.
+func (atu *AnswerTruthUpdate) SetProblem(p *Problem) *AnswerTruthUpdate {
+	return atu.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerTruthMutation object of the builder.
 func (atu *AnswerTruthUpdate) Mutation() *AnswerTruthMutation {
 	return atu.mutation
 }
 
+// ClearProblem clears the "problem" edge to the Problem entity.
+func (atu *AnswerTruthUpdate) ClearProblem() *AnswerTruthUpdate {
+	atu.mutation.ClearProblem()
+	return atu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (atu *AnswerTruthUpdate) Save(ctx context.Context) (int, error) {
+	atu.defaults()
 	return withHooks(ctx, atu.sqlSave, atu.mutation, atu.hooks)
 }
 
@@ -73,7 +121,26 @@ func (atu *AnswerTruthUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (atu *AnswerTruthUpdate) defaults() {
+	if _, ok := atu.mutation.UpdatedAt(); !ok {
+		v := answertruth.UpdateDefaultUpdatedAt()
+		atu.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (atu *AnswerTruthUpdate) check() error {
+	if atu.mutation.ProblemCleared() && len(atu.mutation.ProblemIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "AnswerTruth.problem"`)
+	}
+	return nil
+}
+
 func (atu *AnswerTruthUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := atu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
 	if ps := atu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -82,8 +149,43 @@ func (atu *AnswerTruthUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := atu.mutation.CreatedAt(); ok {
+		_spec.SetField(answertruth.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := atu.mutation.UpdatedAt(); ok {
+		_spec.SetField(answertruth.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := atu.mutation.Truth(); ok {
 		_spec.SetField(answertruth.FieldTruth, field.TypeBool, value)
+	}
+	if atu.mutation.ProblemCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answertruth.ProblemTable,
+			Columns: []string{answertruth.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := atu.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answertruth.ProblemTable,
+			Columns: []string{answertruth.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, atu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -105,6 +207,40 @@ type AnswerTruthUpdateOne struct {
 	mutation *AnswerTruthMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (atuo *AnswerTruthUpdateOne) SetCreatedAt(t time.Time) *AnswerTruthUpdateOne {
+	atuo.mutation.SetCreatedAt(t)
+	return atuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (atuo *AnswerTruthUpdateOne) SetNillableCreatedAt(t *time.Time) *AnswerTruthUpdateOne {
+	if t != nil {
+		atuo.SetCreatedAt(*t)
+	}
+	return atuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (atuo *AnswerTruthUpdateOne) SetUpdatedAt(t time.Time) *AnswerTruthUpdateOne {
+	atuo.mutation.SetUpdatedAt(t)
+	return atuo
+}
+
+// SetProblemID sets the "problem_id" field.
+func (atuo *AnswerTruthUpdateOne) SetProblemID(i int) *AnswerTruthUpdateOne {
+	atuo.mutation.SetProblemID(i)
+	return atuo
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (atuo *AnswerTruthUpdateOne) SetNillableProblemID(i *int) *AnswerTruthUpdateOne {
+	if i != nil {
+		atuo.SetProblemID(*i)
+	}
+	return atuo
+}
+
 // SetTruth sets the "truth" field.
 func (atuo *AnswerTruthUpdateOne) SetTruth(b bool) *AnswerTruthUpdateOne {
 	atuo.mutation.SetTruth(b)
@@ -119,9 +255,20 @@ func (atuo *AnswerTruthUpdateOne) SetNillableTruth(b *bool) *AnswerTruthUpdateOn
 	return atuo
 }
 
+// SetProblem sets the "problem" edge to the Problem entity.
+func (atuo *AnswerTruthUpdateOne) SetProblem(p *Problem) *AnswerTruthUpdateOne {
+	return atuo.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerTruthMutation object of the builder.
 func (atuo *AnswerTruthUpdateOne) Mutation() *AnswerTruthMutation {
 	return atuo.mutation
+}
+
+// ClearProblem clears the "problem" edge to the Problem entity.
+func (atuo *AnswerTruthUpdateOne) ClearProblem() *AnswerTruthUpdateOne {
+	atuo.mutation.ClearProblem()
+	return atuo
 }
 
 // Where appends a list predicates to the AnswerTruthUpdate builder.
@@ -139,6 +286,7 @@ func (atuo *AnswerTruthUpdateOne) Select(field string, fields ...string) *Answer
 
 // Save executes the query and returns the updated AnswerTruth entity.
 func (atuo *AnswerTruthUpdateOne) Save(ctx context.Context) (*AnswerTruth, error) {
+	atuo.defaults()
 	return withHooks(ctx, atuo.sqlSave, atuo.mutation, atuo.hooks)
 }
 
@@ -164,7 +312,26 @@ func (atuo *AnswerTruthUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (atuo *AnswerTruthUpdateOne) defaults() {
+	if _, ok := atuo.mutation.UpdatedAt(); !ok {
+		v := answertruth.UpdateDefaultUpdatedAt()
+		atuo.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (atuo *AnswerTruthUpdateOne) check() error {
+	if atuo.mutation.ProblemCleared() && len(atuo.mutation.ProblemIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "AnswerTruth.problem"`)
+	}
+	return nil
+}
+
 func (atuo *AnswerTruthUpdateOne) sqlSave(ctx context.Context) (_node *AnswerTruth, err error) {
+	if err := atuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
 	id, ok := atuo.mutation.ID()
 	if !ok {
@@ -190,8 +357,43 @@ func (atuo *AnswerTruthUpdateOne) sqlSave(ctx context.Context) (_node *AnswerTru
 			}
 		}
 	}
+	if value, ok := atuo.mutation.CreatedAt(); ok {
+		_spec.SetField(answertruth.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := atuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(answertruth.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := atuo.mutation.Truth(); ok {
 		_spec.SetField(answertruth.FieldTruth, field.TypeBool, value)
+	}
+	if atuo.mutation.ProblemCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answertruth.ProblemTable,
+			Columns: []string{answertruth.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := atuo.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answertruth.ProblemTable,
+			Columns: []string{answertruth.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &AnswerTruth{config: atuo.config}
 	_spec.Assign = _node.assignValues

@@ -9,6 +9,7 @@ import (
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -25,6 +26,26 @@ type AnswerTypeUpdate struct {
 // Where appends a list predicates to the AnswerTypeUpdate builder.
 func (atu *AnswerTypeUpdate) Where(ps ...predicate.AnswerType) *AnswerTypeUpdate {
 	atu.mutation.Where(ps...)
+	return atu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (atu *AnswerTypeUpdate) SetCreatedAt(t time.Time) *AnswerTypeUpdate {
+	atu.mutation.SetCreatedAt(t)
+	return atu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (atu *AnswerTypeUpdate) SetNillableCreatedAt(t *time.Time) *AnswerTypeUpdate {
+	if t != nil {
+		atu.SetCreatedAt(*t)
+	}
+	return atu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (atu *AnswerTypeUpdate) SetUpdatedAt(t time.Time) *AnswerTypeUpdate {
+	atu.mutation.SetUpdatedAt(t)
 	return atu
 }
 
@@ -85,6 +106,7 @@ func (atu *AnswerTypeUpdate) RemoveProblems(p ...*Problem) *AnswerTypeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (atu *AnswerTypeUpdate) Save(ctx context.Context) (int, error) {
+	atu.defaults()
 	return withHooks(ctx, atu.sqlSave, atu.mutation, atu.hooks)
 }
 
@@ -110,6 +132,14 @@ func (atu *AnswerTypeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (atu *AnswerTypeUpdate) defaults() {
+	if _, ok := atu.mutation.UpdatedAt(); !ok {
+		v := answertype.UpdateDefaultUpdatedAt()
+		atu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (atu *AnswerTypeUpdate) check() error {
 	if v, ok := atu.mutation.Name(); ok {
@@ -131,6 +161,12 @@ func (atu *AnswerTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := atu.mutation.CreatedAt(); ok {
+		_spec.SetField(answertype.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := atu.mutation.UpdatedAt(); ok {
+		_spec.SetField(answertype.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := atu.mutation.Name(); ok {
 		_spec.SetField(answertype.FieldName, field.TypeString, value)
@@ -198,6 +234,26 @@ type AnswerTypeUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AnswerTypeMutation
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (atuo *AnswerTypeUpdateOne) SetCreatedAt(t time.Time) *AnswerTypeUpdateOne {
+	atuo.mutation.SetCreatedAt(t)
+	return atuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (atuo *AnswerTypeUpdateOne) SetNillableCreatedAt(t *time.Time) *AnswerTypeUpdateOne {
+	if t != nil {
+		atuo.SetCreatedAt(*t)
+	}
+	return atuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (atuo *AnswerTypeUpdateOne) SetUpdatedAt(t time.Time) *AnswerTypeUpdateOne {
+	atuo.mutation.SetUpdatedAt(t)
+	return atuo
 }
 
 // SetName sets the "name" field.
@@ -270,6 +326,7 @@ func (atuo *AnswerTypeUpdateOne) Select(field string, fields ...string) *AnswerT
 
 // Save executes the query and returns the updated AnswerType entity.
 func (atuo *AnswerTypeUpdateOne) Save(ctx context.Context) (*AnswerType, error) {
+	atuo.defaults()
 	return withHooks(ctx, atuo.sqlSave, atuo.mutation, atuo.hooks)
 }
 
@@ -292,6 +349,14 @@ func (atuo *AnswerTypeUpdateOne) Exec(ctx context.Context) error {
 func (atuo *AnswerTypeUpdateOne) ExecX(ctx context.Context) {
 	if err := atuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (atuo *AnswerTypeUpdateOne) defaults() {
+	if _, ok := atuo.mutation.UpdatedAt(); !ok {
+		v := answertype.UpdateDefaultUpdatedAt()
+		atuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -333,6 +398,12 @@ func (atuo *AnswerTypeUpdateOne) sqlSave(ctx context.Context) (_node *AnswerType
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := atuo.mutation.CreatedAt(); ok {
+		_spec.SetField(answertype.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := atuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(answertype.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := atuo.mutation.Name(); ok {
 		_spec.SetField(answertype.FieldName, field.TypeString, value)

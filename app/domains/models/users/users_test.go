@@ -6,6 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUserId_正常なUserId(t *testing.T) {
+	input := 1
+	userId, err := NewUserId(input)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 1, userId.Value())
+}
+
+func TestUserId_異常なUserId(t *testing.T) {
+	input := 0
+	userId, err := NewUserId(input)
+
+	assert.Error(t, err)
+	assert.Equal(t, 0, userId.Value())
+}
+
 func TestNewEmail_正常なメールアドレス(t *testing.T) {
 	input := "test@example.com"
 	email, err := NewEmail(input)

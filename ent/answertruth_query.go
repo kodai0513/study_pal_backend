@@ -8,6 +8,7 @@ import (
 	"math"
 	"study-pal-backend/ent/answertruth"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,11 +19,11 @@ import (
 // AnswerTruthQuery is the builder for querying AnswerTruth entities.
 type AnswerTruthQuery struct {
 	config
-	ctx        *QueryContext
-	order      []answertruth.OrderOption
-	inters     []Interceptor
-	predicates []predicate.AnswerTruth
-	withFKs    bool
+	ctx         *QueryContext
+	order       []answertruth.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.AnswerTruth
+	withProblem *ProblemQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +58,28 @@ func (atq *AnswerTruthQuery) Unique(unique bool) *AnswerTruthQuery {
 func (atq *AnswerTruthQuery) Order(o ...answertruth.OrderOption) *AnswerTruthQuery {
 	atq.order = append(atq.order, o...)
 	return atq
+}
+
+// QueryProblem chains the current query on the "problem" edge.
+func (atq *AnswerTruthQuery) QueryProblem() *ProblemQuery {
+	query := (&ProblemClient{config: atq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := atq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := atq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(answertruth.Table, answertruth.FieldID, selector),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, answertruth.ProblemTable, answertruth.ProblemColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first AnswerTruth entity from the query.
@@ -246,15 +269,27 @@ func (atq *AnswerTruthQuery) Clone() *AnswerTruthQuery {
 		return nil
 	}
 	return &AnswerTruthQuery{
-		config:     atq.config,
-		ctx:        atq.ctx.Clone(),
-		order:      append([]answertruth.OrderOption{}, atq.order...),
-		inters:     append([]Interceptor{}, atq.inters...),
-		predicates: append([]predicate.AnswerTruth{}, atq.predicates...),
+		config:      atq.config,
+		ctx:         atq.ctx.Clone(),
+		order:       append([]answertruth.OrderOption{}, atq.order...),
+		inters:      append([]Interceptor{}, atq.inters...),
+		predicates:  append([]predicate.AnswerTruth{}, atq.predicates...),
+		withProblem: atq.withProblem.Clone(),
 		// clone intermediate query.
 		sql:  atq.sql.Clone(),
 		path: atq.path,
 	}
+}
+
+// WithProblem tells the query-builder to eager-load the nodes that are connected to
+// the "problem" edge. The optional arguments are used to configure the query builder of the edge.
+func (atq *AnswerTruthQuery) WithProblem(opts ...func(*ProblemQuery)) *AnswerTruthQuery {
+	query := (&ProblemClient{config: atq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	atq.withProblem = query
+	return atq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -263,12 +298,12 @@ func (atq *AnswerTruthQuery) Clone() *AnswerTruthQuery {
 // Example:
 //
 //	var v []struct {
-//		Truth bool `json:"truth,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.AnswerTruth.Query().
-//		GroupBy(answertruth.FieldTruth).
+//		GroupBy(answertruth.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (atq *AnswerTruthQuery) GroupBy(field string, fields ...string) *AnswerTruthGroupBy {
@@ -286,11 +321,11 @@ func (atq *AnswerTruthQuery) GroupBy(field string, fields ...string) *AnswerTrut
 // Example:
 //
 //	var v []struct {
-//		Truth bool `json:"truth,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.AnswerTruth.Query().
-//		Select(answertruth.FieldTruth).
+//		Select(answertruth.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (atq *AnswerTruthQuery) Select(fields ...string) *AnswerTruthSelect {
 	atq.ctx.Fields = append(atq.ctx.Fields, fields...)
@@ -333,19 +368,19 @@ func (atq *AnswerTruthQuery) prepareQuery(ctx context.Context) error {
 
 func (atq *AnswerTruthQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AnswerTruth, error) {
 	var (
-		nodes   = []*AnswerTruth{}
-		withFKs = atq.withFKs
-		_spec   = atq.querySpec()
+		nodes       = []*AnswerTruth{}
+		_spec       = atq.querySpec()
+		loadedTypes = [1]bool{
+			atq.withProblem != nil,
+		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, answertruth.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*AnswerTruth).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &AnswerTruth{config: atq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -357,7 +392,43 @@ func (atq *AnswerTruthQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := atq.withProblem; query != nil {
+		if err := atq.loadProblem(ctx, query, nodes, nil,
+			func(n *AnswerTruth, e *Problem) { n.Edges.Problem = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (atq *AnswerTruthQuery) loadProblem(ctx context.Context, query *ProblemQuery, nodes []*AnswerTruth, init func(*AnswerTruth), assign func(*AnswerTruth, *Problem)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AnswerTruth)
+	for i := range nodes {
+		fk := nodes[i].ProblemID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(problem.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "problem_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (atq *AnswerTruthQuery) sqlCount(ctx context.Context) (int, error) {
@@ -384,6 +455,9 @@ func (atq *AnswerTruthQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != answertruth.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if atq.withProblem != nil {
+			_spec.Node.AddColumnOnce(answertruth.FieldProblemID)
 		}
 	}
 	if ps := atq.predicates; len(ps) > 0 {

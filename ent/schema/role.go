@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/role"
 	"study-pal-backend/ent/workbookmember"
@@ -14,6 +15,12 @@ import (
 // Role holds the schema definition for the Role entity.
 type Role struct {
 	ent.Schema
+}
+
+func (Role) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.TimeMixin{},
+	}
 }
 
 // Fields of the Role.

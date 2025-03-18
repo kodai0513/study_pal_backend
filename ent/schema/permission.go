@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/role"
 
 	"entgo.io/ent"
@@ -12,6 +13,12 @@ import (
 // Permission holds the schema definition for the Permission entity.
 type Permission struct {
 	ent.Schema
+}
+
+func (Permission) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.TimeMixin{},
+	}
 }
 
 // Fields of the Permission.

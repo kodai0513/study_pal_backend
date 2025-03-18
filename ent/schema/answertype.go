@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/problem"
 
 	"entgo.io/ent"
@@ -12,6 +13,12 @@ import (
 // AnswerType holds the schema definition for the AnswerType entity.
 type AnswerType struct {
 	ent.Schema
+}
+
+func (AnswerType) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.TimeMixin{},
+	}
 }
 
 // Fields of the AnswerType.

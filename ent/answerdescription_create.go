@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"study-pal-backend/ent/answerdescription"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -19,10 +21,49 @@ type AnswerDescriptionCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (adc *AnswerDescriptionCreate) SetCreatedAt(t time.Time) *AnswerDescriptionCreate {
+	adc.mutation.SetCreatedAt(t)
+	return adc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (adc *AnswerDescriptionCreate) SetNillableCreatedAt(t *time.Time) *AnswerDescriptionCreate {
+	if t != nil {
+		adc.SetCreatedAt(*t)
+	}
+	return adc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (adc *AnswerDescriptionCreate) SetUpdatedAt(t time.Time) *AnswerDescriptionCreate {
+	adc.mutation.SetUpdatedAt(t)
+	return adc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (adc *AnswerDescriptionCreate) SetNillableUpdatedAt(t *time.Time) *AnswerDescriptionCreate {
+	if t != nil {
+		adc.SetUpdatedAt(*t)
+	}
+	return adc
+}
+
 // SetName sets the "name" field.
 func (adc *AnswerDescriptionCreate) SetName(s string) *AnswerDescriptionCreate {
 	adc.mutation.SetName(s)
 	return adc
+}
+
+// SetProblemID sets the "problem_id" field.
+func (adc *AnswerDescriptionCreate) SetProblemID(i int) *AnswerDescriptionCreate {
+	adc.mutation.SetProblemID(i)
+	return adc
+}
+
+// SetProblem sets the "problem" edge to the Problem entity.
+func (adc *AnswerDescriptionCreate) SetProblem(p *Problem) *AnswerDescriptionCreate {
+	return adc.SetProblemID(p.ID)
 }
 
 // Mutation returns the AnswerDescriptionMutation object of the builder.
@@ -32,6 +73,7 @@ func (adc *AnswerDescriptionCreate) Mutation() *AnswerDescriptionMutation {
 
 // Save creates the AnswerDescription in the database.
 func (adc *AnswerDescriptionCreate) Save(ctx context.Context) (*AnswerDescription, error) {
+	adc.defaults()
 	return withHooks(ctx, adc.sqlSave, adc.mutation, adc.hooks)
 }
 
@@ -57,8 +99,26 @@ func (adc *AnswerDescriptionCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (adc *AnswerDescriptionCreate) defaults() {
+	if _, ok := adc.mutation.CreatedAt(); !ok {
+		v := answerdescription.DefaultCreatedAt()
+		adc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := adc.mutation.UpdatedAt(); !ok {
+		v := answerdescription.DefaultUpdatedAt()
+		adc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (adc *AnswerDescriptionCreate) check() error {
+	if _, ok := adc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AnswerDescription.created_at"`)}
+	}
+	if _, ok := adc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AnswerDescription.updated_at"`)}
+	}
 	if _, ok := adc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "AnswerDescription.name"`)}
 	}
@@ -66,6 +126,12 @@ func (adc *AnswerDescriptionCreate) check() error {
 		if err := answerdescription.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerDescription.name": %w`, err)}
 		}
+	}
+	if _, ok := adc.mutation.ProblemID(); !ok {
+		return &ValidationError{Name: "problem_id", err: errors.New(`ent: missing required field "AnswerDescription.problem_id"`)}
+	}
+	if len(adc.mutation.ProblemIDs()) == 0 {
+		return &ValidationError{Name: "problem", err: errors.New(`ent: missing required edge "AnswerDescription.problem"`)}
 	}
 	return nil
 }
@@ -93,9 +159,34 @@ func (adc *AnswerDescriptionCreate) createSpec() (*AnswerDescription, *sqlgraph.
 		_node = &AnswerDescription{config: adc.config}
 		_spec = sqlgraph.NewCreateSpec(answerdescription.Table, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeInt))
 	)
+	if value, ok := adc.mutation.CreatedAt(); ok {
+		_spec.SetField(answerdescription.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := adc.mutation.UpdatedAt(); ok {
+		_spec.SetField(answerdescription.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := adc.mutation.Name(); ok {
 		_spec.SetField(answerdescription.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if nodes := adc.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answerdescription.ProblemTable,
+			Columns: []string{answerdescription.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ProblemID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -118,6 +209,7 @@ func (adcb *AnswerDescriptionCreateBulk) Save(ctx context.Context) ([]*AnswerDes
 	for i := range adcb.builders {
 		func(i int, root context.Context) {
 			builder := adcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AnswerDescriptionMutation)
 				if !ok {

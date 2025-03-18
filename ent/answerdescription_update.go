@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"study-pal-backend/ent/answerdescription"
 	"study-pal-backend/ent/predicate"
+	"study-pal-backend/ent/problem"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +29,26 @@ func (adu *AnswerDescriptionUpdate) Where(ps ...predicate.AnswerDescription) *An
 	return adu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (adu *AnswerDescriptionUpdate) SetCreatedAt(t time.Time) *AnswerDescriptionUpdate {
+	adu.mutation.SetCreatedAt(t)
+	return adu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (adu *AnswerDescriptionUpdate) SetNillableCreatedAt(t *time.Time) *AnswerDescriptionUpdate {
+	if t != nil {
+		adu.SetCreatedAt(*t)
+	}
+	return adu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (adu *AnswerDescriptionUpdate) SetUpdatedAt(t time.Time) *AnswerDescriptionUpdate {
+	adu.mutation.SetUpdatedAt(t)
+	return adu
+}
+
 // SetName sets the "name" field.
 func (adu *AnswerDescriptionUpdate) SetName(s string) *AnswerDescriptionUpdate {
 	adu.mutation.SetName(s)
@@ -41,13 +63,39 @@ func (adu *AnswerDescriptionUpdate) SetNillableName(s *string) *AnswerDescriptio
 	return adu
 }
 
+// SetProblemID sets the "problem_id" field.
+func (adu *AnswerDescriptionUpdate) SetProblemID(i int) *AnswerDescriptionUpdate {
+	adu.mutation.SetProblemID(i)
+	return adu
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (adu *AnswerDescriptionUpdate) SetNillableProblemID(i *int) *AnswerDescriptionUpdate {
+	if i != nil {
+		adu.SetProblemID(*i)
+	}
+	return adu
+}
+
+// SetProblem sets the "problem" edge to the Problem entity.
+func (adu *AnswerDescriptionUpdate) SetProblem(p *Problem) *AnswerDescriptionUpdate {
+	return adu.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerDescriptionMutation object of the builder.
 func (adu *AnswerDescriptionUpdate) Mutation() *AnswerDescriptionMutation {
 	return adu.mutation
 }
 
+// ClearProblem clears the "problem" edge to the Problem entity.
+func (adu *AnswerDescriptionUpdate) ClearProblem() *AnswerDescriptionUpdate {
+	adu.mutation.ClearProblem()
+	return adu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (adu *AnswerDescriptionUpdate) Save(ctx context.Context) (int, error) {
+	adu.defaults()
 	return withHooks(ctx, adu.sqlSave, adu.mutation, adu.hooks)
 }
 
@@ -73,12 +121,23 @@ func (adu *AnswerDescriptionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (adu *AnswerDescriptionUpdate) defaults() {
+	if _, ok := adu.mutation.UpdatedAt(); !ok {
+		v := answerdescription.UpdateDefaultUpdatedAt()
+		adu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (adu *AnswerDescriptionUpdate) check() error {
 	if v, ok := adu.mutation.Name(); ok {
 		if err := answerdescription.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerDescription.name": %w`, err)}
 		}
+	}
+	if adu.mutation.ProblemCleared() && len(adu.mutation.ProblemIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "AnswerDescription.problem"`)
 	}
 	return nil
 }
@@ -95,8 +154,43 @@ func (adu *AnswerDescriptionUpdate) sqlSave(ctx context.Context) (n int, err err
 			}
 		}
 	}
+	if value, ok := adu.mutation.CreatedAt(); ok {
+		_spec.SetField(answerdescription.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := adu.mutation.UpdatedAt(); ok {
+		_spec.SetField(answerdescription.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := adu.mutation.Name(); ok {
 		_spec.SetField(answerdescription.FieldName, field.TypeString, value)
+	}
+	if adu.mutation.ProblemCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answerdescription.ProblemTable,
+			Columns: []string{answerdescription.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := adu.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answerdescription.ProblemTable,
+			Columns: []string{answerdescription.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, adu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -118,6 +212,26 @@ type AnswerDescriptionUpdateOne struct {
 	mutation *AnswerDescriptionMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (aduo *AnswerDescriptionUpdateOne) SetCreatedAt(t time.Time) *AnswerDescriptionUpdateOne {
+	aduo.mutation.SetCreatedAt(t)
+	return aduo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (aduo *AnswerDescriptionUpdateOne) SetNillableCreatedAt(t *time.Time) *AnswerDescriptionUpdateOne {
+	if t != nil {
+		aduo.SetCreatedAt(*t)
+	}
+	return aduo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (aduo *AnswerDescriptionUpdateOne) SetUpdatedAt(t time.Time) *AnswerDescriptionUpdateOne {
+	aduo.mutation.SetUpdatedAt(t)
+	return aduo
+}
+
 // SetName sets the "name" field.
 func (aduo *AnswerDescriptionUpdateOne) SetName(s string) *AnswerDescriptionUpdateOne {
 	aduo.mutation.SetName(s)
@@ -132,9 +246,34 @@ func (aduo *AnswerDescriptionUpdateOne) SetNillableName(s *string) *AnswerDescri
 	return aduo
 }
 
+// SetProblemID sets the "problem_id" field.
+func (aduo *AnswerDescriptionUpdateOne) SetProblemID(i int) *AnswerDescriptionUpdateOne {
+	aduo.mutation.SetProblemID(i)
+	return aduo
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (aduo *AnswerDescriptionUpdateOne) SetNillableProblemID(i *int) *AnswerDescriptionUpdateOne {
+	if i != nil {
+		aduo.SetProblemID(*i)
+	}
+	return aduo
+}
+
+// SetProblem sets the "problem" edge to the Problem entity.
+func (aduo *AnswerDescriptionUpdateOne) SetProblem(p *Problem) *AnswerDescriptionUpdateOne {
+	return aduo.SetProblemID(p.ID)
+}
+
 // Mutation returns the AnswerDescriptionMutation object of the builder.
 func (aduo *AnswerDescriptionUpdateOne) Mutation() *AnswerDescriptionMutation {
 	return aduo.mutation
+}
+
+// ClearProblem clears the "problem" edge to the Problem entity.
+func (aduo *AnswerDescriptionUpdateOne) ClearProblem() *AnswerDescriptionUpdateOne {
+	aduo.mutation.ClearProblem()
+	return aduo
 }
 
 // Where appends a list predicates to the AnswerDescriptionUpdate builder.
@@ -152,6 +291,7 @@ func (aduo *AnswerDescriptionUpdateOne) Select(field string, fields ...string) *
 
 // Save executes the query and returns the updated AnswerDescription entity.
 func (aduo *AnswerDescriptionUpdateOne) Save(ctx context.Context) (*AnswerDescription, error) {
+	aduo.defaults()
 	return withHooks(ctx, aduo.sqlSave, aduo.mutation, aduo.hooks)
 }
 
@@ -177,12 +317,23 @@ func (aduo *AnswerDescriptionUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (aduo *AnswerDescriptionUpdateOne) defaults() {
+	if _, ok := aduo.mutation.UpdatedAt(); !ok {
+		v := answerdescription.UpdateDefaultUpdatedAt()
+		aduo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (aduo *AnswerDescriptionUpdateOne) check() error {
 	if v, ok := aduo.mutation.Name(); ok {
 		if err := answerdescription.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerDescription.name": %w`, err)}
 		}
+	}
+	if aduo.mutation.ProblemCleared() && len(aduo.mutation.ProblemIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "AnswerDescription.problem"`)
 	}
 	return nil
 }
@@ -216,8 +367,43 @@ func (aduo *AnswerDescriptionUpdateOne) sqlSave(ctx context.Context) (_node *Ans
 			}
 		}
 	}
+	if value, ok := aduo.mutation.CreatedAt(); ok {
+		_spec.SetField(answerdescription.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := aduo.mutation.UpdatedAt(); ok {
+		_spec.SetField(answerdescription.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := aduo.mutation.Name(); ok {
 		_spec.SetField(answerdescription.FieldName, field.TypeString, value)
+	}
+	if aduo.mutation.ProblemCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answerdescription.ProblemTable,
+			Columns: []string{answerdescription.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := aduo.mutation.ProblemIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   answerdescription.ProblemTable,
+			Columns: []string{answerdescription.ProblemColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &AnswerDescription{config: aduo.config}
 	_spec.Assign = _node.assignValues

@@ -299,12 +299,12 @@ func (atq *AnswerTypeQuery) WithProblems(opts ...func(*ProblemQuery)) *AnswerTyp
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.AnswerType.Query().
-//		GroupBy(answertype.FieldName).
+//		GroupBy(answertype.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (atq *AnswerTypeQuery) GroupBy(field string, fields ...string) *AnswerTypeGroupBy {
@@ -322,11 +322,11 @@ func (atq *AnswerTypeQuery) GroupBy(field string, fields ...string) *AnswerTypeG
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.AnswerType.Query().
-//		Select(answertype.FieldName).
+//		Select(answertype.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (atq *AnswerTypeQuery) Select(fields ...string) *AnswerTypeSelect {
 	atq.ctx.Fields = append(atq.ctx.Fields, fields...)
@@ -413,7 +413,6 @@ func (atq *AnswerTypeQuery) loadProblems(ctx context.Context, query *ProblemQuer
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(problem.FieldAnswerTypeID)
 	}

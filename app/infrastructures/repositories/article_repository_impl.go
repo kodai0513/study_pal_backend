@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"study-pal-backend/app/domains/models/articles"
-	"study-pal-backend/app/domains/models/shared"
+	"study-pal-backend/app/domains/models/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/article"
@@ -25,7 +25,7 @@ func (a *ArticleRepositoryImpl) Save(article *articles.Article) {
 	a.client.Article.
 		Create().
 		SetDescription(article.Description()).
-		SetPostID(article.PostId()).
+		SetPostID(article.UserId()).
 		SaveX(a.ctx)
 }
 
@@ -36,25 +36,25 @@ func (a *ArticleRepositoryImpl) Update(article *articles.Article) {
 		SaveX(a.ctx)
 }
 
-func (a *ArticleRepositoryImpl) Delete(id shared.Id) {
+func (a *ArticleRepositoryImpl) Delete(id int) {
 	a.client.Article.
-		DeleteOneID(id.Value()).
+		DeleteOneID(id).
 		ExecX(a.ctx)
 }
 
-func (a *ArticleRepositoryImpl) FindById(id shared.Id) *articles.Article {
+func (a *ArticleRepositoryImpl) FindById(id int) *articles.Article {
 	result := a.client.Article.
 		Query().
-		Where(article.IDEQ(id.Value())).
+		Where(article.IDEQ(id)).
 		FirstX(a.ctx)
 
 	if result == nil {
 		return nil
 	}
 
-	resultId, _ := shared.NewId(result.ID)
+	resultId, _ := articles.NewArticleId(result.ID)
 	resultDescription, _ := articles.NewDescription(result.Description)
-	resultPostId, _ := articles.NewPostId(result.PostID)
+	userId, _ := users.NewUserId(result.PostID)
 
-	return articles.NewArticle(resultId, resultDescription, resultPostId)
+	return articles.NewArticle(resultId, resultDescription, userId)
 }

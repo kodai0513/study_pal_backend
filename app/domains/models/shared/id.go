@@ -18,5 +18,8 @@ func NewId(value int) (*Id, error) {
 }
 
 func (p *Id) Value() int {
+	if p == nil {
+		return 0
+	}
 	return p.value
 }

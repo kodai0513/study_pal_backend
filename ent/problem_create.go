@@ -11,6 +11,9 @@ import (
 	"study-pal-backend/ent/answertruth"
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookcategory"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -23,6 +26,34 @@ type ProblemCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (pc *ProblemCreate) SetCreatedAt(t time.Time) *ProblemCreate {
+	pc.mutation.SetCreatedAt(t)
+	return pc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pc *ProblemCreate) SetNillableCreatedAt(t *time.Time) *ProblemCreate {
+	if t != nil {
+		pc.SetCreatedAt(*t)
+	}
+	return pc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pc *ProblemCreate) SetUpdatedAt(t time.Time) *ProblemCreate {
+	pc.mutation.SetUpdatedAt(t)
+	return pc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pc *ProblemCreate) SetNillableUpdatedAt(t *time.Time) *ProblemCreate {
+	if t != nil {
+		pc.SetUpdatedAt(*t)
+	}
+	return pc
+}
+
 // SetAnswerTypeID sets the "answer_type_id" field.
 func (pc *ProblemCreate) SetAnswerTypeID(i int) *ProblemCreate {
 	pc.mutation.SetAnswerTypeID(i)
@@ -32,6 +63,18 @@ func (pc *ProblemCreate) SetAnswerTypeID(i int) *ProblemCreate {
 // SetStatement sets the "statement" field.
 func (pc *ProblemCreate) SetStatement(s string) *ProblemCreate {
 	pc.mutation.SetStatement(s)
+	return pc
+}
+
+// SetWorkbookID sets the "workbook_id" field.
+func (pc *ProblemCreate) SetWorkbookID(i int) *ProblemCreate {
+	pc.mutation.SetWorkbookID(i)
+	return pc
+}
+
+// SetWorkbookCategoryID sets the "workbook_category_id" field.
+func (pc *ProblemCreate) SetWorkbookCategoryID(i int) *ProblemCreate {
+	pc.mutation.SetWorkbookCategoryID(i)
 	return pc
 }
 
@@ -85,6 +128,16 @@ func (pc *ProblemCreate) AddAnswerTruths(a ...*AnswerTruth) *ProblemCreate {
 	return pc.AddAnswerTruthIDs(ids...)
 }
 
+// SetWorkbook sets the "workbook" edge to the Workbook entity.
+func (pc *ProblemCreate) SetWorkbook(w *Workbook) *ProblemCreate {
+	return pc.SetWorkbookID(w.ID)
+}
+
+// SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
+func (pc *ProblemCreate) SetWorkbookCategory(w *WorkbookCategory) *ProblemCreate {
+	return pc.SetWorkbookCategoryID(w.ID)
+}
+
 // Mutation returns the ProblemMutation object of the builder.
 func (pc *ProblemCreate) Mutation() *ProblemMutation {
 	return pc.mutation
@@ -92,6 +145,7 @@ func (pc *ProblemCreate) Mutation() *ProblemMutation {
 
 // Save creates the Problem in the database.
 func (pc *ProblemCreate) Save(ctx context.Context) (*Problem, error) {
+	pc.defaults()
 	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
 }
 
@@ -117,8 +171,26 @@ func (pc *ProblemCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pc *ProblemCreate) defaults() {
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		v := problem.DefaultCreatedAt()
+		pc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		v := problem.DefaultUpdatedAt()
+		pc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProblemCreate) check() error {
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Problem.created_at"`)}
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Problem.updated_at"`)}
+	}
 	if _, ok := pc.mutation.AnswerTypeID(); !ok {
 		return &ValidationError{Name: "answer_type_id", err: errors.New(`ent: missing required field "Problem.answer_type_id"`)}
 	}
@@ -130,8 +202,20 @@ func (pc *ProblemCreate) check() error {
 			return &ValidationError{Name: "statement", err: fmt.Errorf(`ent: validator failed for field "Problem.statement": %w`, err)}
 		}
 	}
+	if _, ok := pc.mutation.WorkbookID(); !ok {
+		return &ValidationError{Name: "workbook_id", err: errors.New(`ent: missing required field "Problem.workbook_id"`)}
+	}
+	if _, ok := pc.mutation.WorkbookCategoryID(); !ok {
+		return &ValidationError{Name: "workbook_category_id", err: errors.New(`ent: missing required field "Problem.workbook_category_id"`)}
+	}
 	if len(pc.mutation.AnswerTypeIDs()) == 0 {
 		return &ValidationError{Name: "answer_type", err: errors.New(`ent: missing required edge "Problem.answer_type"`)}
+	}
+	if len(pc.mutation.WorkbookIDs()) == 0 {
+		return &ValidationError{Name: "workbook", err: errors.New(`ent: missing required edge "Problem.workbook"`)}
+	}
+	if len(pc.mutation.WorkbookCategoryIDs()) == 0 {
+		return &ValidationError{Name: "workbook_category", err: errors.New(`ent: missing required edge "Problem.workbook_category"`)}
 	}
 	return nil
 }
@@ -159,6 +243,14 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 		_node = &Problem{config: pc.config}
 		_spec = sqlgraph.NewCreateSpec(problem.Table, sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt))
 	)
+	if value, ok := pc.mutation.CreatedAt(); ok {
+		_spec.SetField(problem.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := pc.mutation.UpdatedAt(); ok {
+		_spec.SetField(problem.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := pc.mutation.Statement(); ok {
 		_spec.SetField(problem.FieldStatement, field.TypeString, value)
 		_node.Statement = value
@@ -228,6 +320,40 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := pc.mutation.WorkbookIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookTable,
+			Columns: []string{problem.WorkbookColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.WorkbookID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.WorkbookCategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookCategoryTable,
+			Columns: []string{problem.WorkbookCategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.WorkbookCategoryID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -249,6 +375,7 @@ func (pcb *ProblemCreateBulk) Save(ctx context.Context) ([]*Problem, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProblemMutation)
 				if !ok {
