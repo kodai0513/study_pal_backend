@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerMultiChoicesCreate is the builder for creating a AnswerMultiChoices entity.
@@ -55,15 +56,21 @@ func (amcc *AnswerMultiChoicesCreate) SetName(s string) *AnswerMultiChoicesCreat
 	return amcc
 }
 
-// SetProblemID sets the "problem_id" field.
-func (amcc *AnswerMultiChoicesCreate) SetProblemID(i int) *AnswerMultiChoicesCreate {
-	amcc.mutation.SetProblemID(i)
-	return amcc
-}
-
 // SetIsCorrect sets the "is_correct" field.
 func (amcc *AnswerMultiChoicesCreate) SetIsCorrect(b bool) *AnswerMultiChoicesCreate {
 	amcc.mutation.SetIsCorrect(b)
+	return amcc
+}
+
+// SetProblemID sets the "problem_id" field.
+func (amcc *AnswerMultiChoicesCreate) SetProblemID(u uuid.UUID) *AnswerMultiChoicesCreate {
+	amcc.mutation.SetProblemID(u)
+	return amcc
+}
+
+// SetID sets the "id" field.
+func (amcc *AnswerMultiChoicesCreate) SetID(u uuid.UUID) *AnswerMultiChoicesCreate {
+	amcc.mutation.SetID(u)
 	return amcc
 }
 
@@ -133,11 +140,11 @@ func (amcc *AnswerMultiChoicesCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "AnswerMultiChoices.name": %w`, err)}
 		}
 	}
-	if _, ok := amcc.mutation.ProblemID(); !ok {
-		return &ValidationError{Name: "problem_id", err: errors.New(`ent: missing required field "AnswerMultiChoices.problem_id"`)}
-	}
 	if _, ok := amcc.mutation.IsCorrect(); !ok {
 		return &ValidationError{Name: "is_correct", err: errors.New(`ent: missing required field "AnswerMultiChoices.is_correct"`)}
+	}
+	if _, ok := amcc.mutation.ProblemID(); !ok {
+		return &ValidationError{Name: "problem_id", err: errors.New(`ent: missing required field "AnswerMultiChoices.problem_id"`)}
 	}
 	if len(amcc.mutation.ProblemIDs()) == 0 {
 		return &ValidationError{Name: "problem", err: errors.New(`ent: missing required edge "AnswerMultiChoices.problem"`)}
@@ -156,8 +163,13 @@ func (amcc *AnswerMultiChoicesCreate) sqlSave(ctx context.Context) (*AnswerMulti
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	amcc.mutation.id = &_node.ID
 	amcc.mutation.done = true
 	return _node, nil
@@ -166,8 +178,12 @@ func (amcc *AnswerMultiChoicesCreate) sqlSave(ctx context.Context) (*AnswerMulti
 func (amcc *AnswerMultiChoicesCreate) createSpec() (*AnswerMultiChoices, *sqlgraph.CreateSpec) {
 	var (
 		_node = &AnswerMultiChoices{config: amcc.config}
-		_spec = sqlgraph.NewCreateSpec(answermultichoices.Table, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(answermultichoices.Table, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeUUID))
 	)
+	if id, ok := amcc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := amcc.mutation.CreatedAt(); ok {
 		_spec.SetField(answermultichoices.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -192,7 +208,7 @@ func (amcc *AnswerMultiChoicesCreate) createSpec() (*AnswerMultiChoices, *sqlgra
 			Columns: []string{answermultichoices.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -249,10 +265,6 @@ func (amccb *AnswerMultiChoicesCreateBulk) Save(ctx context.Context) ([]*AnswerM
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -107,14 +108,14 @@ func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
 }
 
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
-func (uu *UserUpdate) AddArticleIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) AddArticleIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddArticleIDs(ids...)
 	return uu
 }
 
 // AddArticles adds the "articles" edges to the Article entity.
 func (uu *UserUpdate) AddArticles(a ...*Article) *UserUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -122,14 +123,14 @@ func (uu *UserUpdate) AddArticles(a ...*Article) *UserUpdate {
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (uu *UserUpdate) AddWorkbookMemberIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddWorkbookMemberIDs(ids...)
 	return uu
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (uu *UserUpdate) AddWorkbookMembers(w ...*WorkbookMember) *UserUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -148,14 +149,14 @@ func (uu *UserUpdate) ClearArticles() *UserUpdate {
 }
 
 // RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
-func (uu *UserUpdate) RemoveArticleIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) RemoveArticleIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.RemoveArticleIDs(ids...)
 	return uu
 }
 
 // RemoveArticles removes "articles" edges to Article entities.
 func (uu *UserUpdate) RemoveArticles(a ...*Article) *UserUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -169,14 +170,14 @@ func (uu *UserUpdate) ClearWorkbookMembers() *UserUpdate {
 }
 
 // RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
-func (uu *UserUpdate) RemoveWorkbookMemberIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.RemoveWorkbookMemberIDs(ids...)
 	return uu
 }
 
 // RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
 func (uu *UserUpdate) RemoveWorkbookMembers(w ...*WorkbookMember) *UserUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -248,7 +249,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := uu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -282,7 +283,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -295,7 +296,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -311,7 +312,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -327,7 +328,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -340,7 +341,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -356,7 +357,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -461,14 +462,14 @@ func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 }
 
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
-func (uuo *UserUpdateOne) AddArticleIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddArticleIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddArticleIDs(ids...)
 	return uuo
 }
 
 // AddArticles adds the "articles" edges to the Article entity.
 func (uuo *UserUpdateOne) AddArticles(a ...*Article) *UserUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -476,14 +477,14 @@ func (uuo *UserUpdateOne) AddArticles(a ...*Article) *UserUpdateOne {
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (uuo *UserUpdateOne) AddWorkbookMemberIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddWorkbookMemberIDs(ids...)
 	return uuo
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (uuo *UserUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *UserUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -502,14 +503,14 @@ func (uuo *UserUpdateOne) ClearArticles() *UserUpdateOne {
 }
 
 // RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
-func (uuo *UserUpdateOne) RemoveArticleIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveArticleIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.RemoveArticleIDs(ids...)
 	return uuo
 }
 
 // RemoveArticles removes "articles" edges to Article entities.
 func (uuo *UserUpdateOne) RemoveArticles(a ...*Article) *UserUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -523,14 +524,14 @@ func (uuo *UserUpdateOne) ClearWorkbookMembers() *UserUpdateOne {
 }
 
 // RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
-func (uuo *UserUpdateOne) RemoveWorkbookMemberIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.RemoveWorkbookMemberIDs(ids...)
 	return uuo
 }
 
 // RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
 func (uuo *UserUpdateOne) RemoveWorkbookMembers(w ...*WorkbookMember) *UserUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -615,7 +616,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if err := uuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	id, ok := uuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
@@ -666,7 +667,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -679,7 +680,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -695,7 +696,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -711,7 +712,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -724,7 +725,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -740,7 +741,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

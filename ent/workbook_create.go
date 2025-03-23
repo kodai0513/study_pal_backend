@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookCreate is the builder for creating a Workbook entity.
@@ -52,8 +53,8 @@ func (wc *WorkbookCreate) SetNillableUpdatedAt(t *time.Time) *WorkbookCreate {
 }
 
 // SetCreatedID sets the "created_id" field.
-func (wc *WorkbookCreate) SetCreatedID(i int) *WorkbookCreate {
-	wc.mutation.SetCreatedID(i)
+func (wc *WorkbookCreate) SetCreatedID(u uuid.UUID) *WorkbookCreate {
+	wc.mutation.SetCreatedID(u)
 	return wc
 }
 
@@ -63,21 +64,41 @@ func (wc *WorkbookCreate) SetDescription(s string) *WorkbookCreate {
 	return wc
 }
 
+// SetIsPublic sets the "is_public" field.
+func (wc *WorkbookCreate) SetIsPublic(b bool) *WorkbookCreate {
+	wc.mutation.SetIsPublic(b)
+	return wc
+}
+
+// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
+func (wc *WorkbookCreate) SetNillableIsPublic(b *bool) *WorkbookCreate {
+	if b != nil {
+		wc.SetIsPublic(*b)
+	}
+	return wc
+}
+
 // SetTitle sets the "title" field.
 func (wc *WorkbookCreate) SetTitle(s string) *WorkbookCreate {
 	wc.mutation.SetTitle(s)
 	return wc
 }
 
+// SetID sets the "id" field.
+func (wc *WorkbookCreate) SetID(u uuid.UUID) *WorkbookCreate {
+	wc.mutation.SetID(u)
+	return wc
+}
+
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wc *WorkbookCreate) AddProblemIDs(ids ...int) *WorkbookCreate {
+func (wc *WorkbookCreate) AddProblemIDs(ids ...uuid.UUID) *WorkbookCreate {
 	wc.mutation.AddProblemIDs(ids...)
 	return wc
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (wc *WorkbookCreate) AddProblems(p ...*Problem) *WorkbookCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -85,14 +106,14 @@ func (wc *WorkbookCreate) AddProblems(p ...*Problem) *WorkbookCreate {
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
-func (wc *WorkbookCreate) AddWorkbookCategoryIDs(ids ...int) *WorkbookCreate {
+func (wc *WorkbookCreate) AddWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookCreate {
 	wc.mutation.AddWorkbookCategoryIDs(ids...)
 	return wc
 }
 
 // AddWorkbookCategories adds the "workbook_categories" edges to the WorkbookCategory entity.
 func (wc *WorkbookCreate) AddWorkbookCategories(w ...*WorkbookCategory) *WorkbookCreate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -100,14 +121,14 @@ func (wc *WorkbookCreate) AddWorkbookCategories(w ...*WorkbookCategory) *Workboo
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (wc *WorkbookCreate) AddWorkbookMemberIDs(ids ...int) *WorkbookCreate {
+func (wc *WorkbookCreate) AddWorkbookMemberIDs(ids ...uuid.UUID) *WorkbookCreate {
 	wc.mutation.AddWorkbookMemberIDs(ids...)
 	return wc
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (wc *WorkbookCreate) AddWorkbookMembers(w ...*WorkbookMember) *WorkbookCreate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -157,6 +178,10 @@ func (wc *WorkbookCreate) defaults() {
 		v := workbook.DefaultUpdatedAt()
 		wc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := wc.mutation.IsPublic(); !ok {
+		v := workbook.DefaultIsPublic
+		wc.mutation.SetIsPublic(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -177,6 +202,9 @@ func (wc *WorkbookCreate) check() error {
 		if err := workbook.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Workbook.description": %w`, err)}
 		}
+	}
+	if _, ok := wc.mutation.IsPublic(); !ok {
+		return &ValidationError{Name: "is_public", err: errors.New(`ent: missing required field "Workbook.is_public"`)}
 	}
 	if _, ok := wc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Workbook.title"`)}
@@ -200,8 +228,13 @@ func (wc *WorkbookCreate) sqlSave(ctx context.Context) (*Workbook, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	wc.mutation.id = &_node.ID
 	wc.mutation.done = true
 	return _node, nil
@@ -210,8 +243,12 @@ func (wc *WorkbookCreate) sqlSave(ctx context.Context) (*Workbook, error) {
 func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Workbook{config: wc.config}
-		_spec = sqlgraph.NewCreateSpec(workbook.Table, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(workbook.Table, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID))
 	)
+	if id, ok := wc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := wc.mutation.CreatedAt(); ok {
 		_spec.SetField(workbook.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -221,12 +258,16 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 		_node.UpdatedAt = value
 	}
 	if value, ok := wc.mutation.CreatedID(); ok {
-		_spec.SetField(workbook.FieldCreatedID, field.TypeInt, value)
+		_spec.SetField(workbook.FieldCreatedID, field.TypeUUID, value)
 		_node.CreatedID = value
 	}
 	if value, ok := wc.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
 		_node.Description = &value
+	}
+	if value, ok := wc.mutation.IsPublic(); ok {
+		_spec.SetField(workbook.FieldIsPublic, field.TypeBool, value)
+		_node.IsPublic = value
 	}
 	if value, ok := wc.mutation.Title(); ok {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
@@ -240,7 +281,7 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -256,7 +297,7 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -272,7 +313,7 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -328,10 +369,6 @@ func (wcb *WorkbookCreateBulk) Save(ctx context.Context) ([]*Workbook, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

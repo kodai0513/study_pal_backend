@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookMember holds the schema definition for the WorkbookMember entity.
@@ -18,6 +19,7 @@ type WorkbookMember struct {
 
 func (WorkbookMember) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }
@@ -25,9 +27,9 @@ func (WorkbookMember) Mixin() []ent.Mixin {
 // Fields of the WorkbookMember.
 func (WorkbookMember) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int(role.Label + "_id"),
-		field.Int("member_id"),
-		field.Int(workbook.Label + "_id"),
+		field.UUID(role.Label+"_id", uuid.UUID{}).Unique(),
+		field.UUID("member_id", uuid.UUID{}).Unique(),
+		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
 	}
 }
 

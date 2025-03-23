@@ -15,6 +15,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookcategoryclassification"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 )
@@ -24,16 +25,16 @@ import (
 // to their package variables.
 func init() {
 	answerdescriptionMixin := schema.AnswerDescription{}.Mixin()
-	answerdescriptionMixinFields0 := answerdescriptionMixin[0].Fields()
-	_ = answerdescriptionMixinFields0
+	answerdescriptionMixinFields1 := answerdescriptionMixin[1].Fields()
+	_ = answerdescriptionMixinFields1
 	answerdescriptionFields := schema.AnswerDescription{}.Fields()
 	_ = answerdescriptionFields
 	// answerdescriptionDescCreatedAt is the schema descriptor for created_at field.
-	answerdescriptionDescCreatedAt := answerdescriptionMixinFields0[0].Descriptor()
+	answerdescriptionDescCreatedAt := answerdescriptionMixinFields1[0].Descriptor()
 	// answerdescription.DefaultCreatedAt holds the default value on creation for the created_at field.
 	answerdescription.DefaultCreatedAt = answerdescriptionDescCreatedAt.Default.(func() time.Time)
 	// answerdescriptionDescUpdatedAt is the schema descriptor for updated_at field.
-	answerdescriptionDescUpdatedAt := answerdescriptionMixinFields0[1].Descriptor()
+	answerdescriptionDescUpdatedAt := answerdescriptionMixinFields1[1].Descriptor()
 	// answerdescription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	answerdescription.DefaultUpdatedAt = answerdescriptionDescUpdatedAt.Default.(func() time.Time)
 	// answerdescription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -57,16 +58,16 @@ func init() {
 		}
 	}()
 	answermultichoicesMixin := schema.AnswerMultiChoices{}.Mixin()
-	answermultichoicesMixinFields0 := answermultichoicesMixin[0].Fields()
-	_ = answermultichoicesMixinFields0
+	answermultichoicesMixinFields1 := answermultichoicesMixin[1].Fields()
+	_ = answermultichoicesMixinFields1
 	answermultichoicesFields := schema.AnswerMultiChoices{}.Fields()
 	_ = answermultichoicesFields
 	// answermultichoicesDescCreatedAt is the schema descriptor for created_at field.
-	answermultichoicesDescCreatedAt := answermultichoicesMixinFields0[0].Descriptor()
+	answermultichoicesDescCreatedAt := answermultichoicesMixinFields1[0].Descriptor()
 	// answermultichoices.DefaultCreatedAt holds the default value on creation for the created_at field.
 	answermultichoices.DefaultCreatedAt = answermultichoicesDescCreatedAt.Default.(func() time.Time)
 	// answermultichoicesDescUpdatedAt is the schema descriptor for updated_at field.
-	answermultichoicesDescUpdatedAt := answermultichoicesMixinFields0[1].Descriptor()
+	answermultichoicesDescUpdatedAt := answermultichoicesMixinFields1[1].Descriptor()
 	// answermultichoices.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	answermultichoices.DefaultUpdatedAt = answermultichoicesDescUpdatedAt.Default.(func() time.Time)
 	// answermultichoices.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -90,31 +91,31 @@ func init() {
 		}
 	}()
 	answertruthMixin := schema.AnswerTruth{}.Mixin()
-	answertruthMixinFields0 := answertruthMixin[0].Fields()
-	_ = answertruthMixinFields0
+	answertruthMixinFields1 := answertruthMixin[1].Fields()
+	_ = answertruthMixinFields1
 	answertruthFields := schema.AnswerTruth{}.Fields()
 	_ = answertruthFields
 	// answertruthDescCreatedAt is the schema descriptor for created_at field.
-	answertruthDescCreatedAt := answertruthMixinFields0[0].Descriptor()
+	answertruthDescCreatedAt := answertruthMixinFields1[0].Descriptor()
 	// answertruth.DefaultCreatedAt holds the default value on creation for the created_at field.
 	answertruth.DefaultCreatedAt = answertruthDescCreatedAt.Default.(func() time.Time)
 	// answertruthDescUpdatedAt is the schema descriptor for updated_at field.
-	answertruthDescUpdatedAt := answertruthMixinFields0[1].Descriptor()
+	answertruthDescUpdatedAt := answertruthMixinFields1[1].Descriptor()
 	// answertruth.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	answertruth.DefaultUpdatedAt = answertruthDescUpdatedAt.Default.(func() time.Time)
 	// answertruth.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	answertruth.UpdateDefaultUpdatedAt = answertruthDescUpdatedAt.UpdateDefault.(func() time.Time)
 	answertypeMixin := schema.AnswerType{}.Mixin()
-	answertypeMixinFields0 := answertypeMixin[0].Fields()
-	_ = answertypeMixinFields0
+	answertypeMixinFields1 := answertypeMixin[1].Fields()
+	_ = answertypeMixinFields1
 	answertypeFields := schema.AnswerType{}.Fields()
 	_ = answertypeFields
 	// answertypeDescCreatedAt is the schema descriptor for created_at field.
-	answertypeDescCreatedAt := answertypeMixinFields0[0].Descriptor()
+	answertypeDescCreatedAt := answertypeMixinFields1[0].Descriptor()
 	// answertype.DefaultCreatedAt holds the default value on creation for the created_at field.
 	answertype.DefaultCreatedAt = answertypeDescCreatedAt.Default.(func() time.Time)
 	// answertypeDescUpdatedAt is the schema descriptor for updated_at field.
-	answertypeDescUpdatedAt := answertypeMixinFields0[1].Descriptor()
+	answertypeDescUpdatedAt := answertypeMixinFields1[1].Descriptor()
 	// answertype.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	answertype.DefaultUpdatedAt = answertypeDescUpdatedAt.Default.(func() time.Time)
 	// answertype.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -138,22 +139,22 @@ func init() {
 		}
 	}()
 	articleMixin := schema.Article{}.Mixin()
-	articleMixinFields0 := articleMixin[0].Fields()
-	_ = articleMixinFields0
+	articleMixinFields1 := articleMixin[1].Fields()
+	_ = articleMixinFields1
 	articleFields := schema.Article{}.Fields()
 	_ = articleFields
 	// articleDescCreatedAt is the schema descriptor for created_at field.
-	articleDescCreatedAt := articleMixinFields0[0].Descriptor()
+	articleDescCreatedAt := articleMixinFields1[0].Descriptor()
 	// article.DefaultCreatedAt holds the default value on creation for the created_at field.
 	article.DefaultCreatedAt = articleDescCreatedAt.Default.(func() time.Time)
 	// articleDescUpdatedAt is the schema descriptor for updated_at field.
-	articleDescUpdatedAt := articleMixinFields0[1].Descriptor()
+	articleDescUpdatedAt := articleMixinFields1[1].Descriptor()
 	// article.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	article.DefaultUpdatedAt = articleDescUpdatedAt.Default.(func() time.Time)
 	// article.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	article.UpdateDefaultUpdatedAt = articleDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// articleDescDescription is the schema descriptor for description field.
-	articleDescDescription := articleFields[0].Descriptor()
+	articleDescDescription := articleFields[1].Descriptor()
 	// article.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	article.DescriptionValidator = func() func(string) error {
 		validators := articleDescDescription.Validators
@@ -171,16 +172,16 @@ func init() {
 		}
 	}()
 	permissionMixin := schema.Permission{}.Mixin()
-	permissionMixinFields0 := permissionMixin[0].Fields()
-	_ = permissionMixinFields0
+	permissionMixinFields1 := permissionMixin[1].Fields()
+	_ = permissionMixinFields1
 	permissionFields := schema.Permission{}.Fields()
 	_ = permissionFields
 	// permissionDescCreatedAt is the schema descriptor for created_at field.
-	permissionDescCreatedAt := permissionMixinFields0[0].Descriptor()
+	permissionDescCreatedAt := permissionMixinFields1[0].Descriptor()
 	// permission.DefaultCreatedAt holds the default value on creation for the created_at field.
 	permission.DefaultCreatedAt = permissionDescCreatedAt.Default.(func() time.Time)
 	// permissionDescUpdatedAt is the schema descriptor for updated_at field.
-	permissionDescUpdatedAt := permissionMixinFields0[1].Descriptor()
+	permissionDescUpdatedAt := permissionMixinFields1[1].Descriptor()
 	// permission.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	permission.DefaultUpdatedAt = permissionDescUpdatedAt.Default.(func() time.Time)
 	// permission.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -204,16 +205,16 @@ func init() {
 		}
 	}()
 	problemMixin := schema.Problem{}.Mixin()
-	problemMixinFields0 := problemMixin[0].Fields()
-	_ = problemMixinFields0
+	problemMixinFields1 := problemMixin[1].Fields()
+	_ = problemMixinFields1
 	problemFields := schema.Problem{}.Fields()
 	_ = problemFields
 	// problemDescCreatedAt is the schema descriptor for created_at field.
-	problemDescCreatedAt := problemMixinFields0[0].Descriptor()
+	problemDescCreatedAt := problemMixinFields1[0].Descriptor()
 	// problem.DefaultCreatedAt holds the default value on creation for the created_at field.
 	problem.DefaultCreatedAt = problemDescCreatedAt.Default.(func() time.Time)
 	// problemDescUpdatedAt is the schema descriptor for updated_at field.
-	problemDescUpdatedAt := problemMixinFields0[1].Descriptor()
+	problemDescUpdatedAt := problemMixinFields1[1].Descriptor()
 	// problem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	problem.DefaultUpdatedAt = problemDescUpdatedAt.Default.(func() time.Time)
 	// problem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -237,16 +238,16 @@ func init() {
 		}
 	}()
 	roleMixin := schema.Role{}.Mixin()
-	roleMixinFields0 := roleMixin[0].Fields()
-	_ = roleMixinFields0
+	roleMixinFields1 := roleMixin[1].Fields()
+	_ = roleMixinFields1
 	roleFields := schema.Role{}.Fields()
 	_ = roleFields
 	// roleDescCreatedAt is the schema descriptor for created_at field.
-	roleDescCreatedAt := roleMixinFields0[0].Descriptor()
+	roleDescCreatedAt := roleMixinFields1[0].Descriptor()
 	// role.DefaultCreatedAt holds the default value on creation for the created_at field.
 	role.DefaultCreatedAt = roleDescCreatedAt.Default.(func() time.Time)
 	// roleDescUpdatedAt is the schema descriptor for updated_at field.
-	roleDescUpdatedAt := roleMixinFields0[1].Descriptor()
+	roleDescUpdatedAt := roleMixinFields1[1].Descriptor()
 	// role.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	role.DefaultUpdatedAt = roleDescUpdatedAt.Default.(func() time.Time)
 	// role.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -270,16 +271,16 @@ func init() {
 		}
 	}()
 	userMixin := schema.User{}.Mixin()
-	userMixinFields0 := userMixin[0].Fields()
-	_ = userMixinFields0
+	userMixinFields1 := userMixin[1].Fields()
+	_ = userMixinFields1
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userMixinFields0[0].Descriptor()
+	userDescCreatedAt := userMixinFields1[0].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userMixinFields0[1].Descriptor()
+	userDescUpdatedAt := userMixinFields1[1].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -343,16 +344,16 @@ func init() {
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	workbookMixin := schema.Workbook{}.Mixin()
-	workbookMixinFields0 := workbookMixin[0].Fields()
-	_ = workbookMixinFields0
+	workbookMixinFields1 := workbookMixin[1].Fields()
+	_ = workbookMixinFields1
 	workbookFields := schema.Workbook{}.Fields()
 	_ = workbookFields
 	// workbookDescCreatedAt is the schema descriptor for created_at field.
-	workbookDescCreatedAt := workbookMixinFields0[0].Descriptor()
+	workbookDescCreatedAt := workbookMixinFields1[0].Descriptor()
 	// workbook.DefaultCreatedAt holds the default value on creation for the created_at field.
 	workbook.DefaultCreatedAt = workbookDescCreatedAt.Default.(func() time.Time)
 	// workbookDescUpdatedAt is the schema descriptor for updated_at field.
-	workbookDescUpdatedAt := workbookMixinFields0[1].Descriptor()
+	workbookDescUpdatedAt := workbookMixinFields1[1].Descriptor()
 	// workbook.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	workbook.DefaultUpdatedAt = workbookDescUpdatedAt.Default.(func() time.Time)
 	// workbook.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -361,8 +362,12 @@ func init() {
 	workbookDescDescription := workbookFields[1].Descriptor()
 	// workbook.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	workbook.DescriptionValidator = workbookDescDescription.Validators[0].(func(string) error)
+	// workbookDescIsPublic is the schema descriptor for is_public field.
+	workbookDescIsPublic := workbookFields[2].Descriptor()
+	// workbook.DefaultIsPublic holds the default value on creation for the is_public field.
+	workbook.DefaultIsPublic = workbookDescIsPublic.Default.(bool)
 	// workbookDescTitle is the schema descriptor for title field.
-	workbookDescTitle := workbookFields[2].Descriptor()
+	workbookDescTitle := workbookFields[3].Descriptor()
 	// workbook.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	workbook.TitleValidator = func() func(string) error {
 		validators := workbookDescTitle.Validators
@@ -380,16 +385,16 @@ func init() {
 		}
 	}()
 	workbookcategoryMixin := schema.WorkbookCategory{}.Mixin()
-	workbookcategoryMixinFields0 := workbookcategoryMixin[0].Fields()
-	_ = workbookcategoryMixinFields0
+	workbookcategoryMixinFields1 := workbookcategoryMixin[1].Fields()
+	_ = workbookcategoryMixinFields1
 	workbookcategoryFields := schema.WorkbookCategory{}.Fields()
 	_ = workbookcategoryFields
 	// workbookcategoryDescCreatedAt is the schema descriptor for created_at field.
-	workbookcategoryDescCreatedAt := workbookcategoryMixinFields0[0].Descriptor()
+	workbookcategoryDescCreatedAt := workbookcategoryMixinFields1[0].Descriptor()
 	// workbookcategory.DefaultCreatedAt holds the default value on creation for the created_at field.
 	workbookcategory.DefaultCreatedAt = workbookcategoryDescCreatedAt.Default.(func() time.Time)
 	// workbookcategoryDescUpdatedAt is the schema descriptor for updated_at field.
-	workbookcategoryDescUpdatedAt := workbookcategoryMixinFields0[1].Descriptor()
+	workbookcategoryDescUpdatedAt := workbookcategoryMixinFields1[1].Descriptor()
 	// workbookcategory.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	workbookcategory.DefaultUpdatedAt = workbookcategoryDescUpdatedAt.Default.(func() time.Time)
 	// workbookcategory.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -412,17 +417,50 @@ func init() {
 			return nil
 		}
 	}()
+	workbookcategoryclassificationMixin := schema.WorkbookCategoryClassification{}.Mixin()
+	workbookcategoryclassificationMixinFields1 := workbookcategoryclassificationMixin[1].Fields()
+	_ = workbookcategoryclassificationMixinFields1
+	workbookcategoryclassificationFields := schema.WorkbookCategoryClassification{}.Fields()
+	_ = workbookcategoryclassificationFields
+	// workbookcategoryclassificationDescCreatedAt is the schema descriptor for created_at field.
+	workbookcategoryclassificationDescCreatedAt := workbookcategoryclassificationMixinFields1[0].Descriptor()
+	// workbookcategoryclassification.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbookcategoryclassification.DefaultCreatedAt = workbookcategoryclassificationDescCreatedAt.Default.(func() time.Time)
+	// workbookcategoryclassificationDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookcategoryclassificationDescUpdatedAt := workbookcategoryclassificationMixinFields1[1].Descriptor()
+	// workbookcategoryclassification.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbookcategoryclassification.DefaultUpdatedAt = workbookcategoryclassificationDescUpdatedAt.Default.(func() time.Time)
+	// workbookcategoryclassification.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbookcategoryclassification.UpdateDefaultUpdatedAt = workbookcategoryclassificationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// workbookcategoryclassificationDescName is the schema descriptor for name field.
+	workbookcategoryclassificationDescName := workbookcategoryclassificationFields[0].Descriptor()
+	// workbookcategoryclassification.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	workbookcategoryclassification.NameValidator = func() func(string) error {
+		validators := workbookcategoryclassificationDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	workbookmemberMixin := schema.WorkbookMember{}.Mixin()
-	workbookmemberMixinFields0 := workbookmemberMixin[0].Fields()
-	_ = workbookmemberMixinFields0
+	workbookmemberMixinFields1 := workbookmemberMixin[1].Fields()
+	_ = workbookmemberMixinFields1
 	workbookmemberFields := schema.WorkbookMember{}.Fields()
 	_ = workbookmemberFields
 	// workbookmemberDescCreatedAt is the schema descriptor for created_at field.
-	workbookmemberDescCreatedAt := workbookmemberMixinFields0[0].Descriptor()
+	workbookmemberDescCreatedAt := workbookmemberMixinFields1[0].Descriptor()
 	// workbookmember.DefaultCreatedAt holds the default value on creation for the created_at field.
 	workbookmember.DefaultCreatedAt = workbookmemberDescCreatedAt.Default.(func() time.Time)
 	// workbookmemberDescUpdatedAt is the schema descriptor for updated_at field.
-	workbookmemberDescUpdatedAt := workbookmemberMixinFields0[1].Descriptor()
+	workbookmemberDescUpdatedAt := workbookmemberMixinFields1[1].Descriptor()
 	// workbookmember.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	workbookmember.DefaultUpdatedAt = workbookmemberDescUpdatedAt.Default.(func() time.Time)
 	// workbookmember.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

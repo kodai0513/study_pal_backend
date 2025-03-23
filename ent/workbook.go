@@ -10,21 +10,24 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Workbook is the model entity for the Workbook schema.
 type Workbook struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedID holds the value of the "created_id" field.
-	CreatedID int `json:"created_id,omitempty"`
+	CreatedID uuid.UUID `json:"created_id,omitempty"`
 	// Description holds the value of the "description" field.
 	Description *string `json:"description,omitempty"`
+	// IsPublic holds the value of the "is_public" field.
+	IsPublic bool `json:"is_public,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -78,12 +81,14 @@ func (*Workbook) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case workbook.FieldID, workbook.FieldCreatedID:
-			values[i] = new(sql.NullInt64)
+		case workbook.FieldIsPublic:
+			values[i] = new(sql.NullBool)
 		case workbook.FieldDescription, workbook.FieldTitle:
 			values[i] = new(sql.NullString)
 		case workbook.FieldCreatedAt, workbook.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case workbook.FieldID, workbook.FieldCreatedID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -100,11 +105,11 @@ func (w *Workbook) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case workbook.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				w.ID = *value
 			}
-			w.ID = int(value.Int64)
 		case workbook.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -118,10 +123,10 @@ func (w *Workbook) assignValues(columns []string, values []any) error {
 				w.UpdatedAt = value.Time
 			}
 		case workbook.FieldCreatedID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field created_id", values[i])
-			} else if value.Valid {
-				w.CreatedID = int(value.Int64)
+			} else if value != nil {
+				w.CreatedID = *value
 			}
 		case workbook.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -129,6 +134,12 @@ func (w *Workbook) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				w.Description = new(string)
 				*w.Description = value.String
+			}
+		case workbook.FieldIsPublic:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_public", values[i])
+			} else if value.Valid {
+				w.IsPublic = value.Bool
 			}
 		case workbook.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -200,6 +211,9 @@ func (w *Workbook) String() string {
 		builder.WriteString("description=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("is_public=")
+	builder.WriteString(fmt.Sprintf("%v", w.IsPublic))
 	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(w.Title)

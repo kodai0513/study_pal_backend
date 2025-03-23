@@ -40,7 +40,7 @@ func (wcd *WorkbookCategoryDelete) ExecX(ctx context.Context) int {
 }
 
 func (wcd *WorkbookCategoryDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(workbookcategory.Table, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(workbookcategory.Table, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID))
 	if ps := wcd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

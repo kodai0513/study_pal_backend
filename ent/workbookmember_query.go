@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookMemberQuery is the builder for querying WorkbookMember entities.
@@ -154,8 +155,8 @@ func (wmq *WorkbookMemberQuery) FirstX(ctx context.Context) *WorkbookMember {
 
 // FirstID returns the first WorkbookMember ID from the query.
 // Returns a *NotFoundError when no WorkbookMember ID was found.
-func (wmq *WorkbookMemberQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (wmq *WorkbookMemberQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wmq.Limit(1).IDs(setContextOp(ctx, wmq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -167,7 +168,7 @@ func (wmq *WorkbookMemberQuery) FirstID(ctx context.Context) (id int, err error)
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (wmq *WorkbookMemberQuery) FirstIDX(ctx context.Context) int {
+func (wmq *WorkbookMemberQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := wmq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -205,8 +206,8 @@ func (wmq *WorkbookMemberQuery) OnlyX(ctx context.Context) *WorkbookMember {
 // OnlyID is like Only, but returns the only WorkbookMember ID in the query.
 // Returns a *NotSingularError when more than one WorkbookMember ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (wmq *WorkbookMemberQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (wmq *WorkbookMemberQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wmq.Limit(2).IDs(setContextOp(ctx, wmq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -222,7 +223,7 @@ func (wmq *WorkbookMemberQuery) OnlyID(ctx context.Context) (id int, err error) 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (wmq *WorkbookMemberQuery) OnlyIDX(ctx context.Context) int {
+func (wmq *WorkbookMemberQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := wmq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -250,7 +251,7 @@ func (wmq *WorkbookMemberQuery) AllX(ctx context.Context) []*WorkbookMember {
 }
 
 // IDs executes the query and returns a list of WorkbookMember IDs.
-func (wmq *WorkbookMemberQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (wmq *WorkbookMemberQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if wmq.ctx.Unique == nil && wmq.path != nil {
 		wmq.Unique(true)
 	}
@@ -262,7 +263,7 @@ func (wmq *WorkbookMemberQuery) IDs(ctx context.Context) (ids []int, err error) 
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (wmq *WorkbookMemberQuery) IDsX(ctx context.Context) []int {
+func (wmq *WorkbookMemberQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := wmq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -488,8 +489,8 @@ func (wmq *WorkbookMemberQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 }
 
 func (wmq *WorkbookMemberQuery) loadRole(ctx context.Context, query *RoleQuery, nodes []*WorkbookMember, init func(*WorkbookMember), assign func(*WorkbookMember, *Role)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*WorkbookMember)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*WorkbookMember)
 	for i := range nodes {
 		fk := nodes[i].RoleID
 		if _, ok := nodeids[fk]; !ok {
@@ -517,8 +518,8 @@ func (wmq *WorkbookMemberQuery) loadRole(ctx context.Context, query *RoleQuery, 
 	return nil
 }
 func (wmq *WorkbookMemberQuery) loadMember(ctx context.Context, query *UserQuery, nodes []*WorkbookMember, init func(*WorkbookMember), assign func(*WorkbookMember, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*WorkbookMember)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*WorkbookMember)
 	for i := range nodes {
 		fk := nodes[i].MemberID
 		if _, ok := nodeids[fk]; !ok {
@@ -546,8 +547,8 @@ func (wmq *WorkbookMemberQuery) loadMember(ctx context.Context, query *UserQuery
 	return nil
 }
 func (wmq *WorkbookMemberQuery) loadWorkbook(ctx context.Context, query *WorkbookQuery, nodes []*WorkbookMember, init func(*WorkbookMember), assign func(*WorkbookMember, *Workbook)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*WorkbookMember)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*WorkbookMember)
 	for i := range nodes {
 		fk := nodes[i].WorkbookID
 		if _, ok := nodeids[fk]; !ok {
@@ -585,7 +586,7 @@ func (wmq *WorkbookMemberQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (wmq *WorkbookMemberQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(workbookmember.Table, workbookmember.Columns, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(workbookmember.Table, workbookmember.Columns, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID))
 	_spec.From = wmq.sql
 	if unique := wmq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

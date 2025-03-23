@@ -11,21 +11,24 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Article is the model entity for the Article schema.
 type Article struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// PageID holds the value of the "page_id" field.
+	PageID *int `json:"page_id,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// PostID holds the value of the "post_id" field.
-	PostID int `json:"post_id,omitempty"`
+	PostID uuid.UUID `json:"post_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArticleQuery when eager-loading is set.
 	Edges        ArticleEdges `json:"edges"`
@@ -57,12 +60,14 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case article.FieldID, article.FieldPostID:
+		case article.FieldPageID:
 			values[i] = new(sql.NullInt64)
 		case article.FieldDescription:
 			values[i] = new(sql.NullString)
 		case article.FieldCreatedAt, article.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case article.FieldID, article.FieldPostID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -79,11 +84,11 @@ func (a *Article) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case article.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				a.ID = *value
 			}
-			a.ID = int(value.Int64)
 		case article.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -96,6 +101,13 @@ func (a *Article) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.UpdatedAt = value.Time
 			}
+		case article.FieldPageID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field page_id", values[i])
+			} else if value.Valid {
+				a.PageID = new(int)
+				*a.PageID = int(value.Int64)
+			}
 		case article.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -103,10 +115,10 @@ func (a *Article) assignValues(columns []string, values []any) error {
 				a.Description = value.String
 			}
 		case article.FieldPostID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field post_id", values[i])
-			} else if value.Valid {
-				a.PostID = int(value.Int64)
+			} else if value != nil {
+				a.PostID = *value
 			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
@@ -154,6 +166,11 @@ func (a *Article) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := a.PageID; v != nil {
+		builder.WriteString("page_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(a.Description)

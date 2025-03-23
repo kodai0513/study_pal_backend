@@ -26,6 +26,8 @@ const (
 	FieldWorkbookID = "workbook_id"
 	// FieldWorkbookCategoryID holds the string denoting the workbook_category_id field in the database.
 	FieldWorkbookCategoryID = "workbook_category_id"
+	// FieldWorkbookCategoryClassificationID holds the string denoting the workbook_category_classification_id field in the database.
+	FieldWorkbookCategoryClassificationID = "workbook_category_classification_id"
 	// EdgeAnswerType holds the string denoting the answer_type edge name in mutations.
 	EdgeAnswerType = "answer_type"
 	// EdgeAnswerDescriptions holds the string denoting the answer_descriptions edge name in mutations.
@@ -38,6 +40,8 @@ const (
 	EdgeWorkbook = "workbook"
 	// EdgeWorkbookCategory holds the string denoting the workbook_category edge name in mutations.
 	EdgeWorkbookCategory = "workbook_category"
+	// EdgeWorkbookCategoryClassification holds the string denoting the workbook_category_classification edge name in mutations.
+	EdgeWorkbookCategoryClassification = "workbook_category_classification"
 	// Table holds the table name of the problem in the database.
 	Table = "problems"
 	// AnswerTypeTable is the table that holds the answer_type relation/edge.
@@ -82,6 +86,13 @@ const (
 	WorkbookCategoryInverseTable = "workbook_categories"
 	// WorkbookCategoryColumn is the table column denoting the workbook_category relation/edge.
 	WorkbookCategoryColumn = "workbook_category_id"
+	// WorkbookCategoryClassificationTable is the table that holds the workbook_category_classification relation/edge.
+	WorkbookCategoryClassificationTable = "problems"
+	// WorkbookCategoryClassificationInverseTable is the table name for the WorkbookCategoryClassification entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookcategoryclassification" package.
+	WorkbookCategoryClassificationInverseTable = "workbook_category_classifications"
+	// WorkbookCategoryClassificationColumn is the table column denoting the workbook_category_classification relation/edge.
+	WorkbookCategoryClassificationColumn = "workbook_category_classification_id"
 )
 
 // Columns holds all SQL columns for problem fields.
@@ -93,6 +104,7 @@ var Columns = []string{
 	FieldStatement,
 	FieldWorkbookID,
 	FieldWorkbookCategoryID,
+	FieldWorkbookCategoryClassificationID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -154,6 +166,11 @@ func ByWorkbookCategoryID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkbookCategoryID, opts...).ToFunc()
 }
 
+// ByWorkbookCategoryClassificationID orders the results by the workbook_category_classification_id field.
+func ByWorkbookCategoryClassificationID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorkbookCategoryClassificationID, opts...).ToFunc()
+}
+
 // ByAnswerTypeField orders the results by answer_type field.
 func ByAnswerTypeField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -161,17 +178,10 @@ func ByAnswerTypeField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByAnswerDescriptionsCount orders the results by answer_descriptions count.
-func ByAnswerDescriptionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAnswerDescriptionsField orders the results by answer_descriptions field.
+func ByAnswerDescriptionsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAnswerDescriptionsStep(), opts...)
-	}
-}
-
-// ByAnswerDescriptions orders the results by answer_descriptions terms.
-func ByAnswerDescriptions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAnswerDescriptionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newAnswerDescriptionsStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -189,17 +199,10 @@ func ByAnswerMultiChoices(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 	}
 }
 
-// ByAnswerTruthsCount orders the results by answer_truths count.
-func ByAnswerTruthsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAnswerTruthsField orders the results by answer_truths field.
+func ByAnswerTruthsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAnswerTruthsStep(), opts...)
-	}
-}
-
-// ByAnswerTruths orders the results by answer_truths terms.
-func ByAnswerTruths(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAnswerTruthsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newAnswerTruthsStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -216,6 +219,13 @@ func ByWorkbookCategoryField(field string, opts ...sql.OrderTermOption) OrderOpt
 		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByWorkbookCategoryClassificationField orders the results by workbook_category_classification field.
+func ByWorkbookCategoryClassificationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryClassificationStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newAnswerTypeStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -227,7 +237,7 @@ func newAnswerDescriptionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AnswerDescriptionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AnswerDescriptionsTable, AnswerDescriptionsColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, AnswerDescriptionsTable, AnswerDescriptionsColumn),
 	)
 }
 func newAnswerMultiChoicesStep() *sqlgraph.Step {
@@ -241,7 +251,7 @@ func newAnswerTruthsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AnswerTruthsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AnswerTruthsTable, AnswerTruthsColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, AnswerTruthsTable, AnswerTruthsColumn),
 	)
 }
 func newWorkbookStep() *sqlgraph.Step {
@@ -256,5 +266,12 @@ func newWorkbookCategoryStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WorkbookCategoryInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryTable, WorkbookCategoryColumn),
+	)
+}
+func newWorkbookCategoryClassificationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkbookCategoryClassificationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryClassificationTable, WorkbookCategoryClassificationColumn),
 	)
 }

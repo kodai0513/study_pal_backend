@@ -10,12 +10,13 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookcategoryclassification"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookCategoryUpdate is the builder for updating WorkbookCategory entities.
@@ -66,28 +67,28 @@ func (wcu *WorkbookCategoryUpdate) SetNillableName(s *string) *WorkbookCategoryU
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (wcu *WorkbookCategoryUpdate) SetWorkbookID(i int) *WorkbookCategoryUpdate {
-	wcu.mutation.SetWorkbookID(i)
+func (wcu *WorkbookCategoryUpdate) SetWorkbookID(u uuid.UUID) *WorkbookCategoryUpdate {
+	wcu.mutation.SetWorkbookID(u)
 	return wcu
 }
 
 // SetNillableWorkbookID sets the "workbook_id" field if the given value is not nil.
-func (wcu *WorkbookCategoryUpdate) SetNillableWorkbookID(i *int) *WorkbookCategoryUpdate {
-	if i != nil {
-		wcu.SetWorkbookID(*i)
+func (wcu *WorkbookCategoryUpdate) SetNillableWorkbookID(u *uuid.UUID) *WorkbookCategoryUpdate {
+	if u != nil {
+		wcu.SetWorkbookID(*u)
 	}
 	return wcu
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wcu *WorkbookCategoryUpdate) AddProblemIDs(ids ...int) *WorkbookCategoryUpdate {
+func (wcu *WorkbookCategoryUpdate) AddProblemIDs(ids ...uuid.UUID) *WorkbookCategoryUpdate {
 	wcu.mutation.AddProblemIDs(ids...)
 	return wcu
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (wcu *WorkbookCategoryUpdate) AddProblems(p ...*Problem) *WorkbookCategoryUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -99,19 +100,19 @@ func (wcu *WorkbookCategoryUpdate) SetWorkbook(w *Workbook) *WorkbookCategoryUpd
 	return wcu.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryClosureIDs adds the "workbook_category_closures" edge to the WorkbookCategoryClosure entity by IDs.
-func (wcu *WorkbookCategoryUpdate) AddWorkbookCategoryClosureIDs(ids ...int) *WorkbookCategoryUpdate {
-	wcu.mutation.AddWorkbookCategoryClosureIDs(ids...)
+// AddWorkbookCategoryClassificationIDs adds the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by IDs.
+func (wcu *WorkbookCategoryUpdate) AddWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryUpdate {
+	wcu.mutation.AddWorkbookCategoryClassificationIDs(ids...)
 	return wcu
 }
 
-// AddWorkbookCategoryClosures adds the "workbook_category_closures" edges to the WorkbookCategoryClosure entity.
-func (wcu *WorkbookCategoryUpdate) AddWorkbookCategoryClosures(w ...*WorkbookCategoryClosure) *WorkbookCategoryUpdate {
-	ids := make([]int, len(w))
+// AddWorkbookCategoryClassifications adds the "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
+func (wcu *WorkbookCategoryUpdate) AddWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryUpdate {
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcu.AddWorkbookCategoryClosureIDs(ids...)
+	return wcu.AddWorkbookCategoryClassificationIDs(ids...)
 }
 
 // Mutation returns the WorkbookCategoryMutation object of the builder.
@@ -126,14 +127,14 @@ func (wcu *WorkbookCategoryUpdate) ClearProblems() *WorkbookCategoryUpdate {
 }
 
 // RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (wcu *WorkbookCategoryUpdate) RemoveProblemIDs(ids ...int) *WorkbookCategoryUpdate {
+func (wcu *WorkbookCategoryUpdate) RemoveProblemIDs(ids ...uuid.UUID) *WorkbookCategoryUpdate {
 	wcu.mutation.RemoveProblemIDs(ids...)
 	return wcu
 }
 
 // RemoveProblems removes "problems" edges to Problem entities.
 func (wcu *WorkbookCategoryUpdate) RemoveProblems(p ...*Problem) *WorkbookCategoryUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -146,25 +147,25 @@ func (wcu *WorkbookCategoryUpdate) ClearWorkbook() *WorkbookCategoryUpdate {
 	return wcu
 }
 
-// ClearWorkbookCategoryClosures clears all "workbook_category_closures" edges to the WorkbookCategoryClosure entity.
-func (wcu *WorkbookCategoryUpdate) ClearWorkbookCategoryClosures() *WorkbookCategoryUpdate {
-	wcu.mutation.ClearWorkbookCategoryClosures()
+// ClearWorkbookCategoryClassifications clears all "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
+func (wcu *WorkbookCategoryUpdate) ClearWorkbookCategoryClassifications() *WorkbookCategoryUpdate {
+	wcu.mutation.ClearWorkbookCategoryClassifications()
 	return wcu
 }
 
-// RemoveWorkbookCategoryClosureIDs removes the "workbook_category_closures" edge to WorkbookCategoryClosure entities by IDs.
-func (wcu *WorkbookCategoryUpdate) RemoveWorkbookCategoryClosureIDs(ids ...int) *WorkbookCategoryUpdate {
-	wcu.mutation.RemoveWorkbookCategoryClosureIDs(ids...)
+// RemoveWorkbookCategoryClassificationIDs removes the "workbook_category_classifications" edge to WorkbookCategoryClassification entities by IDs.
+func (wcu *WorkbookCategoryUpdate) RemoveWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryUpdate {
+	wcu.mutation.RemoveWorkbookCategoryClassificationIDs(ids...)
 	return wcu
 }
 
-// RemoveWorkbookCategoryClosures removes "workbook_category_closures" edges to WorkbookCategoryClosure entities.
-func (wcu *WorkbookCategoryUpdate) RemoveWorkbookCategoryClosures(w ...*WorkbookCategoryClosure) *WorkbookCategoryUpdate {
-	ids := make([]int, len(w))
+// RemoveWorkbookCategoryClassifications removes "workbook_category_classifications" edges to WorkbookCategoryClassification entities.
+func (wcu *WorkbookCategoryUpdate) RemoveWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryUpdate {
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcu.RemoveWorkbookCategoryClosureIDs(ids...)
+	return wcu.RemoveWorkbookCategoryClassificationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -220,7 +221,7 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if err := wcu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(workbookcategory.Table, workbookcategory.Columns, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(workbookcategory.Table, workbookcategory.Columns, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID))
 	if ps := wcu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -245,7 +246,7 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -258,7 +259,7 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -274,7 +275,7 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -290,7 +291,7 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{workbookcategory.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -303,7 +304,7 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{workbookcategory.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -311,28 +312,28 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wcu.mutation.WorkbookCategoryClosuresCleared() {
+	if wcu.mutation.WorkbookCategoryClassificationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wcu.mutation.RemovedWorkbookCategoryClosuresIDs(); len(nodes) > 0 && !wcu.mutation.WorkbookCategoryClosuresCleared() {
+	if nodes := wcu.mutation.RemovedWorkbookCategoryClassificationsIDs(); len(nodes) > 0 && !wcu.mutation.WorkbookCategoryClassificationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -340,15 +341,15 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wcu.mutation.WorkbookCategoryClosuresIDs(); len(nodes) > 0 {
+	if nodes := wcu.mutation.WorkbookCategoryClassificationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -411,28 +412,28 @@ func (wcuo *WorkbookCategoryUpdateOne) SetNillableName(s *string) *WorkbookCateg
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (wcuo *WorkbookCategoryUpdateOne) SetWorkbookID(i int) *WorkbookCategoryUpdateOne {
-	wcuo.mutation.SetWorkbookID(i)
+func (wcuo *WorkbookCategoryUpdateOne) SetWorkbookID(u uuid.UUID) *WorkbookCategoryUpdateOne {
+	wcuo.mutation.SetWorkbookID(u)
 	return wcuo
 }
 
 // SetNillableWorkbookID sets the "workbook_id" field if the given value is not nil.
-func (wcuo *WorkbookCategoryUpdateOne) SetNillableWorkbookID(i *int) *WorkbookCategoryUpdateOne {
-	if i != nil {
-		wcuo.SetWorkbookID(*i)
+func (wcuo *WorkbookCategoryUpdateOne) SetNillableWorkbookID(u *uuid.UUID) *WorkbookCategoryUpdateOne {
+	if u != nil {
+		wcuo.SetWorkbookID(*u)
 	}
 	return wcuo
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wcuo *WorkbookCategoryUpdateOne) AddProblemIDs(ids ...int) *WorkbookCategoryUpdateOne {
+func (wcuo *WorkbookCategoryUpdateOne) AddProblemIDs(ids ...uuid.UUID) *WorkbookCategoryUpdateOne {
 	wcuo.mutation.AddProblemIDs(ids...)
 	return wcuo
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (wcuo *WorkbookCategoryUpdateOne) AddProblems(p ...*Problem) *WorkbookCategoryUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -444,19 +445,19 @@ func (wcuo *WorkbookCategoryUpdateOne) SetWorkbook(w *Workbook) *WorkbookCategor
 	return wcuo.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryClosureIDs adds the "workbook_category_closures" edge to the WorkbookCategoryClosure entity by IDs.
-func (wcuo *WorkbookCategoryUpdateOne) AddWorkbookCategoryClosureIDs(ids ...int) *WorkbookCategoryUpdateOne {
-	wcuo.mutation.AddWorkbookCategoryClosureIDs(ids...)
+// AddWorkbookCategoryClassificationIDs adds the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by IDs.
+func (wcuo *WorkbookCategoryUpdateOne) AddWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryUpdateOne {
+	wcuo.mutation.AddWorkbookCategoryClassificationIDs(ids...)
 	return wcuo
 }
 
-// AddWorkbookCategoryClosures adds the "workbook_category_closures" edges to the WorkbookCategoryClosure entity.
-func (wcuo *WorkbookCategoryUpdateOne) AddWorkbookCategoryClosures(w ...*WorkbookCategoryClosure) *WorkbookCategoryUpdateOne {
-	ids := make([]int, len(w))
+// AddWorkbookCategoryClassifications adds the "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
+func (wcuo *WorkbookCategoryUpdateOne) AddWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryUpdateOne {
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcuo.AddWorkbookCategoryClosureIDs(ids...)
+	return wcuo.AddWorkbookCategoryClassificationIDs(ids...)
 }
 
 // Mutation returns the WorkbookCategoryMutation object of the builder.
@@ -471,14 +472,14 @@ func (wcuo *WorkbookCategoryUpdateOne) ClearProblems() *WorkbookCategoryUpdateOn
 }
 
 // RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (wcuo *WorkbookCategoryUpdateOne) RemoveProblemIDs(ids ...int) *WorkbookCategoryUpdateOne {
+func (wcuo *WorkbookCategoryUpdateOne) RemoveProblemIDs(ids ...uuid.UUID) *WorkbookCategoryUpdateOne {
 	wcuo.mutation.RemoveProblemIDs(ids...)
 	return wcuo
 }
 
 // RemoveProblems removes "problems" edges to Problem entities.
 func (wcuo *WorkbookCategoryUpdateOne) RemoveProblems(p ...*Problem) *WorkbookCategoryUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -491,25 +492,25 @@ func (wcuo *WorkbookCategoryUpdateOne) ClearWorkbook() *WorkbookCategoryUpdateOn
 	return wcuo
 }
 
-// ClearWorkbookCategoryClosures clears all "workbook_category_closures" edges to the WorkbookCategoryClosure entity.
-func (wcuo *WorkbookCategoryUpdateOne) ClearWorkbookCategoryClosures() *WorkbookCategoryUpdateOne {
-	wcuo.mutation.ClearWorkbookCategoryClosures()
+// ClearWorkbookCategoryClassifications clears all "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
+func (wcuo *WorkbookCategoryUpdateOne) ClearWorkbookCategoryClassifications() *WorkbookCategoryUpdateOne {
+	wcuo.mutation.ClearWorkbookCategoryClassifications()
 	return wcuo
 }
 
-// RemoveWorkbookCategoryClosureIDs removes the "workbook_category_closures" edge to WorkbookCategoryClosure entities by IDs.
-func (wcuo *WorkbookCategoryUpdateOne) RemoveWorkbookCategoryClosureIDs(ids ...int) *WorkbookCategoryUpdateOne {
-	wcuo.mutation.RemoveWorkbookCategoryClosureIDs(ids...)
+// RemoveWorkbookCategoryClassificationIDs removes the "workbook_category_classifications" edge to WorkbookCategoryClassification entities by IDs.
+func (wcuo *WorkbookCategoryUpdateOne) RemoveWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryUpdateOne {
+	wcuo.mutation.RemoveWorkbookCategoryClassificationIDs(ids...)
 	return wcuo
 }
 
-// RemoveWorkbookCategoryClosures removes "workbook_category_closures" edges to WorkbookCategoryClosure entities.
-func (wcuo *WorkbookCategoryUpdateOne) RemoveWorkbookCategoryClosures(w ...*WorkbookCategoryClosure) *WorkbookCategoryUpdateOne {
-	ids := make([]int, len(w))
+// RemoveWorkbookCategoryClassifications removes "workbook_category_classifications" edges to WorkbookCategoryClassification entities.
+func (wcuo *WorkbookCategoryUpdateOne) RemoveWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryUpdateOne {
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcuo.RemoveWorkbookCategoryClosureIDs(ids...)
+	return wcuo.RemoveWorkbookCategoryClassificationIDs(ids...)
 }
 
 // Where appends a list predicates to the WorkbookCategoryUpdate builder.
@@ -578,7 +579,7 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 	if err := wcuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(workbookcategory.Table, workbookcategory.Columns, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(workbookcategory.Table, workbookcategory.Columns, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID))
 	id, ok := wcuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "WorkbookCategory.id" for update`)}
@@ -620,7 +621,7 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -633,7 +634,7 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -649,7 +650,7 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -665,7 +666,7 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 			Columns: []string{workbookcategory.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -678,7 +679,7 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 			Columns: []string{workbookcategory.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -686,28 +687,28 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wcuo.mutation.WorkbookCategoryClosuresCleared() {
+	if wcuo.mutation.WorkbookCategoryClassificationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wcuo.mutation.RemovedWorkbookCategoryClosuresIDs(); len(nodes) > 0 && !wcuo.mutation.WorkbookCategoryClosuresCleared() {
+	if nodes := wcuo.mutation.RemovedWorkbookCategoryClassificationsIDs(); len(nodes) > 0 && !wcuo.mutation.WorkbookCategoryClassificationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -715,15 +716,15 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wcuo.mutation.WorkbookCategoryClosuresIDs(); len(nodes) > 0 {
+	if nodes := wcuo.mutation.WorkbookCategoryClassificationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

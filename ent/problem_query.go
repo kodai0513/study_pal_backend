@@ -15,26 +15,29 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookcategoryclassification"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ProblemQuery is the builder for querying Problem entities.
 type ProblemQuery struct {
 	config
-	ctx                    *QueryContext
-	order                  []problem.OrderOption
-	inters                 []Interceptor
-	predicates             []predicate.Problem
-	withAnswerType         *AnswerTypeQuery
-	withAnswerDescriptions *AnswerDescriptionQuery
-	withAnswerMultiChoices *AnswerMultiChoicesQuery
-	withAnswerTruths       *AnswerTruthQuery
-	withWorkbook           *WorkbookQuery
-	withWorkbookCategory   *WorkbookCategoryQuery
+	ctx                                *QueryContext
+	order                              []problem.OrderOption
+	inters                             []Interceptor
+	predicates                         []predicate.Problem
+	withAnswerType                     *AnswerTypeQuery
+	withAnswerDescriptions             *AnswerDescriptionQuery
+	withAnswerMultiChoices             *AnswerMultiChoicesQuery
+	withAnswerTruths                   *AnswerTruthQuery
+	withWorkbook                       *WorkbookQuery
+	withWorkbookCategory               *WorkbookCategoryQuery
+	withWorkbookCategoryClassification *WorkbookCategoryClassificationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -107,7 +110,7 @@ func (pq *ProblemQuery) QueryAnswerDescriptions() *AnswerDescriptionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(problem.Table, problem.FieldID, selector),
 			sqlgraph.To(answerdescription.Table, answerdescription.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, problem.AnswerDescriptionsTable, problem.AnswerDescriptionsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, problem.AnswerDescriptionsTable, problem.AnswerDescriptionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -151,7 +154,7 @@ func (pq *ProblemQuery) QueryAnswerTruths() *AnswerTruthQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(problem.Table, problem.FieldID, selector),
 			sqlgraph.To(answertruth.Table, answertruth.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, problem.AnswerTruthsTable, problem.AnswerTruthsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, problem.AnswerTruthsTable, problem.AnswerTruthsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -203,6 +206,28 @@ func (pq *ProblemQuery) QueryWorkbookCategory() *WorkbookCategoryQuery {
 	return query
 }
 
+// QueryWorkbookCategoryClassification chains the current query on the "workbook_category_classification" edge.
+func (pq *ProblemQuery) QueryWorkbookCategoryClassification() *WorkbookCategoryClassificationQuery {
+	query := (&WorkbookCategoryClassificationClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(problem.Table, problem.FieldID, selector),
+			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryClassificationTable, problem.WorkbookCategoryClassificationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Problem entity from the query.
 // Returns a *NotFoundError when no Problem was found.
 func (pq *ProblemQuery) First(ctx context.Context) (*Problem, error) {
@@ -227,8 +252,8 @@ func (pq *ProblemQuery) FirstX(ctx context.Context) *Problem {
 
 // FirstID returns the first Problem ID from the query.
 // Returns a *NotFoundError when no Problem ID was found.
-func (pq *ProblemQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProblemQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -240,7 +265,7 @@ func (pq *ProblemQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProblemQuery) FirstIDX(ctx context.Context) int {
+func (pq *ProblemQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -278,8 +303,8 @@ func (pq *ProblemQuery) OnlyX(ctx context.Context) *Problem {
 // OnlyID is like Only, but returns the only Problem ID in the query.
 // Returns a *NotSingularError when more than one Problem ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProblemQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProblemQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -295,7 +320,7 @@ func (pq *ProblemQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProblemQuery) OnlyIDX(ctx context.Context) int {
+func (pq *ProblemQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -323,7 +348,7 @@ func (pq *ProblemQuery) AllX(ctx context.Context) []*Problem {
 }
 
 // IDs executes the query and returns a list of Problem IDs.
-func (pq *ProblemQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pq *ProblemQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if pq.ctx.Unique == nil && pq.path != nil {
 		pq.Unique(true)
 	}
@@ -335,7 +360,7 @@ func (pq *ProblemQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProblemQuery) IDsX(ctx context.Context) []int {
+func (pq *ProblemQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -390,17 +415,18 @@ func (pq *ProblemQuery) Clone() *ProblemQuery {
 		return nil
 	}
 	return &ProblemQuery{
-		config:                 pq.config,
-		ctx:                    pq.ctx.Clone(),
-		order:                  append([]problem.OrderOption{}, pq.order...),
-		inters:                 append([]Interceptor{}, pq.inters...),
-		predicates:             append([]predicate.Problem{}, pq.predicates...),
-		withAnswerType:         pq.withAnswerType.Clone(),
-		withAnswerDescriptions: pq.withAnswerDescriptions.Clone(),
-		withAnswerMultiChoices: pq.withAnswerMultiChoices.Clone(),
-		withAnswerTruths:       pq.withAnswerTruths.Clone(),
-		withWorkbook:           pq.withWorkbook.Clone(),
-		withWorkbookCategory:   pq.withWorkbookCategory.Clone(),
+		config:                             pq.config,
+		ctx:                                pq.ctx.Clone(),
+		order:                              append([]problem.OrderOption{}, pq.order...),
+		inters:                             append([]Interceptor{}, pq.inters...),
+		predicates:                         append([]predicate.Problem{}, pq.predicates...),
+		withAnswerType:                     pq.withAnswerType.Clone(),
+		withAnswerDescriptions:             pq.withAnswerDescriptions.Clone(),
+		withAnswerMultiChoices:             pq.withAnswerMultiChoices.Clone(),
+		withAnswerTruths:                   pq.withAnswerTruths.Clone(),
+		withWorkbook:                       pq.withWorkbook.Clone(),
+		withWorkbookCategory:               pq.withWorkbookCategory.Clone(),
+		withWorkbookCategoryClassification: pq.withWorkbookCategoryClassification.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -470,6 +496,17 @@ func (pq *ProblemQuery) WithWorkbookCategory(opts ...func(*WorkbookCategoryQuery
 		opt(query)
 	}
 	pq.withWorkbookCategory = query
+	return pq
+}
+
+// WithWorkbookCategoryClassification tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_category_classification" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProblemQuery) WithWorkbookCategoryClassification(opts ...func(*WorkbookCategoryClassificationQuery)) *ProblemQuery {
+	query := (&WorkbookCategoryClassificationClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withWorkbookCategoryClassification = query
 	return pq
 }
 
@@ -551,13 +588,14 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 	var (
 		nodes       = []*Problem{}
 		_spec       = pq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			pq.withAnswerType != nil,
 			pq.withAnswerDescriptions != nil,
 			pq.withAnswerMultiChoices != nil,
 			pq.withAnswerTruths != nil,
 			pq.withWorkbook != nil,
 			pq.withWorkbookCategory != nil,
+			pq.withWorkbookCategoryClassification != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -585,11 +623,8 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 		}
 	}
 	if query := pq.withAnswerDescriptions; query != nil {
-		if err := pq.loadAnswerDescriptions(ctx, query, nodes,
-			func(n *Problem) { n.Edges.AnswerDescriptions = []*AnswerDescription{} },
-			func(n *Problem, e *AnswerDescription) {
-				n.Edges.AnswerDescriptions = append(n.Edges.AnswerDescriptions, e)
-			}); err != nil {
+		if err := pq.loadAnswerDescriptions(ctx, query, nodes, nil,
+			func(n *Problem, e *AnswerDescription) { n.Edges.AnswerDescriptions = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -603,9 +638,8 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 		}
 	}
 	if query := pq.withAnswerTruths; query != nil {
-		if err := pq.loadAnswerTruths(ctx, query, nodes,
-			func(n *Problem) { n.Edges.AnswerTruths = []*AnswerTruth{} },
-			func(n *Problem, e *AnswerTruth) { n.Edges.AnswerTruths = append(n.Edges.AnswerTruths, e) }); err != nil {
+		if err := pq.loadAnswerTruths(ctx, query, nodes, nil,
+			func(n *Problem, e *AnswerTruth) { n.Edges.AnswerTruths = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -621,12 +655,18 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 			return nil, err
 		}
 	}
+	if query := pq.withWorkbookCategoryClassification; query != nil {
+		if err := pq.loadWorkbookCategoryClassification(ctx, query, nodes, nil,
+			func(n *Problem, e *WorkbookCategoryClassification) { n.Edges.WorkbookCategoryClassification = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
 func (pq *ProblemQuery) loadAnswerType(ctx context.Context, query *AnswerTypeQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *AnswerType)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Problem)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Problem)
 	for i := range nodes {
 		fk := nodes[i].AnswerTypeID
 		if _, ok := nodeids[fk]; !ok {
@@ -655,13 +695,10 @@ func (pq *ProblemQuery) loadAnswerType(ctx context.Context, query *AnswerTypeQue
 }
 func (pq *ProblemQuery) loadAnswerDescriptions(ctx context.Context, query *AnswerDescriptionQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *AnswerDescription)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Problem)
+	nodeids := make(map[uuid.UUID]*Problem)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(answerdescription.FieldProblemID)
@@ -685,7 +722,7 @@ func (pq *ProblemQuery) loadAnswerDescriptions(ctx context.Context, query *Answe
 }
 func (pq *ProblemQuery) loadAnswerMultiChoices(ctx context.Context, query *AnswerMultiChoicesQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *AnswerMultiChoices)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Problem)
+	nodeids := make(map[uuid.UUID]*Problem)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -715,13 +752,10 @@ func (pq *ProblemQuery) loadAnswerMultiChoices(ctx context.Context, query *Answe
 }
 func (pq *ProblemQuery) loadAnswerTruths(ctx context.Context, query *AnswerTruthQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *AnswerTruth)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Problem)
+	nodeids := make(map[uuid.UUID]*Problem)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(answertruth.FieldProblemID)
@@ -744,8 +778,8 @@ func (pq *ProblemQuery) loadAnswerTruths(ctx context.Context, query *AnswerTruth
 	return nil
 }
 func (pq *ProblemQuery) loadWorkbook(ctx context.Context, query *WorkbookQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *Workbook)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Problem)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Problem)
 	for i := range nodes {
 		fk := nodes[i].WorkbookID
 		if _, ok := nodeids[fk]; !ok {
@@ -773,10 +807,13 @@ func (pq *ProblemQuery) loadWorkbook(ctx context.Context, query *WorkbookQuery, 
 	return nil
 }
 func (pq *ProblemQuery) loadWorkbookCategory(ctx context.Context, query *WorkbookCategoryQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *WorkbookCategory)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Problem)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Problem)
 	for i := range nodes {
-		fk := nodes[i].WorkbookCategoryID
+		if nodes[i].WorkbookCategoryID == nil {
+			continue
+		}
+		fk := *nodes[i].WorkbookCategoryID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -801,6 +838,38 @@ func (pq *ProblemQuery) loadWorkbookCategory(ctx context.Context, query *Workboo
 	}
 	return nil
 }
+func (pq *ProblemQuery) loadWorkbookCategoryClassification(ctx context.Context, query *WorkbookCategoryClassificationQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *WorkbookCategoryClassification)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Problem)
+	for i := range nodes {
+		if nodes[i].WorkbookCategoryClassificationID == nil {
+			continue
+		}
+		fk := *nodes[i].WorkbookCategoryClassificationID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(workbookcategoryclassification.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "workbook_category_classification_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (pq *ProblemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
@@ -812,7 +881,7 @@ func (pq *ProblemQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *ProblemQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(problem.Table, problem.Columns, sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(problem.Table, problem.Columns, sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID))
 	_spec.From = pq.sql
 	if unique := pq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -835,6 +904,9 @@ func (pq *ProblemQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if pq.withWorkbookCategory != nil {
 			_spec.Node.AddColumnOnce(problem.FieldWorkbookCategoryID)
+		}
+		if pq.withWorkbookCategoryClassification != nil {
+			_spec.Node.AddColumnOnce(problem.FieldWorkbookCategoryClassificationID)
 		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {

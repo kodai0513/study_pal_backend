@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerTypeUpdate is the builder for updating AnswerType entities.
@@ -64,14 +65,14 @@ func (atu *AnswerTypeUpdate) SetNillableName(s *string) *AnswerTypeUpdate {
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (atu *AnswerTypeUpdate) AddProblemIDs(ids ...int) *AnswerTypeUpdate {
+func (atu *AnswerTypeUpdate) AddProblemIDs(ids ...uuid.UUID) *AnswerTypeUpdate {
 	atu.mutation.AddProblemIDs(ids...)
 	return atu
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (atu *AnswerTypeUpdate) AddProblems(p ...*Problem) *AnswerTypeUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -90,14 +91,14 @@ func (atu *AnswerTypeUpdate) ClearProblems() *AnswerTypeUpdate {
 }
 
 // RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (atu *AnswerTypeUpdate) RemoveProblemIDs(ids ...int) *AnswerTypeUpdate {
+func (atu *AnswerTypeUpdate) RemoveProblemIDs(ids ...uuid.UUID) *AnswerTypeUpdate {
 	atu.mutation.RemoveProblemIDs(ids...)
 	return atu
 }
 
 // RemoveProblems removes "problems" edges to Problem entities.
 func (atu *AnswerTypeUpdate) RemoveProblems(p ...*Problem) *AnswerTypeUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -154,7 +155,7 @@ func (atu *AnswerTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := atu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answertype.Table, answertype.Columns, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answertype.Table, answertype.Columns, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeUUID))
 	if ps := atu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -179,7 +180,7 @@ func (atu *AnswerTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -192,7 +193,7 @@ func (atu *AnswerTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -208,7 +209,7 @@ func (atu *AnswerTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -271,14 +272,14 @@ func (atuo *AnswerTypeUpdateOne) SetNillableName(s *string) *AnswerTypeUpdateOne
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (atuo *AnswerTypeUpdateOne) AddProblemIDs(ids ...int) *AnswerTypeUpdateOne {
+func (atuo *AnswerTypeUpdateOne) AddProblemIDs(ids ...uuid.UUID) *AnswerTypeUpdateOne {
 	atuo.mutation.AddProblemIDs(ids...)
 	return atuo
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (atuo *AnswerTypeUpdateOne) AddProblems(p ...*Problem) *AnswerTypeUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -297,14 +298,14 @@ func (atuo *AnswerTypeUpdateOne) ClearProblems() *AnswerTypeUpdateOne {
 }
 
 // RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (atuo *AnswerTypeUpdateOne) RemoveProblemIDs(ids ...int) *AnswerTypeUpdateOne {
+func (atuo *AnswerTypeUpdateOne) RemoveProblemIDs(ids ...uuid.UUID) *AnswerTypeUpdateOne {
 	atuo.mutation.RemoveProblemIDs(ids...)
 	return atuo
 }
 
 // RemoveProblems removes "problems" edges to Problem entities.
 func (atuo *AnswerTypeUpdateOne) RemoveProblems(p ...*Problem) *AnswerTypeUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -374,7 +375,7 @@ func (atuo *AnswerTypeUpdateOne) sqlSave(ctx context.Context) (_node *AnswerType
 	if err := atuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answertype.Table, answertype.Columns, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answertype.Table, answertype.Columns, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeUUID))
 	id, ok := atuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AnswerType.id" for update`)}
@@ -416,7 +417,7 @@ func (atuo *AnswerTypeUpdateOne) sqlSave(ctx context.Context) (_node *AnswerType
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -429,7 +430,7 @@ func (atuo *AnswerTypeUpdateOne) sqlSave(ctx context.Context) (_node *AnswerType
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -445,7 +446,7 @@ func (atuo *AnswerTypeUpdateOne) sqlSave(ctx context.Context) (_node *AnswerType
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

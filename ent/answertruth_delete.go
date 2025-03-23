@@ -40,7 +40,7 @@ func (atd *AnswerTruthDelete) ExecX(ctx context.Context) int {
 }
 
 func (atd *AnswerTruthDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(answertruth.Table, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(answertruth.Table, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeUUID))
 	if ps := atd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

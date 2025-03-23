@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookMemberCreate is the builder for creating a WorkbookMember entity.
@@ -52,20 +53,26 @@ func (wmc *WorkbookMemberCreate) SetNillableUpdatedAt(t *time.Time) *WorkbookMem
 }
 
 // SetRoleID sets the "role_id" field.
-func (wmc *WorkbookMemberCreate) SetRoleID(i int) *WorkbookMemberCreate {
-	wmc.mutation.SetRoleID(i)
+func (wmc *WorkbookMemberCreate) SetRoleID(u uuid.UUID) *WorkbookMemberCreate {
+	wmc.mutation.SetRoleID(u)
 	return wmc
 }
 
 // SetMemberID sets the "member_id" field.
-func (wmc *WorkbookMemberCreate) SetMemberID(i int) *WorkbookMemberCreate {
-	wmc.mutation.SetMemberID(i)
+func (wmc *WorkbookMemberCreate) SetMemberID(u uuid.UUID) *WorkbookMemberCreate {
+	wmc.mutation.SetMemberID(u)
 	return wmc
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (wmc *WorkbookMemberCreate) SetWorkbookID(i int) *WorkbookMemberCreate {
-	wmc.mutation.SetWorkbookID(i)
+func (wmc *WorkbookMemberCreate) SetWorkbookID(u uuid.UUID) *WorkbookMemberCreate {
+	wmc.mutation.SetWorkbookID(u)
+	return wmc
+}
+
+// SetID sets the "id" field.
+func (wmc *WorkbookMemberCreate) SetID(u uuid.UUID) *WorkbookMemberCreate {
+	wmc.mutation.SetID(u)
 	return wmc
 }
 
@@ -169,8 +176,13 @@ func (wmc *WorkbookMemberCreate) sqlSave(ctx context.Context) (*WorkbookMember, 
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	wmc.mutation.id = &_node.ID
 	wmc.mutation.done = true
 	return _node, nil
@@ -179,8 +191,12 @@ func (wmc *WorkbookMemberCreate) sqlSave(ctx context.Context) (*WorkbookMember, 
 func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.CreateSpec) {
 	var (
 		_node = &WorkbookMember{config: wmc.config}
-		_spec = sqlgraph.NewCreateSpec(workbookmember.Table, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(workbookmember.Table, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID))
 	)
+	if id, ok := wmc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := wmc.mutation.CreatedAt(); ok {
 		_spec.SetField(workbookmember.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -197,7 +213,7 @@ func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.Create
 			Columns: []string{workbookmember.RoleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -214,7 +230,7 @@ func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.Create
 			Columns: []string{workbookmember.MemberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -231,7 +247,7 @@ func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.Create
 			Columns: []string{workbookmember.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -288,10 +304,6 @@ func (wmcb *WorkbookMemberCreateBulk) Save(ctx context.Context) ([]*WorkbookMemb
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

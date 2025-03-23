@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.AnswerTruth {
+func ID(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.AnswerTruth {
+func IDEQ(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.AnswerTruth {
+func IDNEQ(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.AnswerTruth {
+func IDIn(ids ...uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.AnswerTruth {
+func IDNotIn(ids ...uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.AnswerTruth {
+func IDGT(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.AnswerTruth {
+func IDGTE(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.AnswerTruth {
+func IDLT(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.AnswerTruth {
+func IDLTE(id uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldLTE(FieldID, id))
 }
 
@@ -66,7 +67,7 @@ func UpdatedAt(v time.Time) predicate.AnswerTruth {
 }
 
 // ProblemID applies equality check predicate on the "problem_id" field. It's identical to ProblemIDEQ.
-func ProblemID(v int) predicate.AnswerTruth {
+func ProblemID(v uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldEQ(FieldProblemID, v))
 }
 
@@ -156,22 +157,22 @@ func UpdatedAtLTE(v time.Time) predicate.AnswerTruth {
 }
 
 // ProblemIDEQ applies the EQ predicate on the "problem_id" field.
-func ProblemIDEQ(v int) predicate.AnswerTruth {
+func ProblemIDEQ(v uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldEQ(FieldProblemID, v))
 }
 
 // ProblemIDNEQ applies the NEQ predicate on the "problem_id" field.
-func ProblemIDNEQ(v int) predicate.AnswerTruth {
+func ProblemIDNEQ(v uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldNEQ(FieldProblemID, v))
 }
 
 // ProblemIDIn applies the In predicate on the "problem_id" field.
-func ProblemIDIn(vs ...int) predicate.AnswerTruth {
+func ProblemIDIn(vs ...uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldIn(FieldProblemID, vs...))
 }
 
 // ProblemIDNotIn applies the NotIn predicate on the "problem_id" field.
-func ProblemIDNotIn(vs ...int) predicate.AnswerTruth {
+func ProblemIDNotIn(vs ...uuid.UUID) predicate.AnswerTruth {
 	return predicate.AnswerTruth(sql.FieldNotIn(FieldProblemID, vs...))
 }
 
@@ -190,7 +191,7 @@ func HasProblem() predicate.AnswerTruth {
 	return predicate.AnswerTruth(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ProblemTable, ProblemColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, ProblemTable, ProblemColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

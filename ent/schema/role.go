@@ -19,6 +19,7 @@ type Role struct {
 
 func (Role) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }

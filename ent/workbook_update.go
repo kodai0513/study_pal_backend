@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookUpdate is the builder for updating Workbook entities.
@@ -52,23 +53,16 @@ func (wu *WorkbookUpdate) SetUpdatedAt(t time.Time) *WorkbookUpdate {
 }
 
 // SetCreatedID sets the "created_id" field.
-func (wu *WorkbookUpdate) SetCreatedID(i int) *WorkbookUpdate {
-	wu.mutation.ResetCreatedID()
-	wu.mutation.SetCreatedID(i)
+func (wu *WorkbookUpdate) SetCreatedID(u uuid.UUID) *WorkbookUpdate {
+	wu.mutation.SetCreatedID(u)
 	return wu
 }
 
 // SetNillableCreatedID sets the "created_id" field if the given value is not nil.
-func (wu *WorkbookUpdate) SetNillableCreatedID(i *int) *WorkbookUpdate {
-	if i != nil {
-		wu.SetCreatedID(*i)
+func (wu *WorkbookUpdate) SetNillableCreatedID(u *uuid.UUID) *WorkbookUpdate {
+	if u != nil {
+		wu.SetCreatedID(*u)
 	}
-	return wu
-}
-
-// AddCreatedID adds i to the "created_id" field.
-func (wu *WorkbookUpdate) AddCreatedID(i int) *WorkbookUpdate {
-	wu.mutation.AddCreatedID(i)
 	return wu
 }
 
@@ -82,6 +76,20 @@ func (wu *WorkbookUpdate) SetDescription(s string) *WorkbookUpdate {
 func (wu *WorkbookUpdate) SetNillableDescription(s *string) *WorkbookUpdate {
 	if s != nil {
 		wu.SetDescription(*s)
+	}
+	return wu
+}
+
+// SetIsPublic sets the "is_public" field.
+func (wu *WorkbookUpdate) SetIsPublic(b bool) *WorkbookUpdate {
+	wu.mutation.SetIsPublic(b)
+	return wu
+}
+
+// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
+func (wu *WorkbookUpdate) SetNillableIsPublic(b *bool) *WorkbookUpdate {
+	if b != nil {
+		wu.SetIsPublic(*b)
 	}
 	return wu
 }
@@ -101,14 +109,14 @@ func (wu *WorkbookUpdate) SetNillableTitle(s *string) *WorkbookUpdate {
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wu *WorkbookUpdate) AddProblemIDs(ids ...int) *WorkbookUpdate {
+func (wu *WorkbookUpdate) AddProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.AddProblemIDs(ids...)
 	return wu
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (wu *WorkbookUpdate) AddProblems(p ...*Problem) *WorkbookUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -116,14 +124,14 @@ func (wu *WorkbookUpdate) AddProblems(p ...*Problem) *WorkbookUpdate {
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
-func (wu *WorkbookUpdate) AddWorkbookCategoryIDs(ids ...int) *WorkbookUpdate {
+func (wu *WorkbookUpdate) AddWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.AddWorkbookCategoryIDs(ids...)
 	return wu
 }
 
 // AddWorkbookCategories adds the "workbook_categories" edges to the WorkbookCategory entity.
 func (wu *WorkbookUpdate) AddWorkbookCategories(w ...*WorkbookCategory) *WorkbookUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -131,14 +139,14 @@ func (wu *WorkbookUpdate) AddWorkbookCategories(w ...*WorkbookCategory) *Workboo
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (wu *WorkbookUpdate) AddWorkbookMemberIDs(ids ...int) *WorkbookUpdate {
+func (wu *WorkbookUpdate) AddWorkbookMemberIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.AddWorkbookMemberIDs(ids...)
 	return wu
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (wu *WorkbookUpdate) AddWorkbookMembers(w ...*WorkbookMember) *WorkbookUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -157,14 +165,14 @@ func (wu *WorkbookUpdate) ClearProblems() *WorkbookUpdate {
 }
 
 // RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (wu *WorkbookUpdate) RemoveProblemIDs(ids ...int) *WorkbookUpdate {
+func (wu *WorkbookUpdate) RemoveProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.RemoveProblemIDs(ids...)
 	return wu
 }
 
 // RemoveProblems removes "problems" edges to Problem entities.
 func (wu *WorkbookUpdate) RemoveProblems(p ...*Problem) *WorkbookUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -178,14 +186,14 @@ func (wu *WorkbookUpdate) ClearWorkbookCategories() *WorkbookUpdate {
 }
 
 // RemoveWorkbookCategoryIDs removes the "workbook_categories" edge to WorkbookCategory entities by IDs.
-func (wu *WorkbookUpdate) RemoveWorkbookCategoryIDs(ids ...int) *WorkbookUpdate {
+func (wu *WorkbookUpdate) RemoveWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.RemoveWorkbookCategoryIDs(ids...)
 	return wu
 }
 
 // RemoveWorkbookCategories removes "workbook_categories" edges to WorkbookCategory entities.
 func (wu *WorkbookUpdate) RemoveWorkbookCategories(w ...*WorkbookCategory) *WorkbookUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -199,14 +207,14 @@ func (wu *WorkbookUpdate) ClearWorkbookMembers() *WorkbookUpdate {
 }
 
 // RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
-func (wu *WorkbookUpdate) RemoveWorkbookMemberIDs(ids ...int) *WorkbookUpdate {
+func (wu *WorkbookUpdate) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.RemoveWorkbookMemberIDs(ids...)
 	return wu
 }
 
 // RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
 func (wu *WorkbookUpdate) RemoveWorkbookMembers(w ...*WorkbookMember) *WorkbookUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -268,7 +276,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := wu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(workbook.Table, workbook.Columns, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(workbook.Table, workbook.Columns, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID))
 	if ps := wu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -283,13 +291,13 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := wu.mutation.CreatedID(); ok {
-		_spec.SetField(workbook.FieldCreatedID, field.TypeInt, value)
-	}
-	if value, ok := wu.mutation.AddedCreatedID(); ok {
-		_spec.AddField(workbook.FieldCreatedID, field.TypeInt, value)
+		_spec.SetField(workbook.FieldCreatedID, field.TypeUUID, value)
 	}
 	if value, ok := wu.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := wu.mutation.IsPublic(); ok {
+		_spec.SetField(workbook.FieldIsPublic, field.TypeBool, value)
 	}
 	if value, ok := wu.mutation.Title(); ok {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
@@ -302,7 +310,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -315,7 +323,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -331,7 +339,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -347,7 +355,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -360,7 +368,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -376,7 +384,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -392,7 +400,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -405,7 +413,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -421,7 +429,7 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -470,23 +478,16 @@ func (wuo *WorkbookUpdateOne) SetUpdatedAt(t time.Time) *WorkbookUpdateOne {
 }
 
 // SetCreatedID sets the "created_id" field.
-func (wuo *WorkbookUpdateOne) SetCreatedID(i int) *WorkbookUpdateOne {
-	wuo.mutation.ResetCreatedID()
-	wuo.mutation.SetCreatedID(i)
+func (wuo *WorkbookUpdateOne) SetCreatedID(u uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.SetCreatedID(u)
 	return wuo
 }
 
 // SetNillableCreatedID sets the "created_id" field if the given value is not nil.
-func (wuo *WorkbookUpdateOne) SetNillableCreatedID(i *int) *WorkbookUpdateOne {
-	if i != nil {
-		wuo.SetCreatedID(*i)
+func (wuo *WorkbookUpdateOne) SetNillableCreatedID(u *uuid.UUID) *WorkbookUpdateOne {
+	if u != nil {
+		wuo.SetCreatedID(*u)
 	}
-	return wuo
-}
-
-// AddCreatedID adds i to the "created_id" field.
-func (wuo *WorkbookUpdateOne) AddCreatedID(i int) *WorkbookUpdateOne {
-	wuo.mutation.AddCreatedID(i)
 	return wuo
 }
 
@@ -500,6 +501,20 @@ func (wuo *WorkbookUpdateOne) SetDescription(s string) *WorkbookUpdateOne {
 func (wuo *WorkbookUpdateOne) SetNillableDescription(s *string) *WorkbookUpdateOne {
 	if s != nil {
 		wuo.SetDescription(*s)
+	}
+	return wuo
+}
+
+// SetIsPublic sets the "is_public" field.
+func (wuo *WorkbookUpdateOne) SetIsPublic(b bool) *WorkbookUpdateOne {
+	wuo.mutation.SetIsPublic(b)
+	return wuo
+}
+
+// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
+func (wuo *WorkbookUpdateOne) SetNillableIsPublic(b *bool) *WorkbookUpdateOne {
+	if b != nil {
+		wuo.SetIsPublic(*b)
 	}
 	return wuo
 }
@@ -519,14 +534,14 @@ func (wuo *WorkbookUpdateOne) SetNillableTitle(s *string) *WorkbookUpdateOne {
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wuo *WorkbookUpdateOne) AddProblemIDs(ids ...int) *WorkbookUpdateOne {
+func (wuo *WorkbookUpdateOne) AddProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.AddProblemIDs(ids...)
 	return wuo
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (wuo *WorkbookUpdateOne) AddProblems(p ...*Problem) *WorkbookUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -534,14 +549,14 @@ func (wuo *WorkbookUpdateOne) AddProblems(p ...*Problem) *WorkbookUpdateOne {
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
-func (wuo *WorkbookUpdateOne) AddWorkbookCategoryIDs(ids ...int) *WorkbookUpdateOne {
+func (wuo *WorkbookUpdateOne) AddWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.AddWorkbookCategoryIDs(ids...)
 	return wuo
 }
 
 // AddWorkbookCategories adds the "workbook_categories" edges to the WorkbookCategory entity.
 func (wuo *WorkbookUpdateOne) AddWorkbookCategories(w ...*WorkbookCategory) *WorkbookUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -549,14 +564,14 @@ func (wuo *WorkbookUpdateOne) AddWorkbookCategories(w ...*WorkbookCategory) *Wor
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (wuo *WorkbookUpdateOne) AddWorkbookMemberIDs(ids ...int) *WorkbookUpdateOne {
+func (wuo *WorkbookUpdateOne) AddWorkbookMemberIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.AddWorkbookMemberIDs(ids...)
 	return wuo
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (wuo *WorkbookUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *WorkbookUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -575,14 +590,14 @@ func (wuo *WorkbookUpdateOne) ClearProblems() *WorkbookUpdateOne {
 }
 
 // RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (wuo *WorkbookUpdateOne) RemoveProblemIDs(ids ...int) *WorkbookUpdateOne {
+func (wuo *WorkbookUpdateOne) RemoveProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.RemoveProblemIDs(ids...)
 	return wuo
 }
 
 // RemoveProblems removes "problems" edges to Problem entities.
 func (wuo *WorkbookUpdateOne) RemoveProblems(p ...*Problem) *WorkbookUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -596,14 +611,14 @@ func (wuo *WorkbookUpdateOne) ClearWorkbookCategories() *WorkbookUpdateOne {
 }
 
 // RemoveWorkbookCategoryIDs removes the "workbook_categories" edge to WorkbookCategory entities by IDs.
-func (wuo *WorkbookUpdateOne) RemoveWorkbookCategoryIDs(ids ...int) *WorkbookUpdateOne {
+func (wuo *WorkbookUpdateOne) RemoveWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.RemoveWorkbookCategoryIDs(ids...)
 	return wuo
 }
 
 // RemoveWorkbookCategories removes "workbook_categories" edges to WorkbookCategory entities.
 func (wuo *WorkbookUpdateOne) RemoveWorkbookCategories(w ...*WorkbookCategory) *WorkbookUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -617,14 +632,14 @@ func (wuo *WorkbookUpdateOne) ClearWorkbookMembers() *WorkbookUpdateOne {
 }
 
 // RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
-func (wuo *WorkbookUpdateOne) RemoveWorkbookMemberIDs(ids ...int) *WorkbookUpdateOne {
+func (wuo *WorkbookUpdateOne) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.RemoveWorkbookMemberIDs(ids...)
 	return wuo
 }
 
 // RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
 func (wuo *WorkbookUpdateOne) RemoveWorkbookMembers(w ...*WorkbookMember) *WorkbookUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -699,7 +714,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 	if err := wuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(workbook.Table, workbook.Columns, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(workbook.Table, workbook.Columns, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID))
 	id, ok := wuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Workbook.id" for update`)}
@@ -731,13 +746,13 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := wuo.mutation.CreatedID(); ok {
-		_spec.SetField(workbook.FieldCreatedID, field.TypeInt, value)
-	}
-	if value, ok := wuo.mutation.AddedCreatedID(); ok {
-		_spec.AddField(workbook.FieldCreatedID, field.TypeInt, value)
+		_spec.SetField(workbook.FieldCreatedID, field.TypeUUID, value)
 	}
 	if value, ok := wuo.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := wuo.mutation.IsPublic(); ok {
+		_spec.SetField(workbook.FieldIsPublic, field.TypeBool, value)
 	}
 	if value, ok := wuo.mutation.Title(); ok {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
@@ -750,7 +765,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -763,7 +778,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -779,7 +794,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -795,7 +810,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -808,7 +823,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -824,7 +839,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.WorkbookCategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -840,7 +855,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -853,7 +868,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -869,7 +884,7 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Columns: []string{workbook.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

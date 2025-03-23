@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerTruth holds the schema definition for the AnswerTruth entity.
@@ -17,6 +18,7 @@ type AnswerTruth struct {
 
 func (AnswerTruth) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }
@@ -24,7 +26,7 @@ func (AnswerTruth) Mixin() []ent.Mixin {
 // Fields of the AnswerTruth.
 func (AnswerTruth) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int(problem.Label + "_id"),
+		field.UUID(problem.Label+"_id", uuid.UUID{}).Unique(),
 		field.Bool("truth"),
 	}
 }

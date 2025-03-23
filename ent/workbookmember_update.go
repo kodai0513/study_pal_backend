@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookMemberUpdate is the builder for updating WorkbookMember entities.
@@ -52,43 +53,43 @@ func (wmu *WorkbookMemberUpdate) SetUpdatedAt(t time.Time) *WorkbookMemberUpdate
 }
 
 // SetRoleID sets the "role_id" field.
-func (wmu *WorkbookMemberUpdate) SetRoleID(i int) *WorkbookMemberUpdate {
-	wmu.mutation.SetRoleID(i)
+func (wmu *WorkbookMemberUpdate) SetRoleID(u uuid.UUID) *WorkbookMemberUpdate {
+	wmu.mutation.SetRoleID(u)
 	return wmu
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (wmu *WorkbookMemberUpdate) SetNillableRoleID(i *int) *WorkbookMemberUpdate {
-	if i != nil {
-		wmu.SetRoleID(*i)
+func (wmu *WorkbookMemberUpdate) SetNillableRoleID(u *uuid.UUID) *WorkbookMemberUpdate {
+	if u != nil {
+		wmu.SetRoleID(*u)
 	}
 	return wmu
 }
 
 // SetMemberID sets the "member_id" field.
-func (wmu *WorkbookMemberUpdate) SetMemberID(i int) *WorkbookMemberUpdate {
-	wmu.mutation.SetMemberID(i)
+func (wmu *WorkbookMemberUpdate) SetMemberID(u uuid.UUID) *WorkbookMemberUpdate {
+	wmu.mutation.SetMemberID(u)
 	return wmu
 }
 
 // SetNillableMemberID sets the "member_id" field if the given value is not nil.
-func (wmu *WorkbookMemberUpdate) SetNillableMemberID(i *int) *WorkbookMemberUpdate {
-	if i != nil {
-		wmu.SetMemberID(*i)
+func (wmu *WorkbookMemberUpdate) SetNillableMemberID(u *uuid.UUID) *WorkbookMemberUpdate {
+	if u != nil {
+		wmu.SetMemberID(*u)
 	}
 	return wmu
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (wmu *WorkbookMemberUpdate) SetWorkbookID(i int) *WorkbookMemberUpdate {
-	wmu.mutation.SetWorkbookID(i)
+func (wmu *WorkbookMemberUpdate) SetWorkbookID(u uuid.UUID) *WorkbookMemberUpdate {
+	wmu.mutation.SetWorkbookID(u)
 	return wmu
 }
 
 // SetNillableWorkbookID sets the "workbook_id" field if the given value is not nil.
-func (wmu *WorkbookMemberUpdate) SetNillableWorkbookID(i *int) *WorkbookMemberUpdate {
-	if i != nil {
-		wmu.SetWorkbookID(*i)
+func (wmu *WorkbookMemberUpdate) SetNillableWorkbookID(u *uuid.UUID) *WorkbookMemberUpdate {
+	if u != nil {
+		wmu.SetWorkbookID(*u)
 	}
 	return wmu
 }
@@ -185,7 +186,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if err := wmu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(workbookmember.Table, workbookmember.Columns, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(workbookmember.Table, workbookmember.Columns, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID))
 	if ps := wmu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -207,7 +208,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{workbookmember.RoleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -220,7 +221,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{workbookmember.RoleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -236,7 +237,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{workbookmember.MemberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -249,7 +250,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{workbookmember.MemberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -265,7 +266,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{workbookmember.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -278,7 +279,7 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{workbookmember.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -327,43 +328,43 @@ func (wmuo *WorkbookMemberUpdateOne) SetUpdatedAt(t time.Time) *WorkbookMemberUp
 }
 
 // SetRoleID sets the "role_id" field.
-func (wmuo *WorkbookMemberUpdateOne) SetRoleID(i int) *WorkbookMemberUpdateOne {
-	wmuo.mutation.SetRoleID(i)
+func (wmuo *WorkbookMemberUpdateOne) SetRoleID(u uuid.UUID) *WorkbookMemberUpdateOne {
+	wmuo.mutation.SetRoleID(u)
 	return wmuo
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (wmuo *WorkbookMemberUpdateOne) SetNillableRoleID(i *int) *WorkbookMemberUpdateOne {
-	if i != nil {
-		wmuo.SetRoleID(*i)
+func (wmuo *WorkbookMemberUpdateOne) SetNillableRoleID(u *uuid.UUID) *WorkbookMemberUpdateOne {
+	if u != nil {
+		wmuo.SetRoleID(*u)
 	}
 	return wmuo
 }
 
 // SetMemberID sets the "member_id" field.
-func (wmuo *WorkbookMemberUpdateOne) SetMemberID(i int) *WorkbookMemberUpdateOne {
-	wmuo.mutation.SetMemberID(i)
+func (wmuo *WorkbookMemberUpdateOne) SetMemberID(u uuid.UUID) *WorkbookMemberUpdateOne {
+	wmuo.mutation.SetMemberID(u)
 	return wmuo
 }
 
 // SetNillableMemberID sets the "member_id" field if the given value is not nil.
-func (wmuo *WorkbookMemberUpdateOne) SetNillableMemberID(i *int) *WorkbookMemberUpdateOne {
-	if i != nil {
-		wmuo.SetMemberID(*i)
+func (wmuo *WorkbookMemberUpdateOne) SetNillableMemberID(u *uuid.UUID) *WorkbookMemberUpdateOne {
+	if u != nil {
+		wmuo.SetMemberID(*u)
 	}
 	return wmuo
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (wmuo *WorkbookMemberUpdateOne) SetWorkbookID(i int) *WorkbookMemberUpdateOne {
-	wmuo.mutation.SetWorkbookID(i)
+func (wmuo *WorkbookMemberUpdateOne) SetWorkbookID(u uuid.UUID) *WorkbookMemberUpdateOne {
+	wmuo.mutation.SetWorkbookID(u)
 	return wmuo
 }
 
 // SetNillableWorkbookID sets the "workbook_id" field if the given value is not nil.
-func (wmuo *WorkbookMemberUpdateOne) SetNillableWorkbookID(i *int) *WorkbookMemberUpdateOne {
-	if i != nil {
-		wmuo.SetWorkbookID(*i)
+func (wmuo *WorkbookMemberUpdateOne) SetNillableWorkbookID(u *uuid.UUID) *WorkbookMemberUpdateOne {
+	if u != nil {
+		wmuo.SetWorkbookID(*u)
 	}
 	return wmuo
 }
@@ -473,7 +474,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 	if err := wmuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(workbookmember.Table, workbookmember.Columns, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(workbookmember.Table, workbookmember.Columns, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID))
 	id, ok := wmuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "WorkbookMember.id" for update`)}
@@ -512,7 +513,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 			Columns: []string{workbookmember.RoleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -525,7 +526,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 			Columns: []string{workbookmember.RoleColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -541,7 +542,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 			Columns: []string{workbookmember.MemberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -554,7 +555,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 			Columns: []string{workbookmember.MemberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -570,7 +571,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 			Columns: []string{workbookmember.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -583,7 +584,7 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 			Columns: []string{workbookmember.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

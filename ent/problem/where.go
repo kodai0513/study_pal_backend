@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Problem {
+func ID(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Problem {
+func IDEQ(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Problem {
+func IDNEQ(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Problem {
+func IDIn(ids ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Problem {
+func IDNotIn(ids ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Problem {
+func IDGT(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Problem {
+func IDGTE(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Problem {
+func IDLT(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Problem {
+func IDLTE(id uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldLTE(FieldID, id))
 }
 
@@ -66,7 +67,7 @@ func UpdatedAt(v time.Time) predicate.Problem {
 }
 
 // AnswerTypeID applies equality check predicate on the "answer_type_id" field. It's identical to AnswerTypeIDEQ.
-func AnswerTypeID(v int) predicate.Problem {
+func AnswerTypeID(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldAnswerTypeID, v))
 }
 
@@ -76,13 +77,18 @@ func Statement(v string) predicate.Problem {
 }
 
 // WorkbookID applies equality check predicate on the "workbook_id" field. It's identical to WorkbookIDEQ.
-func WorkbookID(v int) predicate.Problem {
+func WorkbookID(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldWorkbookID, v))
 }
 
 // WorkbookCategoryID applies equality check predicate on the "workbook_category_id" field. It's identical to WorkbookCategoryIDEQ.
-func WorkbookCategoryID(v int) predicate.Problem {
+func WorkbookCategoryID(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldWorkbookCategoryID, v))
+}
+
+// WorkbookCategoryClassificationID applies equality check predicate on the "workbook_category_classification_id" field. It's identical to WorkbookCategoryClassificationIDEQ.
+func WorkbookCategoryClassificationID(v uuid.UUID) predicate.Problem {
+	return predicate.Problem(sql.FieldEQ(FieldWorkbookCategoryClassificationID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -166,22 +172,22 @@ func UpdatedAtLTE(v time.Time) predicate.Problem {
 }
 
 // AnswerTypeIDEQ applies the EQ predicate on the "answer_type_id" field.
-func AnswerTypeIDEQ(v int) predicate.Problem {
+func AnswerTypeIDEQ(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldAnswerTypeID, v))
 }
 
 // AnswerTypeIDNEQ applies the NEQ predicate on the "answer_type_id" field.
-func AnswerTypeIDNEQ(v int) predicate.Problem {
+func AnswerTypeIDNEQ(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNEQ(FieldAnswerTypeID, v))
 }
 
 // AnswerTypeIDIn applies the In predicate on the "answer_type_id" field.
-func AnswerTypeIDIn(vs ...int) predicate.Problem {
+func AnswerTypeIDIn(vs ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldIn(FieldAnswerTypeID, vs...))
 }
 
 // AnswerTypeIDNotIn applies the NotIn predicate on the "answer_type_id" field.
-func AnswerTypeIDNotIn(vs ...int) predicate.Problem {
+func AnswerTypeIDNotIn(vs ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNotIn(FieldAnswerTypeID, vs...))
 }
 
@@ -251,43 +257,83 @@ func StatementContainsFold(v string) predicate.Problem {
 }
 
 // WorkbookIDEQ applies the EQ predicate on the "workbook_id" field.
-func WorkbookIDEQ(v int) predicate.Problem {
+func WorkbookIDEQ(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldWorkbookID, v))
 }
 
 // WorkbookIDNEQ applies the NEQ predicate on the "workbook_id" field.
-func WorkbookIDNEQ(v int) predicate.Problem {
+func WorkbookIDNEQ(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNEQ(FieldWorkbookID, v))
 }
 
 // WorkbookIDIn applies the In predicate on the "workbook_id" field.
-func WorkbookIDIn(vs ...int) predicate.Problem {
+func WorkbookIDIn(vs ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldIn(FieldWorkbookID, vs...))
 }
 
 // WorkbookIDNotIn applies the NotIn predicate on the "workbook_id" field.
-func WorkbookIDNotIn(vs ...int) predicate.Problem {
+func WorkbookIDNotIn(vs ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNotIn(FieldWorkbookID, vs...))
 }
 
 // WorkbookCategoryIDEQ applies the EQ predicate on the "workbook_category_id" field.
-func WorkbookCategoryIDEQ(v int) predicate.Problem {
+func WorkbookCategoryIDEQ(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldWorkbookCategoryID, v))
 }
 
 // WorkbookCategoryIDNEQ applies the NEQ predicate on the "workbook_category_id" field.
-func WorkbookCategoryIDNEQ(v int) predicate.Problem {
+func WorkbookCategoryIDNEQ(v uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNEQ(FieldWorkbookCategoryID, v))
 }
 
 // WorkbookCategoryIDIn applies the In predicate on the "workbook_category_id" field.
-func WorkbookCategoryIDIn(vs ...int) predicate.Problem {
+func WorkbookCategoryIDIn(vs ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldIn(FieldWorkbookCategoryID, vs...))
 }
 
 // WorkbookCategoryIDNotIn applies the NotIn predicate on the "workbook_category_id" field.
-func WorkbookCategoryIDNotIn(vs ...int) predicate.Problem {
+func WorkbookCategoryIDNotIn(vs ...uuid.UUID) predicate.Problem {
 	return predicate.Problem(sql.FieldNotIn(FieldWorkbookCategoryID, vs...))
+}
+
+// WorkbookCategoryIDIsNil applies the IsNil predicate on the "workbook_category_id" field.
+func WorkbookCategoryIDIsNil() predicate.Problem {
+	return predicate.Problem(sql.FieldIsNull(FieldWorkbookCategoryID))
+}
+
+// WorkbookCategoryIDNotNil applies the NotNil predicate on the "workbook_category_id" field.
+func WorkbookCategoryIDNotNil() predicate.Problem {
+	return predicate.Problem(sql.FieldNotNull(FieldWorkbookCategoryID))
+}
+
+// WorkbookCategoryClassificationIDEQ applies the EQ predicate on the "workbook_category_classification_id" field.
+func WorkbookCategoryClassificationIDEQ(v uuid.UUID) predicate.Problem {
+	return predicate.Problem(sql.FieldEQ(FieldWorkbookCategoryClassificationID, v))
+}
+
+// WorkbookCategoryClassificationIDNEQ applies the NEQ predicate on the "workbook_category_classification_id" field.
+func WorkbookCategoryClassificationIDNEQ(v uuid.UUID) predicate.Problem {
+	return predicate.Problem(sql.FieldNEQ(FieldWorkbookCategoryClassificationID, v))
+}
+
+// WorkbookCategoryClassificationIDIn applies the In predicate on the "workbook_category_classification_id" field.
+func WorkbookCategoryClassificationIDIn(vs ...uuid.UUID) predicate.Problem {
+	return predicate.Problem(sql.FieldIn(FieldWorkbookCategoryClassificationID, vs...))
+}
+
+// WorkbookCategoryClassificationIDNotIn applies the NotIn predicate on the "workbook_category_classification_id" field.
+func WorkbookCategoryClassificationIDNotIn(vs ...uuid.UUID) predicate.Problem {
+	return predicate.Problem(sql.FieldNotIn(FieldWorkbookCategoryClassificationID, vs...))
+}
+
+// WorkbookCategoryClassificationIDIsNil applies the IsNil predicate on the "workbook_category_classification_id" field.
+func WorkbookCategoryClassificationIDIsNil() predicate.Problem {
+	return predicate.Problem(sql.FieldIsNull(FieldWorkbookCategoryClassificationID))
+}
+
+// WorkbookCategoryClassificationIDNotNil applies the NotNil predicate on the "workbook_category_classification_id" field.
+func WorkbookCategoryClassificationIDNotNil() predicate.Problem {
+	return predicate.Problem(sql.FieldNotNull(FieldWorkbookCategoryClassificationID))
 }
 
 // HasAnswerType applies the HasEdge predicate on the "answer_type" edge.
@@ -318,7 +364,7 @@ func HasAnswerDescriptions() predicate.Problem {
 	return predicate.Problem(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AnswerDescriptionsTable, AnswerDescriptionsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, AnswerDescriptionsTable, AnswerDescriptionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -364,7 +410,7 @@ func HasAnswerTruths() predicate.Problem {
 	return predicate.Problem(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AnswerTruthsTable, AnswerTruthsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, AnswerTruthsTable, AnswerTruthsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -420,6 +466,29 @@ func HasWorkbookCategory() predicate.Problem {
 func HasWorkbookCategoryWith(preds ...predicate.WorkbookCategory) predicate.Problem {
 	return predicate.Problem(func(s *sql.Selector) {
 		step := newWorkbookCategoryStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasWorkbookCategoryClassification applies the HasEdge predicate on the "workbook_category_classification" edge.
+func HasWorkbookCategoryClassification() predicate.Problem {
+	return predicate.Problem(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryClassificationTable, WorkbookCategoryClassificationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWorkbookCategoryClassificationWith applies the HasEdge predicate on the "workbook_category_classification" edge with a given conditions (other predicates).
+func HasWorkbookCategoryClassificationWith(preds ...predicate.WorkbookCategoryClassification) predicate.Problem {
+	return predicate.Problem(func(s *sql.Selector) {
+		step := newWorkbookCategoryClassificationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

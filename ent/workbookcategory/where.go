@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.WorkbookCategory {
+func ID(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.WorkbookCategory {
+func IDEQ(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.WorkbookCategory {
+func IDNEQ(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.WorkbookCategory {
+func IDIn(ids ...uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.WorkbookCategory {
+func IDNotIn(ids ...uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.WorkbookCategory {
+func IDGT(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.WorkbookCategory {
+func IDGTE(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.WorkbookCategory {
+func IDLT(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.WorkbookCategory {
+func IDLTE(id uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldLTE(FieldID, id))
 }
 
@@ -71,7 +72,7 @@ func Name(v string) predicate.WorkbookCategory {
 }
 
 // WorkbookID applies equality check predicate on the "workbook_id" field. It's identical to WorkbookIDEQ.
-func WorkbookID(v int) predicate.WorkbookCategory {
+func WorkbookID(v uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldEQ(FieldWorkbookID, v))
 }
 
@@ -221,22 +222,22 @@ func NameContainsFold(v string) predicate.WorkbookCategory {
 }
 
 // WorkbookIDEQ applies the EQ predicate on the "workbook_id" field.
-func WorkbookIDEQ(v int) predicate.WorkbookCategory {
+func WorkbookIDEQ(v uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldEQ(FieldWorkbookID, v))
 }
 
 // WorkbookIDNEQ applies the NEQ predicate on the "workbook_id" field.
-func WorkbookIDNEQ(v int) predicate.WorkbookCategory {
+func WorkbookIDNEQ(v uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldNEQ(FieldWorkbookID, v))
 }
 
 // WorkbookIDIn applies the In predicate on the "workbook_id" field.
-func WorkbookIDIn(vs ...int) predicate.WorkbookCategory {
+func WorkbookIDIn(vs ...uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldIn(FieldWorkbookID, vs...))
 }
 
 // WorkbookIDNotIn applies the NotIn predicate on the "workbook_id" field.
-func WorkbookIDNotIn(vs ...int) predicate.WorkbookCategory {
+func WorkbookIDNotIn(vs ...uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldNotIn(FieldWorkbookID, vs...))
 }
 
@@ -286,21 +287,21 @@ func HasWorkbookWith(preds ...predicate.Workbook) predicate.WorkbookCategory {
 	})
 }
 
-// HasWorkbookCategoryClosures applies the HasEdge predicate on the "workbook_category_closures" edge.
-func HasWorkbookCategoryClosures() predicate.WorkbookCategory {
+// HasWorkbookCategoryClassifications applies the HasEdge predicate on the "workbook_category_classifications" edge.
+func HasWorkbookCategoryClassifications() predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryClosuresTable, WorkbookCategoryClosuresColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryClassificationsTable, WorkbookCategoryClassificationsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWorkbookCategoryClosuresWith applies the HasEdge predicate on the "workbook_category_closures" edge with a given conditions (other predicates).
-func HasWorkbookCategoryClosuresWith(preds ...predicate.WorkbookCategoryClosure) predicate.WorkbookCategory {
+// HasWorkbookCategoryClassificationsWith applies the HasEdge predicate on the "workbook_category_classifications" edge with a given conditions (other predicates).
+func HasWorkbookCategoryClassificationsWith(preds ...predicate.WorkbookCategoryClassification) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(func(s *sql.Selector) {
-		step := newWorkbookCategoryClosuresStep()
+		step := newWorkbookCategoryClassificationsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

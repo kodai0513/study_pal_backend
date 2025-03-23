@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ArticleCreate is the builder for creating a Article entity.
@@ -49,6 +50,12 @@ func (ac *ArticleCreate) SetNillableUpdatedAt(t *time.Time) *ArticleCreate {
 	return ac
 }
 
+// SetPageID sets the "page_id" field.
+func (ac *ArticleCreate) SetPageID(i int) *ArticleCreate {
+	ac.mutation.SetPageID(i)
+	return ac
+}
+
 // SetDescription sets the "description" field.
 func (ac *ArticleCreate) SetDescription(s string) *ArticleCreate {
 	ac.mutation.SetDescription(s)
@@ -56,8 +63,14 @@ func (ac *ArticleCreate) SetDescription(s string) *ArticleCreate {
 }
 
 // SetPostID sets the "post_id" field.
-func (ac *ArticleCreate) SetPostID(i int) *ArticleCreate {
-	ac.mutation.SetPostID(i)
+func (ac *ArticleCreate) SetPostID(u uuid.UUID) *ArticleCreate {
+	ac.mutation.SetPostID(u)
+	return ac
+}
+
+// SetID sets the "id" field.
+func (ac *ArticleCreate) SetID(u uuid.UUID) *ArticleCreate {
+	ac.mutation.SetID(u)
 	return ac
 }
 
@@ -119,6 +132,9 @@ func (ac *ArticleCreate) check() error {
 	if _, ok := ac.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Article.updated_at"`)}
 	}
+	if _, ok := ac.mutation.PageID(); !ok {
+		return &ValidationError{Name: "page_id", err: errors.New(`ent: missing required field "Article.page_id"`)}
+	}
 	if _, ok := ac.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Article.description"`)}
 	}
@@ -147,8 +163,13 @@ func (ac *ArticleCreate) sqlSave(ctx context.Context) (*Article, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	ac.mutation.id = &_node.ID
 	ac.mutation.done = true
 	return _node, nil
@@ -157,8 +178,12 @@ func (ac *ArticleCreate) sqlSave(ctx context.Context) (*Article, error) {
 func (ac *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Article{config: ac.config}
-		_spec = sqlgraph.NewCreateSpec(article.Table, sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(article.Table, sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID))
 	)
+	if id, ok := ac.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := ac.mutation.CreatedAt(); ok {
 		_spec.SetField(article.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -166,6 +191,10 @@ func (ac *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.UpdatedAt(); ok {
 		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := ac.mutation.PageID(); ok {
+		_spec.SetField(article.FieldPageID, field.TypeInt, value)
+		_node.PageID = &value
 	}
 	if value, ok := ac.mutation.Description(); ok {
 		_spec.SetField(article.FieldDescription, field.TypeString, value)
@@ -179,7 +208,7 @@ func (ac *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 			Columns: []string{article.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -236,10 +265,6 @@ func (acb *ArticleCreateBulk) Save(ctx context.Context) ([]*Article, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

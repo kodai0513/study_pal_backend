@@ -11,13 +11,14 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // WorkbookCategory is the model entity for the WorkbookCategory schema.
 type WorkbookCategory struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -25,7 +26,7 @@ type WorkbookCategory struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// WorkbookID holds the value of the "workbook_id" field.
-	WorkbookID int `json:"workbook_id,omitempty"`
+	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WorkbookCategoryQuery when eager-loading is set.
 	Edges        WorkbookCategoryEdges `json:"edges"`
@@ -38,8 +39,8 @@ type WorkbookCategoryEdges struct {
 	Problems []*Problem `json:"problems,omitempty"`
 	// Workbook holds the value of the workbook edge.
 	Workbook *Workbook `json:"workbook,omitempty"`
-	// WorkbookCategoryClosures holds the value of the workbook_category_closures edge.
-	WorkbookCategoryClosures []*WorkbookCategoryClosure `json:"workbook_category_closures,omitempty"`
+	// WorkbookCategoryClassifications holds the value of the workbook_category_classifications edge.
+	WorkbookCategoryClassifications []*WorkbookCategoryClassification `json:"workbook_category_classifications,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -65,13 +66,13 @@ func (e WorkbookCategoryEdges) WorkbookOrErr() (*Workbook, error) {
 	return nil, &NotLoadedError{edge: "workbook"}
 }
 
-// WorkbookCategoryClosuresOrErr returns the WorkbookCategoryClosures value or an error if the edge
+// WorkbookCategoryClassificationsOrErr returns the WorkbookCategoryClassifications value or an error if the edge
 // was not loaded in eager-loading.
-func (e WorkbookCategoryEdges) WorkbookCategoryClosuresOrErr() ([]*WorkbookCategoryClosure, error) {
+func (e WorkbookCategoryEdges) WorkbookCategoryClassificationsOrErr() ([]*WorkbookCategoryClassification, error) {
 	if e.loadedTypes[2] {
-		return e.WorkbookCategoryClosures, nil
+		return e.WorkbookCategoryClassifications, nil
 	}
-	return nil, &NotLoadedError{edge: "workbook_category_closures"}
+	return nil, &NotLoadedError{edge: "workbook_category_classifications"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -79,12 +80,12 @@ func (*WorkbookCategory) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case workbookcategory.FieldID, workbookcategory.FieldWorkbookID:
-			values[i] = new(sql.NullInt64)
 		case workbookcategory.FieldName:
 			values[i] = new(sql.NullString)
 		case workbookcategory.FieldCreatedAt, workbookcategory.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case workbookcategory.FieldID, workbookcategory.FieldWorkbookID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -101,11 +102,11 @@ func (wc *WorkbookCategory) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case workbookcategory.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				wc.ID = *value
 			}
-			wc.ID = int(value.Int64)
 		case workbookcategory.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -125,10 +126,10 @@ func (wc *WorkbookCategory) assignValues(columns []string, values []any) error {
 				wc.Name = value.String
 			}
 		case workbookcategory.FieldWorkbookID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field workbook_id", values[i])
-			} else if value.Valid {
-				wc.WorkbookID = int(value.Int64)
+			} else if value != nil {
+				wc.WorkbookID = *value
 			}
 		default:
 			wc.selectValues.Set(columns[i], values[i])
@@ -153,9 +154,9 @@ func (wc *WorkbookCategory) QueryWorkbook() *WorkbookQuery {
 	return NewWorkbookCategoryClient(wc.config).QueryWorkbook(wc)
 }
 
-// QueryWorkbookCategoryClosures queries the "workbook_category_closures" edge of the WorkbookCategory entity.
-func (wc *WorkbookCategory) QueryWorkbookCategoryClosures() *WorkbookCategoryClosureQuery {
-	return NewWorkbookCategoryClient(wc.config).QueryWorkbookCategoryClosures(wc)
+// QueryWorkbookCategoryClassifications queries the "workbook_category_classifications" edge of the WorkbookCategory entity.
+func (wc *WorkbookCategory) QueryWorkbookCategoryClassifications() *WorkbookCategoryClassificationQuery {
+	return NewWorkbookCategoryClient(wc.config).QueryWorkbookCategoryClassifications(wc)
 }
 
 // Update returns a builder for updating this WorkbookCategory.

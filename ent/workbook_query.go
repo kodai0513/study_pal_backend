@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookQuery is the builder for querying Workbook entities.
@@ -155,8 +156,8 @@ func (wq *WorkbookQuery) FirstX(ctx context.Context) *Workbook {
 
 // FirstID returns the first Workbook ID from the query.
 // Returns a *NotFoundError when no Workbook ID was found.
-func (wq *WorkbookQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (wq *WorkbookQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wq.Limit(1).IDs(setContextOp(ctx, wq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -168,7 +169,7 @@ func (wq *WorkbookQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (wq *WorkbookQuery) FirstIDX(ctx context.Context) int {
+func (wq *WorkbookQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := wq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -206,8 +207,8 @@ func (wq *WorkbookQuery) OnlyX(ctx context.Context) *Workbook {
 // OnlyID is like Only, but returns the only Workbook ID in the query.
 // Returns a *NotSingularError when more than one Workbook ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (wq *WorkbookQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (wq *WorkbookQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wq.Limit(2).IDs(setContextOp(ctx, wq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -223,7 +224,7 @@ func (wq *WorkbookQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (wq *WorkbookQuery) OnlyIDX(ctx context.Context) int {
+func (wq *WorkbookQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := wq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -251,7 +252,7 @@ func (wq *WorkbookQuery) AllX(ctx context.Context) []*Workbook {
 }
 
 // IDs executes the query and returns a list of Workbook IDs.
-func (wq *WorkbookQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (wq *WorkbookQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if wq.ctx.Unique == nil && wq.path != nil {
 		wq.Unique(true)
 	}
@@ -263,7 +264,7 @@ func (wq *WorkbookQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (wq *WorkbookQuery) IDsX(ctx context.Context) []int {
+func (wq *WorkbookQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := wq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -495,7 +496,7 @@ func (wq *WorkbookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wor
 
 func (wq *WorkbookQuery) loadProblems(ctx context.Context, query *ProblemQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *Problem)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Workbook)
+	nodeids := make(map[uuid.UUID]*Workbook)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -525,7 +526,7 @@ func (wq *WorkbookQuery) loadProblems(ctx context.Context, query *ProblemQuery, 
 }
 func (wq *WorkbookQuery) loadWorkbookCategories(ctx context.Context, query *WorkbookCategoryQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *WorkbookCategory)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Workbook)
+	nodeids := make(map[uuid.UUID]*Workbook)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -555,7 +556,7 @@ func (wq *WorkbookQuery) loadWorkbookCategories(ctx context.Context, query *Work
 }
 func (wq *WorkbookQuery) loadWorkbookMembers(ctx context.Context, query *WorkbookMemberQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *WorkbookMember)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Workbook)
+	nodeids := make(map[uuid.UUID]*Workbook)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -594,7 +595,7 @@ func (wq *WorkbookQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (wq *WorkbookQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(workbook.Table, workbook.Columns, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(workbook.Table, workbook.Columns, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID))
 	_spec.From = wq.sql
 	if unique := wq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

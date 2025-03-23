@@ -29,7 +29,7 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_quer
 		return t.client.Article.Query().WithPost().Limit(limit).AllX(t.ctx)
 	}
 	nextQuery := func() []*ent.Article {
-		return t.client.Article.Query().WithPost().Where(article.IDGTE(type_converts.StringToInt(page.NextPageId(), 0))).Limit(limit).AllX(t.ctx)
+		return t.client.Article.Query().WithPost().Where(article.PageIDGTE(type_converts.StringToInt(page.NextPageId(), 0))).Limit(limit).AllX(t.ctx)
 	}
 
 	resutls, nextPage, err := create_pages.CreatePage[ent.Article](
@@ -37,7 +37,7 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_quer
 		&nextQuery,
 		nil,
 		page,
-		1,
+		4,
 	)
 
 	if err != nil {

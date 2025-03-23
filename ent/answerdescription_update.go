@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerDescriptionUpdate is the builder for updating AnswerDescription entities.
@@ -64,15 +65,15 @@ func (adu *AnswerDescriptionUpdate) SetNillableName(s *string) *AnswerDescriptio
 }
 
 // SetProblemID sets the "problem_id" field.
-func (adu *AnswerDescriptionUpdate) SetProblemID(i int) *AnswerDescriptionUpdate {
-	adu.mutation.SetProblemID(i)
+func (adu *AnswerDescriptionUpdate) SetProblemID(u uuid.UUID) *AnswerDescriptionUpdate {
+	adu.mutation.SetProblemID(u)
 	return adu
 }
 
 // SetNillableProblemID sets the "problem_id" field if the given value is not nil.
-func (adu *AnswerDescriptionUpdate) SetNillableProblemID(i *int) *AnswerDescriptionUpdate {
-	if i != nil {
-		adu.SetProblemID(*i)
+func (adu *AnswerDescriptionUpdate) SetNillableProblemID(u *uuid.UUID) *AnswerDescriptionUpdate {
+	if u != nil {
+		adu.SetProblemID(*u)
 	}
 	return adu
 }
@@ -146,7 +147,7 @@ func (adu *AnswerDescriptionUpdate) sqlSave(ctx context.Context) (n int, err err
 	if err := adu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answerdescription.Table, answerdescription.Columns, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answerdescription.Table, answerdescription.Columns, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeUUID))
 	if ps := adu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -165,26 +166,26 @@ func (adu *AnswerDescriptionUpdate) sqlSave(ctx context.Context) (n int, err err
 	}
 	if adu.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answerdescription.ProblemTable,
 			Columns: []string{answerdescription.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := adu.mutation.ProblemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answerdescription.ProblemTable,
 			Columns: []string{answerdescription.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -247,15 +248,15 @@ func (aduo *AnswerDescriptionUpdateOne) SetNillableName(s *string) *AnswerDescri
 }
 
 // SetProblemID sets the "problem_id" field.
-func (aduo *AnswerDescriptionUpdateOne) SetProblemID(i int) *AnswerDescriptionUpdateOne {
-	aduo.mutation.SetProblemID(i)
+func (aduo *AnswerDescriptionUpdateOne) SetProblemID(u uuid.UUID) *AnswerDescriptionUpdateOne {
+	aduo.mutation.SetProblemID(u)
 	return aduo
 }
 
 // SetNillableProblemID sets the "problem_id" field if the given value is not nil.
-func (aduo *AnswerDescriptionUpdateOne) SetNillableProblemID(i *int) *AnswerDescriptionUpdateOne {
-	if i != nil {
-		aduo.SetProblemID(*i)
+func (aduo *AnswerDescriptionUpdateOne) SetNillableProblemID(u *uuid.UUID) *AnswerDescriptionUpdateOne {
+	if u != nil {
+		aduo.SetProblemID(*u)
 	}
 	return aduo
 }
@@ -342,7 +343,7 @@ func (aduo *AnswerDescriptionUpdateOne) sqlSave(ctx context.Context) (_node *Ans
 	if err := aduo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answerdescription.Table, answerdescription.Columns, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answerdescription.Table, answerdescription.Columns, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeUUID))
 	id, ok := aduo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AnswerDescription.id" for update`)}
@@ -378,26 +379,26 @@ func (aduo *AnswerDescriptionUpdateOne) sqlSave(ctx context.Context) (_node *Ans
 	}
 	if aduo.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answerdescription.ProblemTable,
 			Columns: []string{answerdescription.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := aduo.mutation.ProblemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answerdescription.ProblemTable,
 			Columns: []string{answerdescription.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

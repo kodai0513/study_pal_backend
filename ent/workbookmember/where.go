@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.WorkbookMember {
+func ID(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.WorkbookMember {
+func IDEQ(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.WorkbookMember {
+func IDNEQ(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.WorkbookMember {
+func IDIn(ids ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.WorkbookMember {
+func IDNotIn(ids ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.WorkbookMember {
+func IDGT(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.WorkbookMember {
+func IDGTE(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.WorkbookMember {
+func IDLT(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.WorkbookMember {
+func IDLTE(id uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldLTE(FieldID, id))
 }
 
@@ -66,17 +67,17 @@ func UpdatedAt(v time.Time) predicate.WorkbookMember {
 }
 
 // RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
-func RoleID(v int) predicate.WorkbookMember {
+func RoleID(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldRoleID, v))
 }
 
 // MemberID applies equality check predicate on the "member_id" field. It's identical to MemberIDEQ.
-func MemberID(v int) predicate.WorkbookMember {
+func MemberID(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldMemberID, v))
 }
 
 // WorkbookID applies equality check predicate on the "workbook_id" field. It's identical to WorkbookIDEQ.
-func WorkbookID(v int) predicate.WorkbookMember {
+func WorkbookID(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldWorkbookID, v))
 }
 
@@ -161,62 +162,62 @@ func UpdatedAtLTE(v time.Time) predicate.WorkbookMember {
 }
 
 // RoleIDEQ applies the EQ predicate on the "role_id" field.
-func RoleIDEQ(v int) predicate.WorkbookMember {
+func RoleIDEQ(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldRoleID, v))
 }
 
 // RoleIDNEQ applies the NEQ predicate on the "role_id" field.
-func RoleIDNEQ(v int) predicate.WorkbookMember {
+func RoleIDNEQ(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNEQ(FieldRoleID, v))
 }
 
 // RoleIDIn applies the In predicate on the "role_id" field.
-func RoleIDIn(vs ...int) predicate.WorkbookMember {
+func RoleIDIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldIn(FieldRoleID, vs...))
 }
 
 // RoleIDNotIn applies the NotIn predicate on the "role_id" field.
-func RoleIDNotIn(vs ...int) predicate.WorkbookMember {
+func RoleIDNotIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNotIn(FieldRoleID, vs...))
 }
 
 // MemberIDEQ applies the EQ predicate on the "member_id" field.
-func MemberIDEQ(v int) predicate.WorkbookMember {
+func MemberIDEQ(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldMemberID, v))
 }
 
 // MemberIDNEQ applies the NEQ predicate on the "member_id" field.
-func MemberIDNEQ(v int) predicate.WorkbookMember {
+func MemberIDNEQ(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNEQ(FieldMemberID, v))
 }
 
 // MemberIDIn applies the In predicate on the "member_id" field.
-func MemberIDIn(vs ...int) predicate.WorkbookMember {
+func MemberIDIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldIn(FieldMemberID, vs...))
 }
 
 // MemberIDNotIn applies the NotIn predicate on the "member_id" field.
-func MemberIDNotIn(vs ...int) predicate.WorkbookMember {
+func MemberIDNotIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNotIn(FieldMemberID, vs...))
 }
 
 // WorkbookIDEQ applies the EQ predicate on the "workbook_id" field.
-func WorkbookIDEQ(v int) predicate.WorkbookMember {
+func WorkbookIDEQ(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldWorkbookID, v))
 }
 
 // WorkbookIDNEQ applies the NEQ predicate on the "workbook_id" field.
-func WorkbookIDNEQ(v int) predicate.WorkbookMember {
+func WorkbookIDNEQ(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNEQ(FieldWorkbookID, v))
 }
 
 // WorkbookIDIn applies the In predicate on the "workbook_id" field.
-func WorkbookIDIn(vs ...int) predicate.WorkbookMember {
+func WorkbookIDIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldIn(FieldWorkbookID, vs...))
 }
 
 // WorkbookIDNotIn applies the NotIn predicate on the "workbook_id" field.
-func WorkbookIDNotIn(vs ...int) predicate.WorkbookMember {
+func WorkbookIDNotIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNotIn(FieldWorkbookID, vs...))
 }
 

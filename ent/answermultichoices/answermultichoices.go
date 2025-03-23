@@ -20,10 +20,10 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldProblemID holds the string denoting the problem_id field in the database.
-	FieldProblemID = "problem_id"
 	// FieldIsCorrect holds the string denoting the is_correct field in the database.
 	FieldIsCorrect = "is_correct"
+	// FieldProblemID holds the string denoting the problem_id field in the database.
+	FieldProblemID = "problem_id"
 	// EdgeProblem holds the string denoting the problem edge name in mutations.
 	EdgeProblem = "problem"
 	// Table holds the table name of the answermultichoices in the database.
@@ -43,8 +43,8 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
-	FieldProblemID,
 	FieldIsCorrect,
+	FieldProblemID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -91,14 +91,14 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByProblemID orders the results by the problem_id field.
-func ByProblemID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProblemID, opts...).ToFunc()
-}
-
 // ByIsCorrect orders the results by the is_correct field.
 func ByIsCorrect(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsCorrect, opts...).ToFunc()
+}
+
+// ByProblemID orders the results by the problem_id field.
+func ByProblemID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProblemID, opts...).ToFunc()
 }
 
 // ByProblemField orders the results by problem field.

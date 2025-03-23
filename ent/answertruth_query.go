@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerTruthQuery is the builder for querying AnswerTruth entities.
@@ -74,7 +75,7 @@ func (atq *AnswerTruthQuery) QueryProblem() *ProblemQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(answertruth.Table, answertruth.FieldID, selector),
 			sqlgraph.To(problem.Table, problem.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, answertruth.ProblemTable, answertruth.ProblemColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, answertruth.ProblemTable, answertruth.ProblemColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
 		return fromU, nil
@@ -106,8 +107,8 @@ func (atq *AnswerTruthQuery) FirstX(ctx context.Context) *AnswerTruth {
 
 // FirstID returns the first AnswerTruth ID from the query.
 // Returns a *NotFoundError when no AnswerTruth ID was found.
-func (atq *AnswerTruthQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (atq *AnswerTruthQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = atq.Limit(1).IDs(setContextOp(ctx, atq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -119,7 +120,7 @@ func (atq *AnswerTruthQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (atq *AnswerTruthQuery) FirstIDX(ctx context.Context) int {
+func (atq *AnswerTruthQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := atq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +158,8 @@ func (atq *AnswerTruthQuery) OnlyX(ctx context.Context) *AnswerTruth {
 // OnlyID is like Only, but returns the only AnswerTruth ID in the query.
 // Returns a *NotSingularError when more than one AnswerTruth ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (atq *AnswerTruthQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (atq *AnswerTruthQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = atq.Limit(2).IDs(setContextOp(ctx, atq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -174,7 +175,7 @@ func (atq *AnswerTruthQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (atq *AnswerTruthQuery) OnlyIDX(ctx context.Context) int {
+func (atq *AnswerTruthQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := atq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +203,7 @@ func (atq *AnswerTruthQuery) AllX(ctx context.Context) []*AnswerTruth {
 }
 
 // IDs executes the query and returns a list of AnswerTruth IDs.
-func (atq *AnswerTruthQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (atq *AnswerTruthQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if atq.ctx.Unique == nil && atq.path != nil {
 		atq.Unique(true)
 	}
@@ -214,7 +215,7 @@ func (atq *AnswerTruthQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (atq *AnswerTruthQuery) IDsX(ctx context.Context) []int {
+func (atq *AnswerTruthQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := atq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -402,8 +403,8 @@ func (atq *AnswerTruthQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 }
 
 func (atq *AnswerTruthQuery) loadProblem(ctx context.Context, query *ProblemQuery, nodes []*AnswerTruth, init func(*AnswerTruth), assign func(*AnswerTruth, *Problem)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AnswerTruth)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*AnswerTruth)
 	for i := range nodes {
 		fk := nodes[i].ProblemID
 		if _, ok := nodeids[fk]; !ok {
@@ -441,7 +442,7 @@ func (atq *AnswerTruthQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (atq *AnswerTruthQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeUUID))
 	_spec.From = atq.sql
 	if unique := atq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

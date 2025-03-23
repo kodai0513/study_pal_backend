@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerTypeQuery is the builder for querying AnswerType entities.
@@ -107,8 +108,8 @@ func (atq *AnswerTypeQuery) FirstX(ctx context.Context) *AnswerType {
 
 // FirstID returns the first AnswerType ID from the query.
 // Returns a *NotFoundError when no AnswerType ID was found.
-func (atq *AnswerTypeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (atq *AnswerTypeQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = atq.Limit(1).IDs(setContextOp(ctx, atq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -120,7 +121,7 @@ func (atq *AnswerTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (atq *AnswerTypeQuery) FirstIDX(ctx context.Context) int {
+func (atq *AnswerTypeQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := atq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -158,8 +159,8 @@ func (atq *AnswerTypeQuery) OnlyX(ctx context.Context) *AnswerType {
 // OnlyID is like Only, but returns the only AnswerType ID in the query.
 // Returns a *NotSingularError when more than one AnswerType ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (atq *AnswerTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (atq *AnswerTypeQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = atq.Limit(2).IDs(setContextOp(ctx, atq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -175,7 +176,7 @@ func (atq *AnswerTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (atq *AnswerTypeQuery) OnlyIDX(ctx context.Context) int {
+func (atq *AnswerTypeQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := atq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,7 +204,7 @@ func (atq *AnswerTypeQuery) AllX(ctx context.Context) []*AnswerType {
 }
 
 // IDs executes the query and returns a list of AnswerType IDs.
-func (atq *AnswerTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (atq *AnswerTypeQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if atq.ctx.Unique == nil && atq.path != nil {
 		atq.Unique(true)
 	}
@@ -215,7 +216,7 @@ func (atq *AnswerTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (atq *AnswerTypeQuery) IDsX(ctx context.Context) []int {
+func (atq *AnswerTypeQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := atq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -405,7 +406,7 @@ func (atq *AnswerTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 
 func (atq *AnswerTypeQuery) loadProblems(ctx context.Context, query *ProblemQuery, nodes []*AnswerType, init func(*AnswerType), assign func(*AnswerType, *Problem)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*AnswerType)
+	nodeids := make(map[uuid.UUID]*AnswerType)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -444,7 +445,7 @@ func (atq *AnswerTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (atq *AnswerTypeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(answertype.Table, answertype.Columns, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(answertype.Table, answertype.Columns, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeUUID))
 	_spec.From = atq.sql
 	if unique := atq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

@@ -22,6 +22,8 @@ const (
 	FieldCreatedID = "created_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldIsPublic holds the string denoting the is_public field in the database.
+	FieldIsPublic = "is_public"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// EdgeProblems holds the string denoting the problems edge name in mutations.
@@ -62,6 +64,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldCreatedID,
 	FieldDescription,
+	FieldIsPublic,
 	FieldTitle,
 }
 
@@ -84,6 +87,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
+	// DefaultIsPublic holds the default value on creation for the "is_public" field.
+	DefaultIsPublic bool
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
 )
@@ -114,6 +119,11 @@ func ByCreatedID(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByIsPublic orders the results by the is_public field.
+func ByIsPublic(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsPublic, opts...).ToFunc()
 }
 
 // ByTitle orders the results by the title field.

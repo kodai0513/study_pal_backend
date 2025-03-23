@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	pluralize "github.com/gertd/go-pluralize"
 )
 
 type generateInfo struct {
@@ -55,7 +57,7 @@ func generateAction(generateInfo *generateInfo) {
 		data := map[string]string{
 			"actionCommandName": actionType + "ActionCommand",
 			"actionName":        actionType + "Action",
-			"packageName":       camelToSnake(generateInfo.name),
+			"packageName":       camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
 		}
 
 		currentPath, err := os.Getwd()
@@ -68,7 +70,7 @@ func generateAction(generateInfo *generateInfo) {
 			panic(err)
 		}
 
-		outputPath := currentPath + "/../app/usecases/" + camelToSnake(generateInfo.name) + "/" + strings.ToLower(actionType) + "_action.go"
+		outputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(actionType) + "_action.go"
 		if _, err := os.Stat(outputPath); err == nil {
 			fmt.Println("file has already been created")
 			return
@@ -106,6 +108,8 @@ func generateController(generateInfo *generateInfo) {
 	data := map[string]string{
 		"controllerName": generateInfo.name + "Controller",
 		"godocName":      strings.ToLower(generateInfo.name),
+		"requestName":    generateInfo.name + "IndexRequest",
+		"responseName":   generateInfo.name + "IndexResponse",
 	}
 
 	currentPath, err := os.Getwd()
@@ -146,7 +150,7 @@ func generateController(generateInfo *generateInfo) {
 func generateQuery(generateInfo *generateInfo) {
 	data := map[string]string{
 		"dtoName":          strings.ToUpper(generateInfo.name[0:1]) + strings.ToLower(generateInfo.name[1:]) + "Dto",
-		"packageName":      camelToSnake(generateInfo.name),
+		"packageName":      camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
 		"queryServiceName": strings.ToUpper(generateInfo.name[0:1]) + strings.ToLower(generateInfo.name[1:]) + "QueryService",
 	}
 
@@ -160,7 +164,7 @@ func generateQuery(generateInfo *generateInfo) {
 		panic(err)
 	}
 
-	outputPath := currentPath + "/../app/usecases/" + camelToSnake(generateInfo.name) + "/" + camelToSnake(generateInfo.name) + "_query_service.go"
+	outputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + camelToSnake(generateInfo.name) + "_query_service.go"
 	if _, err := os.Stat(outputPath); err == nil {
 		fmt.Println("file has already been created")
 		return

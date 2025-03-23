@@ -18,6 +18,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldPageID holds the string denoting the page_id field in the database.
+	FieldPageID = "page_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// FieldPostID holds the string denoting the post_id field in the database.
@@ -40,6 +42,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldPageID,
 	FieldDescription,
 	FieldPostID,
 }
@@ -81,6 +84,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByPageID orders the results by the page_id field.
+func ByPageID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPageID, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

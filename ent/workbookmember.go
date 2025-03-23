@@ -13,23 +13,24 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // WorkbookMember is the model entity for the WorkbookMember schema.
 type WorkbookMember struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// RoleID holds the value of the "role_id" field.
-	RoleID int `json:"role_id,omitempty"`
+	RoleID uuid.UUID `json:"role_id,omitempty"`
 	// MemberID holds the value of the "member_id" field.
-	MemberID int `json:"member_id,omitempty"`
+	MemberID uuid.UUID `json:"member_id,omitempty"`
 	// WorkbookID holds the value of the "workbook_id" field.
-	WorkbookID int `json:"workbook_id,omitempty"`
+	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WorkbookMemberQuery when eager-loading is set.
 	Edges        WorkbookMemberEdges `json:"edges"`
@@ -87,10 +88,10 @@ func (*WorkbookMember) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case workbookmember.FieldID, workbookmember.FieldRoleID, workbookmember.FieldMemberID, workbookmember.FieldWorkbookID:
-			values[i] = new(sql.NullInt64)
 		case workbookmember.FieldCreatedAt, workbookmember.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case workbookmember.FieldID, workbookmember.FieldRoleID, workbookmember.FieldMemberID, workbookmember.FieldWorkbookID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -107,11 +108,11 @@ func (wm *WorkbookMember) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case workbookmember.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				wm.ID = *value
 			}
-			wm.ID = int(value.Int64)
 		case workbookmember.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -125,22 +126,22 @@ func (wm *WorkbookMember) assignValues(columns []string, values []any) error {
 				wm.UpdatedAt = value.Time
 			}
 		case workbookmember.FieldRoleID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
-			} else if value.Valid {
-				wm.RoleID = int(value.Int64)
+			} else if value != nil {
+				wm.RoleID = *value
 			}
 		case workbookmember.FieldMemberID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field member_id", values[i])
-			} else if value.Valid {
-				wm.MemberID = int(value.Int64)
+			} else if value != nil {
+				wm.MemberID = *value
 			}
 		case workbookmember.FieldWorkbookID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field workbook_id", values[i])
-			} else if value.Valid {
-				wm.WorkbookID = int(value.Int64)
+			} else if value != nil {
+				wm.WorkbookID = *value
 			}
 		default:
 			wm.selectValues.Set(columns[i], values[i])

@@ -11,24 +11,25 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookcategoryclassification"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookCategoryQuery is the builder for querying WorkbookCategory entities.
 type WorkbookCategoryQuery struct {
 	config
-	ctx                          *QueryContext
-	order                        []workbookcategory.OrderOption
-	inters                       []Interceptor
-	predicates                   []predicate.WorkbookCategory
-	withProblems                 *ProblemQuery
-	withWorkbook                 *WorkbookQuery
-	withWorkbookCategoryClosures *WorkbookCategoryClosureQuery
+	ctx                                 *QueryContext
+	order                               []workbookcategory.OrderOption
+	inters                              []Interceptor
+	predicates                          []predicate.WorkbookCategory
+	withProblems                        *ProblemQuery
+	withWorkbook                        *WorkbookQuery
+	withWorkbookCategoryClassifications *WorkbookCategoryClassificationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -109,9 +110,9 @@ func (wcq *WorkbookCategoryQuery) QueryWorkbook() *WorkbookQuery {
 	return query
 }
 
-// QueryWorkbookCategoryClosures chains the current query on the "workbook_category_closures" edge.
-func (wcq *WorkbookCategoryQuery) QueryWorkbookCategoryClosures() *WorkbookCategoryClosureQuery {
-	query := (&WorkbookCategoryClosureClient{config: wcq.config}).Query()
+// QueryWorkbookCategoryClassifications chains the current query on the "workbook_category_classifications" edge.
+func (wcq *WorkbookCategoryQuery) QueryWorkbookCategoryClassifications() *WorkbookCategoryClassificationQuery {
+	query := (&WorkbookCategoryClassificationClient{config: wcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -122,8 +123,8 @@ func (wcq *WorkbookCategoryQuery) QueryWorkbookCategoryClosures() *WorkbookCateg
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(workbookcategory.Table, workbookcategory.FieldID, selector),
-			sqlgraph.To(workbookcategoryclosure.Table, workbookcategoryclosure.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryClosuresTable, workbookcategory.WorkbookCategoryClosuresColumn),
+			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryClassificationsTable, workbookcategory.WorkbookCategoryClassificationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wcq.driver.Dialect(), step)
 		return fromU, nil
@@ -155,8 +156,8 @@ func (wcq *WorkbookCategoryQuery) FirstX(ctx context.Context) *WorkbookCategory 
 
 // FirstID returns the first WorkbookCategory ID from the query.
 // Returns a *NotFoundError when no WorkbookCategory ID was found.
-func (wcq *WorkbookCategoryQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (wcq *WorkbookCategoryQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wcq.Limit(1).IDs(setContextOp(ctx, wcq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -168,7 +169,7 @@ func (wcq *WorkbookCategoryQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (wcq *WorkbookCategoryQuery) FirstIDX(ctx context.Context) int {
+func (wcq *WorkbookCategoryQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := wcq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -206,8 +207,8 @@ func (wcq *WorkbookCategoryQuery) OnlyX(ctx context.Context) *WorkbookCategory {
 // OnlyID is like Only, but returns the only WorkbookCategory ID in the query.
 // Returns a *NotSingularError when more than one WorkbookCategory ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (wcq *WorkbookCategoryQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (wcq *WorkbookCategoryQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wcq.Limit(2).IDs(setContextOp(ctx, wcq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -223,7 +224,7 @@ func (wcq *WorkbookCategoryQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (wcq *WorkbookCategoryQuery) OnlyIDX(ctx context.Context) int {
+func (wcq *WorkbookCategoryQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := wcq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -251,7 +252,7 @@ func (wcq *WorkbookCategoryQuery) AllX(ctx context.Context) []*WorkbookCategory 
 }
 
 // IDs executes the query and returns a list of WorkbookCategory IDs.
-func (wcq *WorkbookCategoryQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (wcq *WorkbookCategoryQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if wcq.ctx.Unique == nil && wcq.path != nil {
 		wcq.Unique(true)
 	}
@@ -263,7 +264,7 @@ func (wcq *WorkbookCategoryQuery) IDs(ctx context.Context) (ids []int, err error
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (wcq *WorkbookCategoryQuery) IDsX(ctx context.Context) []int {
+func (wcq *WorkbookCategoryQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := wcq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -318,14 +319,14 @@ func (wcq *WorkbookCategoryQuery) Clone() *WorkbookCategoryQuery {
 		return nil
 	}
 	return &WorkbookCategoryQuery{
-		config:                       wcq.config,
-		ctx:                          wcq.ctx.Clone(),
-		order:                        append([]workbookcategory.OrderOption{}, wcq.order...),
-		inters:                       append([]Interceptor{}, wcq.inters...),
-		predicates:                   append([]predicate.WorkbookCategory{}, wcq.predicates...),
-		withProblems:                 wcq.withProblems.Clone(),
-		withWorkbook:                 wcq.withWorkbook.Clone(),
-		withWorkbookCategoryClosures: wcq.withWorkbookCategoryClosures.Clone(),
+		config:                              wcq.config,
+		ctx:                                 wcq.ctx.Clone(),
+		order:                               append([]workbookcategory.OrderOption{}, wcq.order...),
+		inters:                              append([]Interceptor{}, wcq.inters...),
+		predicates:                          append([]predicate.WorkbookCategory{}, wcq.predicates...),
+		withProblems:                        wcq.withProblems.Clone(),
+		withWorkbook:                        wcq.withWorkbook.Clone(),
+		withWorkbookCategoryClassifications: wcq.withWorkbookCategoryClassifications.Clone(),
 		// clone intermediate query.
 		sql:  wcq.sql.Clone(),
 		path: wcq.path,
@@ -354,14 +355,14 @@ func (wcq *WorkbookCategoryQuery) WithWorkbook(opts ...func(*WorkbookQuery)) *Wo
 	return wcq
 }
 
-// WithWorkbookCategoryClosures tells the query-builder to eager-load the nodes that are connected to
-// the "workbook_category_closures" edge. The optional arguments are used to configure the query builder of the edge.
-func (wcq *WorkbookCategoryQuery) WithWorkbookCategoryClosures(opts ...func(*WorkbookCategoryClosureQuery)) *WorkbookCategoryQuery {
-	query := (&WorkbookCategoryClosureClient{config: wcq.config}).Query()
+// WithWorkbookCategoryClassifications tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_category_classifications" edge. The optional arguments are used to configure the query builder of the edge.
+func (wcq *WorkbookCategoryQuery) WithWorkbookCategoryClassifications(opts ...func(*WorkbookCategoryClassificationQuery)) *WorkbookCategoryQuery {
+	query := (&WorkbookCategoryClassificationClient{config: wcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	wcq.withWorkbookCategoryClosures = query
+	wcq.withWorkbookCategoryClassifications = query
 	return wcq
 }
 
@@ -446,7 +447,7 @@ func (wcq *WorkbookCategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		loadedTypes = [3]bool{
 			wcq.withProblems != nil,
 			wcq.withWorkbook != nil,
-			wcq.withWorkbookCategoryClosures != nil,
+			wcq.withWorkbookCategoryClassifications != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -480,11 +481,13 @@ func (wcq *WorkbookCategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 			return nil, err
 		}
 	}
-	if query := wcq.withWorkbookCategoryClosures; query != nil {
-		if err := wcq.loadWorkbookCategoryClosures(ctx, query, nodes,
-			func(n *WorkbookCategory) { n.Edges.WorkbookCategoryClosures = []*WorkbookCategoryClosure{} },
-			func(n *WorkbookCategory, e *WorkbookCategoryClosure) {
-				n.Edges.WorkbookCategoryClosures = append(n.Edges.WorkbookCategoryClosures, e)
+	if query := wcq.withWorkbookCategoryClassifications; query != nil {
+		if err := wcq.loadWorkbookCategoryClassifications(ctx, query, nodes,
+			func(n *WorkbookCategory) {
+				n.Edges.WorkbookCategoryClassifications = []*WorkbookCategoryClassification{}
+			},
+			func(n *WorkbookCategory, e *WorkbookCategoryClassification) {
+				n.Edges.WorkbookCategoryClassifications = append(n.Edges.WorkbookCategoryClassifications, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -494,7 +497,7 @@ func (wcq *WorkbookCategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 
 func (wcq *WorkbookCategoryQuery) loadProblems(ctx context.Context, query *ProblemQuery, nodes []*WorkbookCategory, init func(*WorkbookCategory), assign func(*WorkbookCategory, *Problem)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*WorkbookCategory)
+	nodeids := make(map[uuid.UUID]*WorkbookCategory)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -514,17 +517,20 @@ func (wcq *WorkbookCategoryQuery) loadProblems(ctx context.Context, query *Probl
 	}
 	for _, n := range neighbors {
 		fk := n.WorkbookCategoryID
-		node, ok := nodeids[fk]
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "workbook_category_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
 func (wcq *WorkbookCategoryQuery) loadWorkbook(ctx context.Context, query *WorkbookQuery, nodes []*WorkbookCategory, init func(*WorkbookCategory), assign func(*WorkbookCategory, *Workbook)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*WorkbookCategory)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*WorkbookCategory)
 	for i := range nodes {
 		fk := nodes[i].WorkbookID
 		if _, ok := nodeids[fk]; !ok {
@@ -551,9 +557,9 @@ func (wcq *WorkbookCategoryQuery) loadWorkbook(ctx context.Context, query *Workb
 	}
 	return nil
 }
-func (wcq *WorkbookCategoryQuery) loadWorkbookCategoryClosures(ctx context.Context, query *WorkbookCategoryClosureQuery, nodes []*WorkbookCategory, init func(*WorkbookCategory), assign func(*WorkbookCategory, *WorkbookCategoryClosure)) error {
+func (wcq *WorkbookCategoryQuery) loadWorkbookCategoryClassifications(ctx context.Context, query *WorkbookCategoryClassificationQuery, nodes []*WorkbookCategory, init func(*WorkbookCategory), assign func(*WorkbookCategory, *WorkbookCategoryClassification)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*WorkbookCategory)
+	nodeids := make(map[uuid.UUID]*WorkbookCategory)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -562,21 +568,21 @@ func (wcq *WorkbookCategoryQuery) loadWorkbookCategoryClosures(ctx context.Conte
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.WorkbookCategoryClosure(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(workbookcategory.WorkbookCategoryClosuresColumn), fks...))
+	query.Where(predicate.WorkbookCategoryClassification(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(workbookcategory.WorkbookCategoryClassificationsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.workbook_category_workbook_category_closures
+		fk := n.workbook_category_workbook_category_classifications
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "workbook_category_workbook_category_closures" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "workbook_category_workbook_category_classifications" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_workbook_category_closures" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_workbook_category_classifications" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -593,7 +599,7 @@ func (wcq *WorkbookCategoryQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (wcq *WorkbookCategoryQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(workbookcategory.Table, workbookcategory.Columns, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(workbookcategory.Table, workbookcategory.Columns, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID))
 	_spec.From = wcq.sql
 	if unique := wcq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

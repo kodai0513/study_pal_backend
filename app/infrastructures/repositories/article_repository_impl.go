@@ -2,11 +2,14 @@ package repositories
 
 import (
 	"context"
-	"study-pal-backend/app/domains/models/articles"
-	"study-pal-backend/app/domains/models/users"
+	"study-pal-backend/app/domains/models/entities"
+	"study-pal-backend/app/domains/models/value_objects/articles"
+	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/article"
+
+	"github.com/google/uuid"
 )
 
 type ArticleRepositoryImpl struct {
@@ -21,28 +24,29 @@ func NewArticleRepositoryImpl(ctx context.Context, client *ent.Client) repositor
 	}
 }
 
-func (a *ArticleRepositoryImpl) Save(article *articles.Article) {
+func (a *ArticleRepositoryImpl) Create(article *entities.Article) {
 	a.client.Article.
 		Create().
+		SetID(article.Id()).
 		SetDescription(article.Description()).
 		SetPostID(article.UserId()).
 		SaveX(a.ctx)
 }
 
-func (a *ArticleRepositoryImpl) Update(article *articles.Article) {
+func (a *ArticleRepositoryImpl) Update(article *entities.Article) {
 	a.client.Article.
 		UpdateOneID(article.Id()).
 		SetDescription(article.Description()).
 		SaveX(a.ctx)
 }
 
-func (a *ArticleRepositoryImpl) Delete(id int) {
+func (a *ArticleRepositoryImpl) Delete(id uuid.UUID) {
 	a.client.Article.
 		DeleteOneID(id).
 		ExecX(a.ctx)
 }
 
-func (a *ArticleRepositoryImpl) FindById(id int) *articles.Article {
+func (a *ArticleRepositoryImpl) FindById(id uuid.UUID) *entities.Article {
 	result := a.client.Article.
 		Query().
 		Where(article.IDEQ(id)).
@@ -52,9 +56,9 @@ func (a *ArticleRepositoryImpl) FindById(id int) *articles.Article {
 		return nil
 	}
 
-	resultId, _ := articles.NewArticleId(result.ID)
+	resultId := articles.NewArticleId(result.ID)
 	resultDescription, _ := articles.NewDescription(result.Description)
-	userId, _ := users.NewUserId(result.PostID)
+	userId := users.NewUserId(result.PostID)
 
-	return articles.NewArticle(resultId, resultDescription, userId)
+	return entities.NewArticle(resultId, resultDescription, userId)
 }

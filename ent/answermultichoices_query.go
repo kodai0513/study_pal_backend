@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerMultiChoicesQuery is the builder for querying AnswerMultiChoices entities.
@@ -106,8 +107,8 @@ func (amcq *AnswerMultiChoicesQuery) FirstX(ctx context.Context) *AnswerMultiCho
 
 // FirstID returns the first AnswerMultiChoices ID from the query.
 // Returns a *NotFoundError when no AnswerMultiChoices ID was found.
-func (amcq *AnswerMultiChoicesQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (amcq *AnswerMultiChoicesQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = amcq.Limit(1).IDs(setContextOp(ctx, amcq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -119,7 +120,7 @@ func (amcq *AnswerMultiChoicesQuery) FirstID(ctx context.Context) (id int, err e
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (amcq *AnswerMultiChoicesQuery) FirstIDX(ctx context.Context) int {
+func (amcq *AnswerMultiChoicesQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := amcq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +158,8 @@ func (amcq *AnswerMultiChoicesQuery) OnlyX(ctx context.Context) *AnswerMultiChoi
 // OnlyID is like Only, but returns the only AnswerMultiChoices ID in the query.
 // Returns a *NotSingularError when more than one AnswerMultiChoices ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (amcq *AnswerMultiChoicesQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (amcq *AnswerMultiChoicesQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = amcq.Limit(2).IDs(setContextOp(ctx, amcq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -174,7 +175,7 @@ func (amcq *AnswerMultiChoicesQuery) OnlyID(ctx context.Context) (id int, err er
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (amcq *AnswerMultiChoicesQuery) OnlyIDX(ctx context.Context) int {
+func (amcq *AnswerMultiChoicesQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := amcq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +203,7 @@ func (amcq *AnswerMultiChoicesQuery) AllX(ctx context.Context) []*AnswerMultiCho
 }
 
 // IDs executes the query and returns a list of AnswerMultiChoices IDs.
-func (amcq *AnswerMultiChoicesQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (amcq *AnswerMultiChoicesQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if amcq.ctx.Unique == nil && amcq.path != nil {
 		amcq.Unique(true)
 	}
@@ -214,7 +215,7 @@ func (amcq *AnswerMultiChoicesQuery) IDs(ctx context.Context) (ids []int, err er
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (amcq *AnswerMultiChoicesQuery) IDsX(ctx context.Context) []int {
+func (amcq *AnswerMultiChoicesQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := amcq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -402,8 +403,8 @@ func (amcq *AnswerMultiChoicesQuery) sqlAll(ctx context.Context, hooks ...queryH
 }
 
 func (amcq *AnswerMultiChoicesQuery) loadProblem(ctx context.Context, query *ProblemQuery, nodes []*AnswerMultiChoices, init func(*AnswerMultiChoices), assign func(*AnswerMultiChoices, *Problem)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AnswerMultiChoices)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*AnswerMultiChoices)
 	for i := range nodes {
 		fk := nodes[i].ProblemID
 		if _, ok := nodeids[fk]; !ok {
@@ -441,7 +442,7 @@ func (amcq *AnswerMultiChoicesQuery) sqlCount(ctx context.Context) (int, error) 
 }
 
 func (amcq *AnswerMultiChoicesQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(answermultichoices.Table, answermultichoices.Columns, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(answermultichoices.Table, answermultichoices.Columns, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeUUID))
 	_spec.From = amcq.sql
 	if unique := amcq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

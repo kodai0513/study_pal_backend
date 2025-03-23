@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerDescriptionCreate is the builder for creating a AnswerDescription entity.
@@ -56,8 +57,14 @@ func (adc *AnswerDescriptionCreate) SetName(s string) *AnswerDescriptionCreate {
 }
 
 // SetProblemID sets the "problem_id" field.
-func (adc *AnswerDescriptionCreate) SetProblemID(i int) *AnswerDescriptionCreate {
-	adc.mutation.SetProblemID(i)
+func (adc *AnswerDescriptionCreate) SetProblemID(u uuid.UUID) *AnswerDescriptionCreate {
+	adc.mutation.SetProblemID(u)
+	return adc
+}
+
+// SetID sets the "id" field.
+func (adc *AnswerDescriptionCreate) SetID(u uuid.UUID) *AnswerDescriptionCreate {
+	adc.mutation.SetID(u)
 	return adc
 }
 
@@ -147,8 +154,13 @@ func (adc *AnswerDescriptionCreate) sqlSave(ctx context.Context) (*AnswerDescrip
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	adc.mutation.id = &_node.ID
 	adc.mutation.done = true
 	return _node, nil
@@ -157,8 +169,12 @@ func (adc *AnswerDescriptionCreate) sqlSave(ctx context.Context) (*AnswerDescrip
 func (adc *AnswerDescriptionCreate) createSpec() (*AnswerDescription, *sqlgraph.CreateSpec) {
 	var (
 		_node = &AnswerDescription{config: adc.config}
-		_spec = sqlgraph.NewCreateSpec(answerdescription.Table, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(answerdescription.Table, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeUUID))
 	)
+	if id, ok := adc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := adc.mutation.CreatedAt(); ok {
 		_spec.SetField(answerdescription.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -173,13 +189,13 @@ func (adc *AnswerDescriptionCreate) createSpec() (*AnswerDescription, *sqlgraph.
 	}
 	if nodes := adc.mutation.ProblemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answerdescription.ProblemTable,
 			Columns: []string{answerdescription.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -236,10 +252,6 @@ func (adcb *AnswerDescriptionCreateBulk) Save(ctx context.Context) ([]*AnswerDes
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

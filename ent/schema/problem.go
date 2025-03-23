@@ -9,11 +9,13 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookcategoryclassification"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // Problem holds the schema definition for the Problem entity.
@@ -23,6 +25,7 @@ type Problem struct {
 
 func (Problem) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }
@@ -30,10 +33,11 @@ func (Problem) Mixin() []ent.Mixin {
 // Fields of the Problem.
 func (Problem) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int(answertype.Label + "_id"),
+		field.UUID(answertype.Label+"_id", uuid.UUID{}).Unique(),
 		field.String("statement").MaxLen(1000).NotEmpty(),
-		field.Int(workbook.Label + "_id"),
-		field.Int(workbookcategory.Label + "_id"),
+		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
+		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
+		field.UUID(workbookcategoryclassification.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
 	}
 }
 
@@ -41,10 +45,11 @@ func (Problem) Fields() []ent.Field {
 func (Problem) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From(answertype.Label, AnswerType.Type).Ref(problem.Table).Unique().Required().Field(answertype.Label + "_id"),
-		edge.To(answerdescription.Table, AnswerDescription.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(answerdescription.Table, AnswerDescription.Type).Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(answermultichoices.Table, AnswerMultiChoices.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To(answertruth.Table, AnswerTruth.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(answertruth.Table, AnswerTruth.Type).Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From(workbook.Label, Workbook.Type).Ref(problem.Table).Unique().Required().Field(workbook.Label + "_id"),
-		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(problem.Table).Unique().Required().Field(workbookcategory.Label + "_id"),
+		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(problem.Table).Unique().Field(workbookcategory.Label + "_id"),
+		edge.From(workbookcategoryclassification.Label, WorkbookCategoryClassification.Type).Ref(problem.Table).Unique().Field(workbookcategoryclassification.Label + "_id"),
 	}
 }

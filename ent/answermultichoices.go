@@ -11,23 +11,24 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // AnswerMultiChoices is the model entity for the AnswerMultiChoices schema.
 type AnswerMultiChoices struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// ProblemID holds the value of the "problem_id" field.
-	ProblemID int `json:"problem_id,omitempty"`
 	// IsCorrect holds the value of the "is_correct" field.
 	IsCorrect bool `json:"is_correct,omitempty"`
+	// ProblemID holds the value of the "problem_id" field.
+	ProblemID uuid.UUID `json:"problem_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AnswerMultiChoicesQuery when eager-loading is set.
 	Edges        AnswerMultiChoicesEdges `json:"edges"`
@@ -61,12 +62,12 @@ func (*AnswerMultiChoices) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case answermultichoices.FieldIsCorrect:
 			values[i] = new(sql.NullBool)
-		case answermultichoices.FieldID, answermultichoices.FieldProblemID:
-			values[i] = new(sql.NullInt64)
 		case answermultichoices.FieldName:
 			values[i] = new(sql.NullString)
 		case answermultichoices.FieldCreatedAt, answermultichoices.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case answermultichoices.FieldID, answermultichoices.FieldProblemID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -83,11 +84,11 @@ func (amc *AnswerMultiChoices) assignValues(columns []string, values []any) erro
 	for i := range columns {
 		switch columns[i] {
 		case answermultichoices.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				amc.ID = *value
 			}
-			amc.ID = int(value.Int64)
 		case answermultichoices.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -106,17 +107,17 @@ func (amc *AnswerMultiChoices) assignValues(columns []string, values []any) erro
 			} else if value.Valid {
 				amc.Name = value.String
 			}
-		case answermultichoices.FieldProblemID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field problem_id", values[i])
-			} else if value.Valid {
-				amc.ProblemID = int(value.Int64)
-			}
 		case answermultichoices.FieldIsCorrect:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field is_correct", values[i])
 			} else if value.Valid {
 				amc.IsCorrect = value.Bool
+			}
+		case answermultichoices.FieldProblemID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field problem_id", values[i])
+			} else if value != nil {
+				amc.ProblemID = *value
 			}
 		default:
 			amc.selectValues.Set(columns[i], values[i])
@@ -168,11 +169,11 @@ func (amc *AnswerMultiChoices) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(amc.Name)
 	builder.WriteString(", ")
-	builder.WriteString("problem_id=")
-	builder.WriteString(fmt.Sprintf("%v", amc.ProblemID))
-	builder.WriteString(", ")
 	builder.WriteString("is_correct=")
 	builder.WriteString(fmt.Sprintf("%v", amc.IsCorrect))
+	builder.WriteString(", ")
+	builder.WriteString("problem_id=")
+	builder.WriteString(fmt.Sprintf("%v", amc.ProblemID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.AnswerMultiChoices {
+func ID(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.AnswerMultiChoices {
+func IDEQ(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.AnswerMultiChoices {
+func IDNEQ(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.AnswerMultiChoices {
+func IDIn(ids ...uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.AnswerMultiChoices {
+func IDNotIn(ids ...uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.AnswerMultiChoices {
+func IDGT(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.AnswerMultiChoices {
+func IDGTE(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.AnswerMultiChoices {
+func IDLT(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.AnswerMultiChoices {
+func IDLTE(id uuid.UUID) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,14 +71,14 @@ func Name(v string) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldName, v))
 }
 
-// ProblemID applies equality check predicate on the "problem_id" field. It's identical to ProblemIDEQ.
-func ProblemID(v int) predicate.AnswerMultiChoices {
-	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldProblemID, v))
-}
-
 // IsCorrect applies equality check predicate on the "is_correct" field. It's identical to IsCorrectEQ.
 func IsCorrect(v bool) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldIsCorrect, v))
+}
+
+// ProblemID applies equality check predicate on the "problem_id" field. It's identical to ProblemIDEQ.
+func ProblemID(v uuid.UUID) predicate.AnswerMultiChoices {
+	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldProblemID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -225,26 +226,6 @@ func NameContainsFold(v string) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldContainsFold(FieldName, v))
 }
 
-// ProblemIDEQ applies the EQ predicate on the "problem_id" field.
-func ProblemIDEQ(v int) predicate.AnswerMultiChoices {
-	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldProblemID, v))
-}
-
-// ProblemIDNEQ applies the NEQ predicate on the "problem_id" field.
-func ProblemIDNEQ(v int) predicate.AnswerMultiChoices {
-	return predicate.AnswerMultiChoices(sql.FieldNEQ(FieldProblemID, v))
-}
-
-// ProblemIDIn applies the In predicate on the "problem_id" field.
-func ProblemIDIn(vs ...int) predicate.AnswerMultiChoices {
-	return predicate.AnswerMultiChoices(sql.FieldIn(FieldProblemID, vs...))
-}
-
-// ProblemIDNotIn applies the NotIn predicate on the "problem_id" field.
-func ProblemIDNotIn(vs ...int) predicate.AnswerMultiChoices {
-	return predicate.AnswerMultiChoices(sql.FieldNotIn(FieldProblemID, vs...))
-}
-
 // IsCorrectEQ applies the EQ predicate on the "is_correct" field.
 func IsCorrectEQ(v bool) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldIsCorrect, v))
@@ -253,6 +234,26 @@ func IsCorrectEQ(v bool) predicate.AnswerMultiChoices {
 // IsCorrectNEQ applies the NEQ predicate on the "is_correct" field.
 func IsCorrectNEQ(v bool) predicate.AnswerMultiChoices {
 	return predicate.AnswerMultiChoices(sql.FieldNEQ(FieldIsCorrect, v))
+}
+
+// ProblemIDEQ applies the EQ predicate on the "problem_id" field.
+func ProblemIDEQ(v uuid.UUID) predicate.AnswerMultiChoices {
+	return predicate.AnswerMultiChoices(sql.FieldEQ(FieldProblemID, v))
+}
+
+// ProblemIDNEQ applies the NEQ predicate on the "problem_id" field.
+func ProblemIDNEQ(v uuid.UUID) predicate.AnswerMultiChoices {
+	return predicate.AnswerMultiChoices(sql.FieldNEQ(FieldProblemID, v))
+}
+
+// ProblemIDIn applies the In predicate on the "problem_id" field.
+func ProblemIDIn(vs ...uuid.UUID) predicate.AnswerMultiChoices {
+	return predicate.AnswerMultiChoices(sql.FieldIn(FieldProblemID, vs...))
+}
+
+// ProblemIDNotIn applies the NotIn predicate on the "problem_id" field.
+func ProblemIDNotIn(vs ...uuid.UUID) predicate.AnswerMultiChoices {
+	return predicate.AnswerMultiChoices(sql.FieldNotIn(FieldProblemID, vs...))
 }
 
 // HasProblem applies the HasEdge predicate on the "problem" edge.

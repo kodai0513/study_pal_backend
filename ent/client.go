@@ -22,13 +22,14 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookcategoryclassification"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // Client is the client that holds all ent builders.
@@ -58,8 +59,8 @@ type Client struct {
 	Workbook *WorkbookClient
 	// WorkbookCategory is the client for interacting with the WorkbookCategory builders.
 	WorkbookCategory *WorkbookCategoryClient
-	// WorkbookCategoryClosure is the client for interacting with the WorkbookCategoryClosure builders.
-	WorkbookCategoryClosure *WorkbookCategoryClosureClient
+	// WorkbookCategoryClassification is the client for interacting with the WorkbookCategoryClassification builders.
+	WorkbookCategoryClassification *WorkbookCategoryClassificationClient
 	// WorkbookMember is the client for interacting with the WorkbookMember builders.
 	WorkbookMember *WorkbookMemberClient
 }
@@ -84,7 +85,7 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 	c.Workbook = NewWorkbookClient(c.config)
 	c.WorkbookCategory = NewWorkbookCategoryClient(c.config)
-	c.WorkbookCategoryClosure = NewWorkbookCategoryClosureClient(c.config)
+	c.WorkbookCategoryClassification = NewWorkbookCategoryClassificationClient(c.config)
 	c.WorkbookMember = NewWorkbookMemberClient(c.config)
 }
 
@@ -176,21 +177,21 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AnswerDescription:       NewAnswerDescriptionClient(cfg),
-		AnswerMultiChoices:      NewAnswerMultiChoicesClient(cfg),
-		AnswerTruth:             NewAnswerTruthClient(cfg),
-		AnswerType:              NewAnswerTypeClient(cfg),
-		Article:                 NewArticleClient(cfg),
-		Permission:              NewPermissionClient(cfg),
-		Problem:                 NewProblemClient(cfg),
-		Role:                    NewRoleClient(cfg),
-		User:                    NewUserClient(cfg),
-		Workbook:                NewWorkbookClient(cfg),
-		WorkbookCategory:        NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryClosure: NewWorkbookCategoryClosureClient(cfg),
-		WorkbookMember:          NewWorkbookMemberClient(cfg),
+		ctx:                            ctx,
+		config:                         cfg,
+		AnswerDescription:              NewAnswerDescriptionClient(cfg),
+		AnswerMultiChoices:             NewAnswerMultiChoicesClient(cfg),
+		AnswerTruth:                    NewAnswerTruthClient(cfg),
+		AnswerType:                     NewAnswerTypeClient(cfg),
+		Article:                        NewArticleClient(cfg),
+		Permission:                     NewPermissionClient(cfg),
+		Problem:                        NewProblemClient(cfg),
+		Role:                           NewRoleClient(cfg),
+		User:                           NewUserClient(cfg),
+		Workbook:                       NewWorkbookClient(cfg),
+		WorkbookCategory:               NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryClassification: NewWorkbookCategoryClassificationClient(cfg),
+		WorkbookMember:                 NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -208,21 +209,21 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AnswerDescription:       NewAnswerDescriptionClient(cfg),
-		AnswerMultiChoices:      NewAnswerMultiChoicesClient(cfg),
-		AnswerTruth:             NewAnswerTruthClient(cfg),
-		AnswerType:              NewAnswerTypeClient(cfg),
-		Article:                 NewArticleClient(cfg),
-		Permission:              NewPermissionClient(cfg),
-		Problem:                 NewProblemClient(cfg),
-		Role:                    NewRoleClient(cfg),
-		User:                    NewUserClient(cfg),
-		Workbook:                NewWorkbookClient(cfg),
-		WorkbookCategory:        NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryClosure: NewWorkbookCategoryClosureClient(cfg),
-		WorkbookMember:          NewWorkbookMemberClient(cfg),
+		ctx:                            ctx,
+		config:                         cfg,
+		AnswerDescription:              NewAnswerDescriptionClient(cfg),
+		AnswerMultiChoices:             NewAnswerMultiChoicesClient(cfg),
+		AnswerTruth:                    NewAnswerTruthClient(cfg),
+		AnswerType:                     NewAnswerTypeClient(cfg),
+		Article:                        NewArticleClient(cfg),
+		Permission:                     NewPermissionClient(cfg),
+		Problem:                        NewProblemClient(cfg),
+		Role:                           NewRoleClient(cfg),
+		User:                           NewUserClient(cfg),
+		Workbook:                       NewWorkbookClient(cfg),
+		WorkbookCategory:               NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryClassification: NewWorkbookCategoryClassificationClient(cfg),
+		WorkbookMember:                 NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -254,7 +255,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AnswerDescription, c.AnswerMultiChoices, c.AnswerTruth, c.AnswerType,
 		c.Article, c.Permission, c.Problem, c.Role, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
+		c.WorkbookCategory, c.WorkbookCategoryClassification, c.WorkbookMember,
 	} {
 		n.Use(hooks...)
 	}
@@ -266,7 +267,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AnswerDescription, c.AnswerMultiChoices, c.AnswerTruth, c.AnswerType,
 		c.Article, c.Permission, c.Problem, c.Role, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
+		c.WorkbookCategory, c.WorkbookCategoryClassification, c.WorkbookMember,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -297,8 +298,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Workbook.mutate(ctx, m)
 	case *WorkbookCategoryMutation:
 		return c.WorkbookCategory.mutate(ctx, m)
-	case *WorkbookCategoryClosureMutation:
-		return c.WorkbookCategoryClosure.mutate(ctx, m)
+	case *WorkbookCategoryClassificationMutation:
+		return c.WorkbookCategoryClassification.mutate(ctx, m)
 	case *WorkbookMemberMutation:
 		return c.WorkbookMember.mutate(ctx, m)
 	default:
@@ -367,7 +368,7 @@ func (c *AnswerDescriptionClient) UpdateOne(ad *AnswerDescription) *AnswerDescri
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AnswerDescriptionClient) UpdateOneID(id int) *AnswerDescriptionUpdateOne {
+func (c *AnswerDescriptionClient) UpdateOneID(id uuid.UUID) *AnswerDescriptionUpdateOne {
 	mutation := newAnswerDescriptionMutation(c.config, OpUpdateOne, withAnswerDescriptionID(id))
 	return &AnswerDescriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -384,7 +385,7 @@ func (c *AnswerDescriptionClient) DeleteOne(ad *AnswerDescription) *AnswerDescri
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AnswerDescriptionClient) DeleteOneID(id int) *AnswerDescriptionDeleteOne {
+func (c *AnswerDescriptionClient) DeleteOneID(id uuid.UUID) *AnswerDescriptionDeleteOne {
 	builder := c.Delete().Where(answerdescription.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -401,12 +402,12 @@ func (c *AnswerDescriptionClient) Query() *AnswerDescriptionQuery {
 }
 
 // Get returns a AnswerDescription entity by its id.
-func (c *AnswerDescriptionClient) Get(ctx context.Context, id int) (*AnswerDescription, error) {
+func (c *AnswerDescriptionClient) Get(ctx context.Context, id uuid.UUID) (*AnswerDescription, error) {
 	return c.Query().Where(answerdescription.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AnswerDescriptionClient) GetX(ctx context.Context, id int) *AnswerDescription {
+func (c *AnswerDescriptionClient) GetX(ctx context.Context, id uuid.UUID) *AnswerDescription {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -422,7 +423,7 @@ func (c *AnswerDescriptionClient) QueryProblem(ad *AnswerDescription) *ProblemQu
 		step := sqlgraph.NewStep(
 			sqlgraph.From(answerdescription.Table, answerdescription.FieldID, id),
 			sqlgraph.To(problem.Table, problem.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, answerdescription.ProblemTable, answerdescription.ProblemColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, answerdescription.ProblemTable, answerdescription.ProblemColumn),
 		)
 		fromV = sqlgraph.Neighbors(ad.driver.Dialect(), step)
 		return fromV, nil
@@ -516,7 +517,7 @@ func (c *AnswerMultiChoicesClient) UpdateOne(amc *AnswerMultiChoices) *AnswerMul
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AnswerMultiChoicesClient) UpdateOneID(id int) *AnswerMultiChoicesUpdateOne {
+func (c *AnswerMultiChoicesClient) UpdateOneID(id uuid.UUID) *AnswerMultiChoicesUpdateOne {
 	mutation := newAnswerMultiChoicesMutation(c.config, OpUpdateOne, withAnswerMultiChoicesID(id))
 	return &AnswerMultiChoicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -533,7 +534,7 @@ func (c *AnswerMultiChoicesClient) DeleteOne(amc *AnswerMultiChoices) *AnswerMul
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AnswerMultiChoicesClient) DeleteOneID(id int) *AnswerMultiChoicesDeleteOne {
+func (c *AnswerMultiChoicesClient) DeleteOneID(id uuid.UUID) *AnswerMultiChoicesDeleteOne {
 	builder := c.Delete().Where(answermultichoices.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -550,12 +551,12 @@ func (c *AnswerMultiChoicesClient) Query() *AnswerMultiChoicesQuery {
 }
 
 // Get returns a AnswerMultiChoices entity by its id.
-func (c *AnswerMultiChoicesClient) Get(ctx context.Context, id int) (*AnswerMultiChoices, error) {
+func (c *AnswerMultiChoicesClient) Get(ctx context.Context, id uuid.UUID) (*AnswerMultiChoices, error) {
 	return c.Query().Where(answermultichoices.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AnswerMultiChoicesClient) GetX(ctx context.Context, id int) *AnswerMultiChoices {
+func (c *AnswerMultiChoicesClient) GetX(ctx context.Context, id uuid.UUID) *AnswerMultiChoices {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -665,7 +666,7 @@ func (c *AnswerTruthClient) UpdateOne(at *AnswerTruth) *AnswerTruthUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AnswerTruthClient) UpdateOneID(id int) *AnswerTruthUpdateOne {
+func (c *AnswerTruthClient) UpdateOneID(id uuid.UUID) *AnswerTruthUpdateOne {
 	mutation := newAnswerTruthMutation(c.config, OpUpdateOne, withAnswerTruthID(id))
 	return &AnswerTruthUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -682,7 +683,7 @@ func (c *AnswerTruthClient) DeleteOne(at *AnswerTruth) *AnswerTruthDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AnswerTruthClient) DeleteOneID(id int) *AnswerTruthDeleteOne {
+func (c *AnswerTruthClient) DeleteOneID(id uuid.UUID) *AnswerTruthDeleteOne {
 	builder := c.Delete().Where(answertruth.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -699,12 +700,12 @@ func (c *AnswerTruthClient) Query() *AnswerTruthQuery {
 }
 
 // Get returns a AnswerTruth entity by its id.
-func (c *AnswerTruthClient) Get(ctx context.Context, id int) (*AnswerTruth, error) {
+func (c *AnswerTruthClient) Get(ctx context.Context, id uuid.UUID) (*AnswerTruth, error) {
 	return c.Query().Where(answertruth.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AnswerTruthClient) GetX(ctx context.Context, id int) *AnswerTruth {
+func (c *AnswerTruthClient) GetX(ctx context.Context, id uuid.UUID) *AnswerTruth {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -720,7 +721,7 @@ func (c *AnswerTruthClient) QueryProblem(at *AnswerTruth) *ProblemQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(answertruth.Table, answertruth.FieldID, id),
 			sqlgraph.To(problem.Table, problem.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, answertruth.ProblemTable, answertruth.ProblemColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, answertruth.ProblemTable, answertruth.ProblemColumn),
 		)
 		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
 		return fromV, nil
@@ -814,7 +815,7 @@ func (c *AnswerTypeClient) UpdateOne(at *AnswerType) *AnswerTypeUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AnswerTypeClient) UpdateOneID(id int) *AnswerTypeUpdateOne {
+func (c *AnswerTypeClient) UpdateOneID(id uuid.UUID) *AnswerTypeUpdateOne {
 	mutation := newAnswerTypeMutation(c.config, OpUpdateOne, withAnswerTypeID(id))
 	return &AnswerTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -831,7 +832,7 @@ func (c *AnswerTypeClient) DeleteOne(at *AnswerType) *AnswerTypeDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AnswerTypeClient) DeleteOneID(id int) *AnswerTypeDeleteOne {
+func (c *AnswerTypeClient) DeleteOneID(id uuid.UUID) *AnswerTypeDeleteOne {
 	builder := c.Delete().Where(answertype.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -848,12 +849,12 @@ func (c *AnswerTypeClient) Query() *AnswerTypeQuery {
 }
 
 // Get returns a AnswerType entity by its id.
-func (c *AnswerTypeClient) Get(ctx context.Context, id int) (*AnswerType, error) {
+func (c *AnswerTypeClient) Get(ctx context.Context, id uuid.UUID) (*AnswerType, error) {
 	return c.Query().Where(answertype.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AnswerTypeClient) GetX(ctx context.Context, id int) *AnswerType {
+func (c *AnswerTypeClient) GetX(ctx context.Context, id uuid.UUID) *AnswerType {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -963,7 +964,7 @@ func (c *ArticleClient) UpdateOne(a *Article) *ArticleUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ArticleClient) UpdateOneID(id int) *ArticleUpdateOne {
+func (c *ArticleClient) UpdateOneID(id uuid.UUID) *ArticleUpdateOne {
 	mutation := newArticleMutation(c.config, OpUpdateOne, withArticleID(id))
 	return &ArticleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -980,7 +981,7 @@ func (c *ArticleClient) DeleteOne(a *Article) *ArticleDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ArticleClient) DeleteOneID(id int) *ArticleDeleteOne {
+func (c *ArticleClient) DeleteOneID(id uuid.UUID) *ArticleDeleteOne {
 	builder := c.Delete().Where(article.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -997,12 +998,12 @@ func (c *ArticleClient) Query() *ArticleQuery {
 }
 
 // Get returns a Article entity by its id.
-func (c *ArticleClient) Get(ctx context.Context, id int) (*Article, error) {
+func (c *ArticleClient) Get(ctx context.Context, id uuid.UUID) (*Article, error) {
 	return c.Query().Where(article.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ArticleClient) GetX(ctx context.Context, id int) *Article {
+func (c *ArticleClient) GetX(ctx context.Context, id uuid.UUID) *Article {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1112,7 +1113,7 @@ func (c *PermissionClient) UpdateOne(pe *Permission) *PermissionUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PermissionClient) UpdateOneID(id int) *PermissionUpdateOne {
+func (c *PermissionClient) UpdateOneID(id uuid.UUID) *PermissionUpdateOne {
 	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermissionID(id))
 	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1129,7 +1130,7 @@ func (c *PermissionClient) DeleteOne(pe *Permission) *PermissionDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PermissionClient) DeleteOneID(id int) *PermissionDeleteOne {
+func (c *PermissionClient) DeleteOneID(id uuid.UUID) *PermissionDeleteOne {
 	builder := c.Delete().Where(permission.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1146,12 +1147,12 @@ func (c *PermissionClient) Query() *PermissionQuery {
 }
 
 // Get returns a Permission entity by its id.
-func (c *PermissionClient) Get(ctx context.Context, id int) (*Permission, error) {
+func (c *PermissionClient) Get(ctx context.Context, id uuid.UUID) (*Permission, error) {
 	return c.Query().Where(permission.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PermissionClient) GetX(ctx context.Context, id int) *Permission {
+func (c *PermissionClient) GetX(ctx context.Context, id uuid.UUID) *Permission {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1261,7 +1262,7 @@ func (c *ProblemClient) UpdateOne(pr *Problem) *ProblemUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ProblemClient) UpdateOneID(id int) *ProblemUpdateOne {
+func (c *ProblemClient) UpdateOneID(id uuid.UUID) *ProblemUpdateOne {
 	mutation := newProblemMutation(c.config, OpUpdateOne, withProblemID(id))
 	return &ProblemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1278,7 +1279,7 @@ func (c *ProblemClient) DeleteOne(pr *Problem) *ProblemDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ProblemClient) DeleteOneID(id int) *ProblemDeleteOne {
+func (c *ProblemClient) DeleteOneID(id uuid.UUID) *ProblemDeleteOne {
 	builder := c.Delete().Where(problem.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1295,12 +1296,12 @@ func (c *ProblemClient) Query() *ProblemQuery {
 }
 
 // Get returns a Problem entity by its id.
-func (c *ProblemClient) Get(ctx context.Context, id int) (*Problem, error) {
+func (c *ProblemClient) Get(ctx context.Context, id uuid.UUID) (*Problem, error) {
 	return c.Query().Where(problem.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ProblemClient) GetX(ctx context.Context, id int) *Problem {
+func (c *ProblemClient) GetX(ctx context.Context, id uuid.UUID) *Problem {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1332,7 +1333,7 @@ func (c *ProblemClient) QueryAnswerDescriptions(pr *Problem) *AnswerDescriptionQ
 		step := sqlgraph.NewStep(
 			sqlgraph.From(problem.Table, problem.FieldID, id),
 			sqlgraph.To(answerdescription.Table, answerdescription.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, problem.AnswerDescriptionsTable, problem.AnswerDescriptionsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, problem.AnswerDescriptionsTable, problem.AnswerDescriptionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -1364,7 +1365,7 @@ func (c *ProblemClient) QueryAnswerTruths(pr *Problem) *AnswerTruthQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(problem.Table, problem.FieldID, id),
 			sqlgraph.To(answertruth.Table, answertruth.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, problem.AnswerTruthsTable, problem.AnswerTruthsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, problem.AnswerTruthsTable, problem.AnswerTruthsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -1397,6 +1398,22 @@ func (c *ProblemClient) QueryWorkbookCategory(pr *Problem) *WorkbookCategoryQuer
 			sqlgraph.From(problem.Table, problem.FieldID, id),
 			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryTable, problem.WorkbookCategoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWorkbookCategoryClassification queries the workbook_category_classification edge of a Problem.
+func (c *ProblemClient) QueryWorkbookCategoryClassification(pr *Problem) *WorkbookCategoryClassificationQuery {
+	query := (&WorkbookCategoryClassificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(problem.Table, problem.FieldID, id),
+			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryClassificationTable, problem.WorkbookCategoryClassificationColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -1490,7 +1507,7 @@ func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RoleClient) UpdateOneID(id int) *RoleUpdateOne {
+func (c *RoleClient) UpdateOneID(id uuid.UUID) *RoleUpdateOne {
 	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
 	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1507,7 +1524,7 @@ func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
+func (c *RoleClient) DeleteOneID(id uuid.UUID) *RoleDeleteOne {
 	builder := c.Delete().Where(role.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1524,12 +1541,12 @@ func (c *RoleClient) Query() *RoleQuery {
 }
 
 // Get returns a Role entity by its id.
-func (c *RoleClient) Get(ctx context.Context, id int) (*Role, error) {
+func (c *RoleClient) Get(ctx context.Context, id uuid.UUID) (*Role, error) {
 	return c.Query().Where(role.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
+func (c *RoleClient) GetX(ctx context.Context, id uuid.UUID) *Role {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1655,7 +1672,7 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+func (c *UserClient) UpdateOneID(id uuid.UUID) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1672,7 +1689,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+func (c *UserClient) DeleteOneID(id uuid.UUID) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1689,12 +1706,12 @@ func (c *UserClient) Query() *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+func (c *UserClient) Get(ctx context.Context, id uuid.UUID) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int) *User {
+func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1820,7 +1837,7 @@ func (c *WorkbookClient) UpdateOne(w *Workbook) *WorkbookUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WorkbookClient) UpdateOneID(id int) *WorkbookUpdateOne {
+func (c *WorkbookClient) UpdateOneID(id uuid.UUID) *WorkbookUpdateOne {
 	mutation := newWorkbookMutation(c.config, OpUpdateOne, withWorkbookID(id))
 	return &WorkbookUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1837,7 +1854,7 @@ func (c *WorkbookClient) DeleteOne(w *Workbook) *WorkbookDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WorkbookClient) DeleteOneID(id int) *WorkbookDeleteOne {
+func (c *WorkbookClient) DeleteOneID(id uuid.UUID) *WorkbookDeleteOne {
 	builder := c.Delete().Where(workbook.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1854,12 +1871,12 @@ func (c *WorkbookClient) Query() *WorkbookQuery {
 }
 
 // Get returns a Workbook entity by its id.
-func (c *WorkbookClient) Get(ctx context.Context, id int) (*Workbook, error) {
+func (c *WorkbookClient) Get(ctx context.Context, id uuid.UUID) (*Workbook, error) {
 	return c.Query().Where(workbook.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WorkbookClient) GetX(ctx context.Context, id int) *Workbook {
+func (c *WorkbookClient) GetX(ctx context.Context, id uuid.UUID) *Workbook {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2001,7 +2018,7 @@ func (c *WorkbookCategoryClient) UpdateOne(wc *WorkbookCategory) *WorkbookCatego
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WorkbookCategoryClient) UpdateOneID(id int) *WorkbookCategoryUpdateOne {
+func (c *WorkbookCategoryClient) UpdateOneID(id uuid.UUID) *WorkbookCategoryUpdateOne {
 	mutation := newWorkbookCategoryMutation(c.config, OpUpdateOne, withWorkbookCategoryID(id))
 	return &WorkbookCategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2018,7 +2035,7 @@ func (c *WorkbookCategoryClient) DeleteOne(wc *WorkbookCategory) *WorkbookCatego
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WorkbookCategoryClient) DeleteOneID(id int) *WorkbookCategoryDeleteOne {
+func (c *WorkbookCategoryClient) DeleteOneID(id uuid.UUID) *WorkbookCategoryDeleteOne {
 	builder := c.Delete().Where(workbookcategory.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2035,12 +2052,12 @@ func (c *WorkbookCategoryClient) Query() *WorkbookCategoryQuery {
 }
 
 // Get returns a WorkbookCategory entity by its id.
-func (c *WorkbookCategoryClient) Get(ctx context.Context, id int) (*WorkbookCategory, error) {
+func (c *WorkbookCategoryClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookCategory, error) {
 	return c.Query().Where(workbookcategory.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WorkbookCategoryClient) GetX(ctx context.Context, id int) *WorkbookCategory {
+func (c *WorkbookCategoryClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookCategory {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2080,15 +2097,15 @@ func (c *WorkbookCategoryClient) QueryWorkbook(wc *WorkbookCategory) *WorkbookQu
 	return query
 }
 
-// QueryWorkbookCategoryClosures queries the workbook_category_closures edge of a WorkbookCategory.
-func (c *WorkbookCategoryClient) QueryWorkbookCategoryClosures(wc *WorkbookCategory) *WorkbookCategoryClosureQuery {
-	query := (&WorkbookCategoryClosureClient{config: c.config}).Query()
+// QueryWorkbookCategoryClassifications queries the workbook_category_classifications edge of a WorkbookCategory.
+func (c *WorkbookCategoryClient) QueryWorkbookCategoryClassifications(wc *WorkbookCategory) *WorkbookCategoryClassificationQuery {
+	query := (&WorkbookCategoryClassificationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := wc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(workbookcategory.Table, workbookcategory.FieldID, id),
-			sqlgraph.To(workbookcategoryclosure.Table, workbookcategoryclosure.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryClosuresTable, workbookcategory.WorkbookCategoryClosuresColumn),
+			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryClassificationsTable, workbookcategory.WorkbookCategoryClassificationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(wc.driver.Dialect(), step)
 		return fromV, nil
@@ -2121,107 +2138,107 @@ func (c *WorkbookCategoryClient) mutate(ctx context.Context, m *WorkbookCategory
 	}
 }
 
-// WorkbookCategoryClosureClient is a client for the WorkbookCategoryClosure schema.
-type WorkbookCategoryClosureClient struct {
+// WorkbookCategoryClassificationClient is a client for the WorkbookCategoryClassification schema.
+type WorkbookCategoryClassificationClient struct {
 	config
 }
 
-// NewWorkbookCategoryClosureClient returns a client for the WorkbookCategoryClosure from the given config.
-func NewWorkbookCategoryClosureClient(c config) *WorkbookCategoryClosureClient {
-	return &WorkbookCategoryClosureClient{config: c}
+// NewWorkbookCategoryClassificationClient returns a client for the WorkbookCategoryClassification from the given config.
+func NewWorkbookCategoryClassificationClient(c config) *WorkbookCategoryClassificationClient {
+	return &WorkbookCategoryClassificationClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `workbookcategoryclosure.Hooks(f(g(h())))`.
-func (c *WorkbookCategoryClosureClient) Use(hooks ...Hook) {
-	c.hooks.WorkbookCategoryClosure = append(c.hooks.WorkbookCategoryClosure, hooks...)
+// A call to `Use(f, g, h)` equals to `workbookcategoryclassification.Hooks(f(g(h())))`.
+func (c *WorkbookCategoryClassificationClient) Use(hooks ...Hook) {
+	c.hooks.WorkbookCategoryClassification = append(c.hooks.WorkbookCategoryClassification, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `workbookcategoryclosure.Intercept(f(g(h())))`.
-func (c *WorkbookCategoryClosureClient) Intercept(interceptors ...Interceptor) {
-	c.inters.WorkbookCategoryClosure = append(c.inters.WorkbookCategoryClosure, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `workbookcategoryclassification.Intercept(f(g(h())))`.
+func (c *WorkbookCategoryClassificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WorkbookCategoryClassification = append(c.inters.WorkbookCategoryClassification, interceptors...)
 }
 
-// Create returns a builder for creating a WorkbookCategoryClosure entity.
-func (c *WorkbookCategoryClosureClient) Create() *WorkbookCategoryClosureCreate {
-	mutation := newWorkbookCategoryClosureMutation(c.config, OpCreate)
-	return &WorkbookCategoryClosureCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a WorkbookCategoryClassification entity.
+func (c *WorkbookCategoryClassificationClient) Create() *WorkbookCategoryClassificationCreate {
+	mutation := newWorkbookCategoryClassificationMutation(c.config, OpCreate)
+	return &WorkbookCategoryClassificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of WorkbookCategoryClosure entities.
-func (c *WorkbookCategoryClosureClient) CreateBulk(builders ...*WorkbookCategoryClosureCreate) *WorkbookCategoryClosureCreateBulk {
-	return &WorkbookCategoryClosureCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of WorkbookCategoryClassification entities.
+func (c *WorkbookCategoryClassificationClient) CreateBulk(builders ...*WorkbookCategoryClassificationCreate) *WorkbookCategoryClassificationCreateBulk {
+	return &WorkbookCategoryClassificationCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *WorkbookCategoryClosureClient) MapCreateBulk(slice any, setFunc func(*WorkbookCategoryClosureCreate, int)) *WorkbookCategoryClosureCreateBulk {
+func (c *WorkbookCategoryClassificationClient) MapCreateBulk(slice any, setFunc func(*WorkbookCategoryClassificationCreate, int)) *WorkbookCategoryClassificationCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &WorkbookCategoryClosureCreateBulk{err: fmt.Errorf("calling to WorkbookCategoryClosureClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &WorkbookCategoryClassificationCreateBulk{err: fmt.Errorf("calling to WorkbookCategoryClassificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*WorkbookCategoryClosureCreate, rv.Len())
+	builders := make([]*WorkbookCategoryClassificationCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &WorkbookCategoryClosureCreateBulk{config: c.config, builders: builders}
+	return &WorkbookCategoryClassificationCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for WorkbookCategoryClosure.
-func (c *WorkbookCategoryClosureClient) Update() *WorkbookCategoryClosureUpdate {
-	mutation := newWorkbookCategoryClosureMutation(c.config, OpUpdate)
-	return &WorkbookCategoryClosureUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for WorkbookCategoryClassification.
+func (c *WorkbookCategoryClassificationClient) Update() *WorkbookCategoryClassificationUpdate {
+	mutation := newWorkbookCategoryClassificationMutation(c.config, OpUpdate)
+	return &WorkbookCategoryClassificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *WorkbookCategoryClosureClient) UpdateOne(wcc *WorkbookCategoryClosure) *WorkbookCategoryClosureUpdateOne {
-	mutation := newWorkbookCategoryClosureMutation(c.config, OpUpdateOne, withWorkbookCategoryClosure(wcc))
-	return &WorkbookCategoryClosureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *WorkbookCategoryClassificationClient) UpdateOne(wcc *WorkbookCategoryClassification) *WorkbookCategoryClassificationUpdateOne {
+	mutation := newWorkbookCategoryClassificationMutation(c.config, OpUpdateOne, withWorkbookCategoryClassification(wcc))
+	return &WorkbookCategoryClassificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WorkbookCategoryClosureClient) UpdateOneID(id int) *WorkbookCategoryClosureUpdateOne {
-	mutation := newWorkbookCategoryClosureMutation(c.config, OpUpdateOne, withWorkbookCategoryClosureID(id))
-	return &WorkbookCategoryClosureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *WorkbookCategoryClassificationClient) UpdateOneID(id uuid.UUID) *WorkbookCategoryClassificationUpdateOne {
+	mutation := newWorkbookCategoryClassificationMutation(c.config, OpUpdateOne, withWorkbookCategoryClassificationID(id))
+	return &WorkbookCategoryClassificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for WorkbookCategoryClosure.
-func (c *WorkbookCategoryClosureClient) Delete() *WorkbookCategoryClosureDelete {
-	mutation := newWorkbookCategoryClosureMutation(c.config, OpDelete)
-	return &WorkbookCategoryClosureDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for WorkbookCategoryClassification.
+func (c *WorkbookCategoryClassificationClient) Delete() *WorkbookCategoryClassificationDelete {
+	mutation := newWorkbookCategoryClassificationMutation(c.config, OpDelete)
+	return &WorkbookCategoryClassificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *WorkbookCategoryClosureClient) DeleteOne(wcc *WorkbookCategoryClosure) *WorkbookCategoryClosureDeleteOne {
+func (c *WorkbookCategoryClassificationClient) DeleteOne(wcc *WorkbookCategoryClassification) *WorkbookCategoryClassificationDeleteOne {
 	return c.DeleteOneID(wcc.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WorkbookCategoryClosureClient) DeleteOneID(id int) *WorkbookCategoryClosureDeleteOne {
-	builder := c.Delete().Where(workbookcategoryclosure.ID(id))
+func (c *WorkbookCategoryClassificationClient) DeleteOneID(id uuid.UUID) *WorkbookCategoryClassificationDeleteOne {
+	builder := c.Delete().Where(workbookcategoryclassification.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &WorkbookCategoryClosureDeleteOne{builder}
+	return &WorkbookCategoryClassificationDeleteOne{builder}
 }
 
-// Query returns a query builder for WorkbookCategoryClosure.
-func (c *WorkbookCategoryClosureClient) Query() *WorkbookCategoryClosureQuery {
-	return &WorkbookCategoryClosureQuery{
+// Query returns a query builder for WorkbookCategoryClassification.
+func (c *WorkbookCategoryClassificationClient) Query() *WorkbookCategoryClassificationQuery {
+	return &WorkbookCategoryClassificationQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeWorkbookCategoryClosure},
+		ctx:    &QueryContext{Type: TypeWorkbookCategoryClassification},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a WorkbookCategoryClosure entity by its id.
-func (c *WorkbookCategoryClosureClient) Get(ctx context.Context, id int) (*WorkbookCategoryClosure, error) {
-	return c.Query().Where(workbookcategoryclosure.ID(id)).Only(ctx)
+// Get returns a WorkbookCategoryClassification entity by its id.
+func (c *WorkbookCategoryClassificationClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookCategoryClassification, error) {
+	return c.Query().Where(workbookcategoryclassification.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WorkbookCategoryClosureClient) GetX(ctx context.Context, id int) *WorkbookCategoryClosure {
+func (c *WorkbookCategoryClassificationClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookCategoryClassification {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2229,28 +2246,44 @@ func (c *WorkbookCategoryClosureClient) GetX(ctx context.Context, id int) *Workb
 	return obj
 }
 
+// QueryProblems queries the problems edge of a WorkbookCategoryClassification.
+func (c *WorkbookCategoryClassificationClient) QueryProblems(wcc *WorkbookCategoryClassification) *ProblemQuery {
+	query := (&ProblemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wcc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID, id),
+			sqlgraph.To(problem.Table, problem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategoryclassification.ProblemsTable, workbookcategoryclassification.ProblemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(wcc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
-func (c *WorkbookCategoryClosureClient) Hooks() []Hook {
-	return c.hooks.WorkbookCategoryClosure
+func (c *WorkbookCategoryClassificationClient) Hooks() []Hook {
+	return c.hooks.WorkbookCategoryClassification
 }
 
 // Interceptors returns the client interceptors.
-func (c *WorkbookCategoryClosureClient) Interceptors() []Interceptor {
-	return c.inters.WorkbookCategoryClosure
+func (c *WorkbookCategoryClassificationClient) Interceptors() []Interceptor {
+	return c.inters.WorkbookCategoryClassification
 }
 
-func (c *WorkbookCategoryClosureClient) mutate(ctx context.Context, m *WorkbookCategoryClosureMutation) (Value, error) {
+func (c *WorkbookCategoryClassificationClient) mutate(ctx context.Context, m *WorkbookCategoryClassificationMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&WorkbookCategoryClosureCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryClassificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&WorkbookCategoryClosureUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryClassificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&WorkbookCategoryClosureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryClassificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&WorkbookCategoryClosureDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&WorkbookCategoryClassificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown WorkbookCategoryClosure mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown WorkbookCategoryClassification mutation op: %q", m.Op())
 	}
 }
 
@@ -2315,7 +2348,7 @@ func (c *WorkbookMemberClient) UpdateOne(wm *WorkbookMember) *WorkbookMemberUpda
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WorkbookMemberClient) UpdateOneID(id int) *WorkbookMemberUpdateOne {
+func (c *WorkbookMemberClient) UpdateOneID(id uuid.UUID) *WorkbookMemberUpdateOne {
 	mutation := newWorkbookMemberMutation(c.config, OpUpdateOne, withWorkbookMemberID(id))
 	return &WorkbookMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2332,7 +2365,7 @@ func (c *WorkbookMemberClient) DeleteOne(wm *WorkbookMember) *WorkbookMemberDele
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WorkbookMemberClient) DeleteOneID(id int) *WorkbookMemberDeleteOne {
+func (c *WorkbookMemberClient) DeleteOneID(id uuid.UUID) *WorkbookMemberDeleteOne {
 	builder := c.Delete().Where(workbookmember.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2349,12 +2382,12 @@ func (c *WorkbookMemberClient) Query() *WorkbookMemberQuery {
 }
 
 // Get returns a WorkbookMember entity by its id.
-func (c *WorkbookMemberClient) Get(ctx context.Context, id int) (*WorkbookMember, error) {
+func (c *WorkbookMemberClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookMember, error) {
 	return c.Query().Where(workbookmember.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WorkbookMemberClient) GetX(ctx context.Context, id int) *WorkbookMember {
+func (c *WorkbookMemberClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookMember {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2440,11 +2473,11 @@ type (
 	hooks struct {
 		AnswerDescription, AnswerMultiChoices, AnswerTruth, AnswerType, Article,
 		Permission, Problem, Role, User, Workbook, WorkbookCategory,
-		WorkbookCategoryClosure, WorkbookMember []ent.Hook
+		WorkbookCategoryClassification, WorkbookMember []ent.Hook
 	}
 	inters struct {
 		AnswerDescription, AnswerMultiChoices, AnswerTruth, AnswerType, Article,
 		Permission, Problem, Role, User, Workbook, WorkbookCategory,
-		WorkbookCategoryClosure, WorkbookMember []ent.Interceptor
+		WorkbookCategoryClassification, WorkbookMember []ent.Interceptor
 	}
 )

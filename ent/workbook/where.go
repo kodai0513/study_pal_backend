@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Workbook {
+func ID(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Workbook {
+func IDEQ(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Workbook {
+func IDNEQ(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Workbook {
+func IDIn(ids ...uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Workbook {
+func IDNotIn(ids ...uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Workbook {
+func IDGT(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Workbook {
+func IDGTE(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Workbook {
+func IDLT(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Workbook {
+func IDLTE(id uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldLTE(FieldID, id))
 }
 
@@ -66,13 +67,18 @@ func UpdatedAt(v time.Time) predicate.Workbook {
 }
 
 // CreatedID applies equality check predicate on the "created_id" field. It's identical to CreatedIDEQ.
-func CreatedID(v int) predicate.Workbook {
+func CreatedID(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldEQ(FieldCreatedID, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Workbook {
 	return predicate.Workbook(sql.FieldEQ(FieldDescription, v))
+}
+
+// IsPublic applies equality check predicate on the "is_public" field. It's identical to IsPublicEQ.
+func IsPublic(v bool) predicate.Workbook {
+	return predicate.Workbook(sql.FieldEQ(FieldIsPublic, v))
 }
 
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
@@ -161,42 +167,42 @@ func UpdatedAtLTE(v time.Time) predicate.Workbook {
 }
 
 // CreatedIDEQ applies the EQ predicate on the "created_id" field.
-func CreatedIDEQ(v int) predicate.Workbook {
+func CreatedIDEQ(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldEQ(FieldCreatedID, v))
 }
 
 // CreatedIDNEQ applies the NEQ predicate on the "created_id" field.
-func CreatedIDNEQ(v int) predicate.Workbook {
+func CreatedIDNEQ(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldNEQ(FieldCreatedID, v))
 }
 
 // CreatedIDIn applies the In predicate on the "created_id" field.
-func CreatedIDIn(vs ...int) predicate.Workbook {
+func CreatedIDIn(vs ...uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldIn(FieldCreatedID, vs...))
 }
 
 // CreatedIDNotIn applies the NotIn predicate on the "created_id" field.
-func CreatedIDNotIn(vs ...int) predicate.Workbook {
+func CreatedIDNotIn(vs ...uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldNotIn(FieldCreatedID, vs...))
 }
 
 // CreatedIDGT applies the GT predicate on the "created_id" field.
-func CreatedIDGT(v int) predicate.Workbook {
+func CreatedIDGT(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldGT(FieldCreatedID, v))
 }
 
 // CreatedIDGTE applies the GTE predicate on the "created_id" field.
-func CreatedIDGTE(v int) predicate.Workbook {
+func CreatedIDGTE(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldGTE(FieldCreatedID, v))
 }
 
 // CreatedIDLT applies the LT predicate on the "created_id" field.
-func CreatedIDLT(v int) predicate.Workbook {
+func CreatedIDLT(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldLT(FieldCreatedID, v))
 }
 
 // CreatedIDLTE applies the LTE predicate on the "created_id" field.
-func CreatedIDLTE(v int) predicate.Workbook {
+func CreatedIDLTE(v uuid.UUID) predicate.Workbook {
 	return predicate.Workbook(sql.FieldLTE(FieldCreatedID, v))
 }
 
@@ -263,6 +269,16 @@ func DescriptionEqualFold(v string) predicate.Workbook {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Workbook {
 	return predicate.Workbook(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// IsPublicEQ applies the EQ predicate on the "is_public" field.
+func IsPublicEQ(v bool) predicate.Workbook {
+	return predicate.Workbook(sql.FieldEQ(FieldIsPublic, v))
+}
+
+// IsPublicNEQ applies the NEQ predicate on the "is_public" field.
+func IsPublicNEQ(v bool) predicate.Workbook {
+	return predicate.Workbook(sql.FieldNEQ(FieldIsPublic, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.

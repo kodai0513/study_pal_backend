@@ -8,50 +8,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Article {
+func ID(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Article {
+func IDEQ(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Article {
+func IDNEQ(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Article {
+func IDIn(ids ...uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Article {
+func IDNotIn(ids ...uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Article {
+func IDGT(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Article {
+func IDGTE(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Article {
+func IDLT(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Article {
+func IDLTE(id uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldLTE(FieldID, id))
 }
 
@@ -65,13 +66,18 @@ func UpdatedAt(v time.Time) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// PageID applies equality check predicate on the "page_id" field. It's identical to PageIDEQ.
+func PageID(v int) predicate.Article {
+	return predicate.Article(sql.FieldEQ(FieldPageID, v))
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldDescription, v))
 }
 
 // PostID applies equality check predicate on the "post_id" field. It's identical to PostIDEQ.
-func PostID(v int) predicate.Article {
+func PostID(v uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldPostID, v))
 }
 
@@ -155,6 +161,46 @@ func UpdatedAtLTE(v time.Time) predicate.Article {
 	return predicate.Article(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
+// PageIDEQ applies the EQ predicate on the "page_id" field.
+func PageIDEQ(v int) predicate.Article {
+	return predicate.Article(sql.FieldEQ(FieldPageID, v))
+}
+
+// PageIDNEQ applies the NEQ predicate on the "page_id" field.
+func PageIDNEQ(v int) predicate.Article {
+	return predicate.Article(sql.FieldNEQ(FieldPageID, v))
+}
+
+// PageIDIn applies the In predicate on the "page_id" field.
+func PageIDIn(vs ...int) predicate.Article {
+	return predicate.Article(sql.FieldIn(FieldPageID, vs...))
+}
+
+// PageIDNotIn applies the NotIn predicate on the "page_id" field.
+func PageIDNotIn(vs ...int) predicate.Article {
+	return predicate.Article(sql.FieldNotIn(FieldPageID, vs...))
+}
+
+// PageIDGT applies the GT predicate on the "page_id" field.
+func PageIDGT(v int) predicate.Article {
+	return predicate.Article(sql.FieldGT(FieldPageID, v))
+}
+
+// PageIDGTE applies the GTE predicate on the "page_id" field.
+func PageIDGTE(v int) predicate.Article {
+	return predicate.Article(sql.FieldGTE(FieldPageID, v))
+}
+
+// PageIDLT applies the LT predicate on the "page_id" field.
+func PageIDLT(v int) predicate.Article {
+	return predicate.Article(sql.FieldLT(FieldPageID, v))
+}
+
+// PageIDLTE applies the LTE predicate on the "page_id" field.
+func PageIDLTE(v int) predicate.Article {
+	return predicate.Article(sql.FieldLTE(FieldPageID, v))
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldDescription, v))
@@ -221,22 +267,22 @@ func DescriptionContainsFold(v string) predicate.Article {
 }
 
 // PostIDEQ applies the EQ predicate on the "post_id" field.
-func PostIDEQ(v int) predicate.Article {
+func PostIDEQ(v uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldPostID, v))
 }
 
 // PostIDNEQ applies the NEQ predicate on the "post_id" field.
-func PostIDNEQ(v int) predicate.Article {
+func PostIDNEQ(v uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldNEQ(FieldPostID, v))
 }
 
 // PostIDIn applies the In predicate on the "post_id" field.
-func PostIDIn(vs ...int) predicate.Article {
+func PostIDIn(vs ...uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldIn(FieldPostID, vs...))
 }
 
 // PostIDNotIn applies the NotIn predicate on the "post_id" field.
-func PostIDNotIn(vs ...int) predicate.Article {
+func PostIDNotIn(vs ...uuid.UUID) predicate.Article {
 	return predicate.Article(sql.FieldNotIn(FieldPostID, vs...))
 }
 

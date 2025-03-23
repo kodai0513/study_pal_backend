@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerTypeCreate is the builder for creating a AnswerType entity.
@@ -55,15 +56,21 @@ func (atc *AnswerTypeCreate) SetName(s string) *AnswerTypeCreate {
 	return atc
 }
 
+// SetID sets the "id" field.
+func (atc *AnswerTypeCreate) SetID(u uuid.UUID) *AnswerTypeCreate {
+	atc.mutation.SetID(u)
+	return atc
+}
+
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (atc *AnswerTypeCreate) AddProblemIDs(ids ...int) *AnswerTypeCreate {
+func (atc *AnswerTypeCreate) AddProblemIDs(ids ...uuid.UUID) *AnswerTypeCreate {
 	atc.mutation.AddProblemIDs(ids...)
 	return atc
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (atc *AnswerTypeCreate) AddProblems(p ...*Problem) *AnswerTypeCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -145,8 +152,13 @@ func (atc *AnswerTypeCreate) sqlSave(ctx context.Context) (*AnswerType, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	atc.mutation.id = &_node.ID
 	atc.mutation.done = true
 	return _node, nil
@@ -155,8 +167,12 @@ func (atc *AnswerTypeCreate) sqlSave(ctx context.Context) (*AnswerType, error) {
 func (atc *AnswerTypeCreate) createSpec() (*AnswerType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &AnswerType{config: atc.config}
-		_spec = sqlgraph.NewCreateSpec(answertype.Table, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(answertype.Table, sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeUUID))
 	)
+	if id, ok := atc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := atc.mutation.CreatedAt(); ok {
 		_spec.SetField(answertype.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -177,7 +193,7 @@ func (atc *AnswerTypeCreate) createSpec() (*AnswerType, *sqlgraph.CreateSpec) {
 			Columns: []string{answertype.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -233,10 +249,6 @@ func (atcb *AnswerTypeCreateBulk) Save(ctx context.Context) ([]*AnswerType, erro
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerMultiChoicesUpdate is the builder for updating AnswerMultiChoices entities.
@@ -63,20 +64,6 @@ func (amcu *AnswerMultiChoicesUpdate) SetNillableName(s *string) *AnswerMultiCho
 	return amcu
 }
 
-// SetProblemID sets the "problem_id" field.
-func (amcu *AnswerMultiChoicesUpdate) SetProblemID(i int) *AnswerMultiChoicesUpdate {
-	amcu.mutation.SetProblemID(i)
-	return amcu
-}
-
-// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
-func (amcu *AnswerMultiChoicesUpdate) SetNillableProblemID(i *int) *AnswerMultiChoicesUpdate {
-	if i != nil {
-		amcu.SetProblemID(*i)
-	}
-	return amcu
-}
-
 // SetIsCorrect sets the "is_correct" field.
 func (amcu *AnswerMultiChoicesUpdate) SetIsCorrect(b bool) *AnswerMultiChoicesUpdate {
 	amcu.mutation.SetIsCorrect(b)
@@ -87,6 +74,20 @@ func (amcu *AnswerMultiChoicesUpdate) SetIsCorrect(b bool) *AnswerMultiChoicesUp
 func (amcu *AnswerMultiChoicesUpdate) SetNillableIsCorrect(b *bool) *AnswerMultiChoicesUpdate {
 	if b != nil {
 		amcu.SetIsCorrect(*b)
+	}
+	return amcu
+}
+
+// SetProblemID sets the "problem_id" field.
+func (amcu *AnswerMultiChoicesUpdate) SetProblemID(u uuid.UUID) *AnswerMultiChoicesUpdate {
+	amcu.mutation.SetProblemID(u)
+	return amcu
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (amcu *AnswerMultiChoicesUpdate) SetNillableProblemID(u *uuid.UUID) *AnswerMultiChoicesUpdate {
+	if u != nil {
+		amcu.SetProblemID(*u)
 	}
 	return amcu
 }
@@ -160,7 +161,7 @@ func (amcu *AnswerMultiChoicesUpdate) sqlSave(ctx context.Context) (n int, err e
 	if err := amcu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answermultichoices.Table, answermultichoices.Columns, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answermultichoices.Table, answermultichoices.Columns, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeUUID))
 	if ps := amcu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -188,7 +189,7 @@ func (amcu *AnswerMultiChoicesUpdate) sqlSave(ctx context.Context) (n int, err e
 			Columns: []string{answermultichoices.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -201,7 +202,7 @@ func (amcu *AnswerMultiChoicesUpdate) sqlSave(ctx context.Context) (n int, err e
 			Columns: []string{answermultichoices.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -263,20 +264,6 @@ func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableName(s *string) *AnswerMult
 	return amcuo
 }
 
-// SetProblemID sets the "problem_id" field.
-func (amcuo *AnswerMultiChoicesUpdateOne) SetProblemID(i int) *AnswerMultiChoicesUpdateOne {
-	amcuo.mutation.SetProblemID(i)
-	return amcuo
-}
-
-// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
-func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableProblemID(i *int) *AnswerMultiChoicesUpdateOne {
-	if i != nil {
-		amcuo.SetProblemID(*i)
-	}
-	return amcuo
-}
-
 // SetIsCorrect sets the "is_correct" field.
 func (amcuo *AnswerMultiChoicesUpdateOne) SetIsCorrect(b bool) *AnswerMultiChoicesUpdateOne {
 	amcuo.mutation.SetIsCorrect(b)
@@ -287,6 +274,20 @@ func (amcuo *AnswerMultiChoicesUpdateOne) SetIsCorrect(b bool) *AnswerMultiChoic
 func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableIsCorrect(b *bool) *AnswerMultiChoicesUpdateOne {
 	if b != nil {
 		amcuo.SetIsCorrect(*b)
+	}
+	return amcuo
+}
+
+// SetProblemID sets the "problem_id" field.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetProblemID(u uuid.UUID) *AnswerMultiChoicesUpdateOne {
+	amcuo.mutation.SetProblemID(u)
+	return amcuo
+}
+
+// SetNillableProblemID sets the "problem_id" field if the given value is not nil.
+func (amcuo *AnswerMultiChoicesUpdateOne) SetNillableProblemID(u *uuid.UUID) *AnswerMultiChoicesUpdateOne {
+	if u != nil {
+		amcuo.SetProblemID(*u)
 	}
 	return amcuo
 }
@@ -373,7 +374,7 @@ func (amcuo *AnswerMultiChoicesUpdateOne) sqlSave(ctx context.Context) (_node *A
 	if err := amcuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answermultichoices.Table, answermultichoices.Columns, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answermultichoices.Table, answermultichoices.Columns, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeUUID))
 	id, ok := amcuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AnswerMultiChoices.id" for update`)}
@@ -418,7 +419,7 @@ func (amcuo *AnswerMultiChoicesUpdateOne) sqlSave(ctx context.Context) (_node *A
 			Columns: []string{answermultichoices.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -431,7 +432,7 @@ func (amcuo *AnswerMultiChoicesUpdateOne) sqlSave(ctx context.Context) (_node *A
 			Columns: []string{answermultichoices.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

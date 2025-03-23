@@ -5,33 +5,39 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"study-pal-backend/ent/answerdescription"
+	"study-pal-backend/ent/answertruth"
 	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookcategoryclassification"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Problem is the model entity for the Problem schema.
 type Problem struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// AnswerTypeID holds the value of the "answer_type_id" field.
-	AnswerTypeID int `json:"answer_type_id,omitempty"`
+	AnswerTypeID uuid.UUID `json:"answer_type_id,omitempty"`
 	// Statement holds the value of the "statement" field.
 	Statement string `json:"statement,omitempty"`
 	// WorkbookID holds the value of the "workbook_id" field.
-	WorkbookID int `json:"workbook_id,omitempty"`
+	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// WorkbookCategoryID holds the value of the "workbook_category_id" field.
-	WorkbookCategoryID int `json:"workbook_category_id,omitempty"`
+	WorkbookCategoryID *uuid.UUID `json:"workbook_category_id,omitempty"`
+	// WorkbookCategoryClassificationID holds the value of the "workbook_category_classification_id" field.
+	WorkbookCategoryClassificationID *uuid.UUID `json:"workbook_category_classification_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProblemQuery when eager-loading is set.
 	Edges        ProblemEdges `json:"edges"`
@@ -43,18 +49,20 @@ type ProblemEdges struct {
 	// AnswerType holds the value of the answer_type edge.
 	AnswerType *AnswerType `json:"answer_type,omitempty"`
 	// AnswerDescriptions holds the value of the answer_descriptions edge.
-	AnswerDescriptions []*AnswerDescription `json:"answer_descriptions,omitempty"`
+	AnswerDescriptions *AnswerDescription `json:"answer_descriptions,omitempty"`
 	// AnswerMultiChoices holds the value of the answer_multi_choices edge.
 	AnswerMultiChoices []*AnswerMultiChoices `json:"answer_multi_choices,omitempty"`
 	// AnswerTruths holds the value of the answer_truths edge.
-	AnswerTruths []*AnswerTruth `json:"answer_truths,omitempty"`
+	AnswerTruths *AnswerTruth `json:"answer_truths,omitempty"`
 	// Workbook holds the value of the workbook edge.
 	Workbook *Workbook `json:"workbook,omitempty"`
 	// WorkbookCategory holds the value of the workbook_category edge.
 	WorkbookCategory *WorkbookCategory `json:"workbook_category,omitempty"`
+	// WorkbookCategoryClassification holds the value of the workbook_category_classification edge.
+	WorkbookCategoryClassification *WorkbookCategoryClassification `json:"workbook_category_classification,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // AnswerTypeOrErr returns the AnswerType value or an error if the edge
@@ -69,10 +77,12 @@ func (e ProblemEdges) AnswerTypeOrErr() (*AnswerType, error) {
 }
 
 // AnswerDescriptionsOrErr returns the AnswerDescriptions value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProblemEdges) AnswerDescriptionsOrErr() ([]*AnswerDescription, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProblemEdges) AnswerDescriptionsOrErr() (*AnswerDescription, error) {
+	if e.AnswerDescriptions != nil {
 		return e.AnswerDescriptions, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: answerdescription.Label}
 	}
 	return nil, &NotLoadedError{edge: "answer_descriptions"}
 }
@@ -87,10 +97,12 @@ func (e ProblemEdges) AnswerMultiChoicesOrErr() ([]*AnswerMultiChoices, error) {
 }
 
 // AnswerTruthsOrErr returns the AnswerTruths value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProblemEdges) AnswerTruthsOrErr() ([]*AnswerTruth, error) {
-	if e.loadedTypes[3] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProblemEdges) AnswerTruthsOrErr() (*AnswerTruth, error) {
+	if e.AnswerTruths != nil {
 		return e.AnswerTruths, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: answertruth.Label}
 	}
 	return nil, &NotLoadedError{edge: "answer_truths"}
 }
@@ -117,17 +129,30 @@ func (e ProblemEdges) WorkbookCategoryOrErr() (*WorkbookCategory, error) {
 	return nil, &NotLoadedError{edge: "workbook_category"}
 }
 
+// WorkbookCategoryClassificationOrErr returns the WorkbookCategoryClassification value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProblemEdges) WorkbookCategoryClassificationOrErr() (*WorkbookCategoryClassification, error) {
+	if e.WorkbookCategoryClassification != nil {
+		return e.WorkbookCategoryClassification, nil
+	} else if e.loadedTypes[6] {
+		return nil, &NotFoundError{label: workbookcategoryclassification.Label}
+	}
+	return nil, &NotLoadedError{edge: "workbook_category_classification"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Problem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case problem.FieldID, problem.FieldAnswerTypeID, problem.FieldWorkbookID, problem.FieldWorkbookCategoryID:
-			values[i] = new(sql.NullInt64)
+		case problem.FieldWorkbookCategoryID, problem.FieldWorkbookCategoryClassificationID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case problem.FieldStatement:
 			values[i] = new(sql.NullString)
 		case problem.FieldCreatedAt, problem.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case problem.FieldID, problem.FieldAnswerTypeID, problem.FieldWorkbookID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -144,11 +169,11 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case problem.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pr.ID = *value
 			}
-			pr.ID = int(value.Int64)
 		case problem.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -162,10 +187,10 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 				pr.UpdatedAt = value.Time
 			}
 		case problem.FieldAnswerTypeID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field answer_type_id", values[i])
-			} else if value.Valid {
-				pr.AnswerTypeID = int(value.Int64)
+			} else if value != nil {
+				pr.AnswerTypeID = *value
 			}
 		case problem.FieldStatement:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -174,16 +199,24 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 				pr.Statement = value.String
 			}
 		case problem.FieldWorkbookID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field workbook_id", values[i])
-			} else if value.Valid {
-				pr.WorkbookID = int(value.Int64)
+			} else if value != nil {
+				pr.WorkbookID = *value
 			}
 		case problem.FieldWorkbookCategoryID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field workbook_category_id", values[i])
 			} else if value.Valid {
-				pr.WorkbookCategoryID = int(value.Int64)
+				pr.WorkbookCategoryID = new(uuid.UUID)
+				*pr.WorkbookCategoryID = *value.S.(*uuid.UUID)
+			}
+		case problem.FieldWorkbookCategoryClassificationID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field workbook_category_classification_id", values[i])
+			} else if value.Valid {
+				pr.WorkbookCategoryClassificationID = new(uuid.UUID)
+				*pr.WorkbookCategoryClassificationID = *value.S.(*uuid.UUID)
 			}
 		default:
 			pr.selectValues.Set(columns[i], values[i])
@@ -228,6 +261,11 @@ func (pr *Problem) QueryWorkbookCategory() *WorkbookCategoryQuery {
 	return NewProblemClient(pr.config).QueryWorkbookCategory(pr)
 }
 
+// QueryWorkbookCategoryClassification queries the "workbook_category_classification" edge of the Problem entity.
+func (pr *Problem) QueryWorkbookCategoryClassification() *WorkbookCategoryClassificationQuery {
+	return NewProblemClient(pr.config).QueryWorkbookCategoryClassification(pr)
+}
+
 // Update returns a builder for updating this Problem.
 // Note that you need to call Problem.Unwrap() before calling this method if this Problem
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -266,8 +304,15 @@ func (pr *Problem) String() string {
 	builder.WriteString("workbook_id=")
 	builder.WriteString(fmt.Sprintf("%v", pr.WorkbookID))
 	builder.WriteString(", ")
-	builder.WriteString("workbook_category_id=")
-	builder.WriteString(fmt.Sprintf("%v", pr.WorkbookCategoryID))
+	if v := pr.WorkbookCategoryID; v != nil {
+		builder.WriteString("workbook_category_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := pr.WorkbookCategoryClassificationID; v != nil {
+		builder.WriteString("workbook_category_classification_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

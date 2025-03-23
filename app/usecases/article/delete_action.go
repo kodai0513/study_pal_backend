@@ -2,18 +2,20 @@ package article
 
 import (
 	"errors"
-	"study-pal-backend/app/domains/models/users"
+	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/app/usecases/shared/usecase_error"
+
+	"github.com/google/uuid"
 )
 
-type DeleteActionCommand struct {
-	postId    int
-	articleId int
+type deleteActionCommand struct {
+	postId    uuid.UUID
+	articleId uuid.UUID
 }
 
-func NewDeleteActionCommand(articleId int, postId int) *DeleteActionCommand {
-	return &DeleteActionCommand{
+func NewDeleteActionCommand(articleId uuid.UUID, postId uuid.UUID) *deleteActionCommand {
+	return &deleteActionCommand{
 		articleId: articleId,
 		postId:    postId,
 	}
@@ -29,16 +31,8 @@ func NewDeleteAction(articleRepository repositories.ArticleRepository) *DeleteAc
 	}
 }
 
-func (c *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.UsecaseErrorGroup {
-	usecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
-	userId, err := users.NewUserId(command.postId)
-	if err != nil {
-		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
-	}
-
-	if usecaseErrGroup.IsError() {
-		return usecaseErrGroup
-	}
+func (c *DeleteAction) Execute(command *deleteActionCommand) usecase_error.UsecaseErrorGroup {
+	userId := users.NewUserId(command.postId)
 
 	targetArticle := c.articleRepository.FindById(command.articleId)
 

@@ -17,6 +17,7 @@ type AnswerType struct {
 
 func (AnswerType) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }

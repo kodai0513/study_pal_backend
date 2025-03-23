@@ -7,12 +7,13 @@ import (
 	"study-pal-backend/app/utils/study_pal_jwts"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func AuthRequired(devModeLogin bool, secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if devModeLogin {
-			c.Set("user_id", 1)
+			c.Set("user_id", uuid.MustParse("1b142a47-765f-46ce-be5c-5d37c8ffbca5"))
 		} else {
 			authHeader := c.GetHeader("Authorization")
 			if authHeader == "" {

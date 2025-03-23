@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ArticleUpdate is the builder for updating Article entities.
@@ -49,6 +50,27 @@ func (au *ArticleUpdate) SetUpdatedAt(t time.Time) *ArticleUpdate {
 	return au
 }
 
+// SetPageID sets the "page_id" field.
+func (au *ArticleUpdate) SetPageID(i int) *ArticleUpdate {
+	au.mutation.ResetPageID()
+	au.mutation.SetPageID(i)
+	return au
+}
+
+// SetNillablePageID sets the "page_id" field if the given value is not nil.
+func (au *ArticleUpdate) SetNillablePageID(i *int) *ArticleUpdate {
+	if i != nil {
+		au.SetPageID(*i)
+	}
+	return au
+}
+
+// AddPageID adds i to the "page_id" field.
+func (au *ArticleUpdate) AddPageID(i int) *ArticleUpdate {
+	au.mutation.AddPageID(i)
+	return au
+}
+
 // SetDescription sets the "description" field.
 func (au *ArticleUpdate) SetDescription(s string) *ArticleUpdate {
 	au.mutation.SetDescription(s)
@@ -64,15 +86,15 @@ func (au *ArticleUpdate) SetNillableDescription(s *string) *ArticleUpdate {
 }
 
 // SetPostID sets the "post_id" field.
-func (au *ArticleUpdate) SetPostID(i int) *ArticleUpdate {
-	au.mutation.SetPostID(i)
+func (au *ArticleUpdate) SetPostID(u uuid.UUID) *ArticleUpdate {
+	au.mutation.SetPostID(u)
 	return au
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (au *ArticleUpdate) SetNillablePostID(i *int) *ArticleUpdate {
-	if i != nil {
-		au.SetPostID(*i)
+func (au *ArticleUpdate) SetNillablePostID(u *uuid.UUID) *ArticleUpdate {
+	if u != nil {
+		au.SetPostID(*u)
 	}
 	return au
 }
@@ -146,7 +168,7 @@ func (au *ArticleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(article.Table, article.Columns, sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(article.Table, article.Columns, sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -160,6 +182,12 @@ func (au *ArticleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.UpdatedAt(); ok {
 		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := au.mutation.PageID(); ok {
+		_spec.SetField(article.FieldPageID, field.TypeInt, value)
+	}
+	if value, ok := au.mutation.AddedPageID(); ok {
+		_spec.AddField(article.FieldPageID, field.TypeInt, value)
+	}
 	if value, ok := au.mutation.Description(); ok {
 		_spec.SetField(article.FieldDescription, field.TypeString, value)
 	}
@@ -171,7 +199,7 @@ func (au *ArticleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{article.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -184,7 +212,7 @@ func (au *ArticleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{article.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -232,6 +260,27 @@ func (auo *ArticleUpdateOne) SetUpdatedAt(t time.Time) *ArticleUpdateOne {
 	return auo
 }
 
+// SetPageID sets the "page_id" field.
+func (auo *ArticleUpdateOne) SetPageID(i int) *ArticleUpdateOne {
+	auo.mutation.ResetPageID()
+	auo.mutation.SetPageID(i)
+	return auo
+}
+
+// SetNillablePageID sets the "page_id" field if the given value is not nil.
+func (auo *ArticleUpdateOne) SetNillablePageID(i *int) *ArticleUpdateOne {
+	if i != nil {
+		auo.SetPageID(*i)
+	}
+	return auo
+}
+
+// AddPageID adds i to the "page_id" field.
+func (auo *ArticleUpdateOne) AddPageID(i int) *ArticleUpdateOne {
+	auo.mutation.AddPageID(i)
+	return auo
+}
+
 // SetDescription sets the "description" field.
 func (auo *ArticleUpdateOne) SetDescription(s string) *ArticleUpdateOne {
 	auo.mutation.SetDescription(s)
@@ -247,15 +296,15 @@ func (auo *ArticleUpdateOne) SetNillableDescription(s *string) *ArticleUpdateOne
 }
 
 // SetPostID sets the "post_id" field.
-func (auo *ArticleUpdateOne) SetPostID(i int) *ArticleUpdateOne {
-	auo.mutation.SetPostID(i)
+func (auo *ArticleUpdateOne) SetPostID(u uuid.UUID) *ArticleUpdateOne {
+	auo.mutation.SetPostID(u)
 	return auo
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (auo *ArticleUpdateOne) SetNillablePostID(i *int) *ArticleUpdateOne {
-	if i != nil {
-		auo.SetPostID(*i)
+func (auo *ArticleUpdateOne) SetNillablePostID(u *uuid.UUID) *ArticleUpdateOne {
+	if u != nil {
+		auo.SetPostID(*u)
 	}
 	return auo
 }
@@ -342,7 +391,7 @@ func (auo *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err e
 	if err := auo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(article.Table, article.Columns, sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(article.Table, article.Columns, sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Article.id" for update`)}
@@ -373,6 +422,12 @@ func (auo *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err e
 	if value, ok := auo.mutation.UpdatedAt(); ok {
 		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := auo.mutation.PageID(); ok {
+		_spec.SetField(article.FieldPageID, field.TypeInt, value)
+	}
+	if value, ok := auo.mutation.AddedPageID(); ok {
+		_spec.AddField(article.FieldPageID, field.TypeInt, value)
+	}
 	if value, ok := auo.mutation.Description(); ok {
 		_spec.SetField(article.FieldDescription, field.TypeString, value)
 	}
@@ -384,7 +439,7 @@ func (auo *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err e
 			Columns: []string{article.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -397,7 +452,7 @@ func (auo *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err e
 			Columns: []string{article.PostColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

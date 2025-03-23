@@ -1,9 +1,9 @@
 package repositories
 
 import (
-	"study-pal-backend/app/domains/models/users"
+	"study-pal-backend/app/domains/models/entities"
 )
 
 type UserRepository interface {
-	FindByName(name string) *users.User
+	FindByName(name string) *entities.User
 }

@@ -11,13 +11,14 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // AnswerDescription is the model entity for the AnswerDescription schema.
 type AnswerDescription struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -25,7 +26,7 @@ type AnswerDescription struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// ProblemID holds the value of the "problem_id" field.
-	ProblemID int `json:"problem_id,omitempty"`
+	ProblemID uuid.UUID `json:"problem_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AnswerDescriptionQuery when eager-loading is set.
 	Edges        AnswerDescriptionEdges `json:"edges"`
@@ -57,12 +58,12 @@ func (*AnswerDescription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case answerdescription.FieldID, answerdescription.FieldProblemID:
-			values[i] = new(sql.NullInt64)
 		case answerdescription.FieldName:
 			values[i] = new(sql.NullString)
 		case answerdescription.FieldCreatedAt, answerdescription.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case answerdescription.FieldID, answerdescription.FieldProblemID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -79,11 +80,11 @@ func (ad *AnswerDescription) assignValues(columns []string, values []any) error 
 	for i := range columns {
 		switch columns[i] {
 		case answerdescription.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				ad.ID = *value
 			}
-			ad.ID = int(value.Int64)
 		case answerdescription.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -103,10 +104,10 @@ func (ad *AnswerDescription) assignValues(columns []string, values []any) error 
 				ad.Name = value.String
 			}
 		case answerdescription.FieldProblemID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field problem_id", values[i])
-			} else if value.Valid {
-				ad.ProblemID = int(value.Int64)
+			} else if value != nil {
+				ad.ProblemID = *value
 			}
 		default:
 			ad.selectValues.Set(columns[i], values[i])

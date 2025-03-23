@@ -9,11 +9,12 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookcategoryclassification"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // WorkbookCategoryCreate is the builder for creating a WorkbookCategory entity.
@@ -58,20 +59,26 @@ func (wcc *WorkbookCategoryCreate) SetName(s string) *WorkbookCategoryCreate {
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (wcc *WorkbookCategoryCreate) SetWorkbookID(i int) *WorkbookCategoryCreate {
-	wcc.mutation.SetWorkbookID(i)
+func (wcc *WorkbookCategoryCreate) SetWorkbookID(u uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.SetWorkbookID(u)
+	return wcc
+}
+
+// SetID sets the "id" field.
+func (wcc *WorkbookCategoryCreate) SetID(u uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.SetID(u)
 	return wcc
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wcc *WorkbookCategoryCreate) AddProblemIDs(ids ...int) *WorkbookCategoryCreate {
+func (wcc *WorkbookCategoryCreate) AddProblemIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
 	wcc.mutation.AddProblemIDs(ids...)
 	return wcc
 }
 
 // AddProblems adds the "problems" edges to the Problem entity.
 func (wcc *WorkbookCategoryCreate) AddProblems(p ...*Problem) *WorkbookCategoryCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -83,19 +90,19 @@ func (wcc *WorkbookCategoryCreate) SetWorkbook(w *Workbook) *WorkbookCategoryCre
 	return wcc.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryClosureIDs adds the "workbook_category_closures" edge to the WorkbookCategoryClosure entity by IDs.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClosureIDs(ids ...int) *WorkbookCategoryCreate {
-	wcc.mutation.AddWorkbookCategoryClosureIDs(ids...)
+// AddWorkbookCategoryClassificationIDs adds the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by IDs.
+func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.AddWorkbookCategoryClassificationIDs(ids...)
 	return wcc
 }
 
-// AddWorkbookCategoryClosures adds the "workbook_category_closures" edges to the WorkbookCategoryClosure entity.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClosures(w ...*WorkbookCategoryClosure) *WorkbookCategoryCreate {
-	ids := make([]int, len(w))
+// AddWorkbookCategoryClassifications adds the "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
+func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryCreate {
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcc.AddWorkbookCategoryClosureIDs(ids...)
+	return wcc.AddWorkbookCategoryClassificationIDs(ids...)
 }
 
 // Mutation returns the WorkbookCategoryMutation object of the builder.
@@ -179,8 +186,13 @@ func (wcc *WorkbookCategoryCreate) sqlSave(ctx context.Context) (*WorkbookCatego
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	wcc.mutation.id = &_node.ID
 	wcc.mutation.done = true
 	return _node, nil
@@ -189,8 +201,12 @@ func (wcc *WorkbookCategoryCreate) sqlSave(ctx context.Context) (*WorkbookCatego
 func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.CreateSpec) {
 	var (
 		_node = &WorkbookCategory{config: wcc.config}
-		_spec = sqlgraph.NewCreateSpec(workbookcategory.Table, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(workbookcategory.Table, sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID))
 	)
+	if id, ok := wcc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := wcc.mutation.CreatedAt(); ok {
 		_spec.SetField(workbookcategory.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -211,7 +227,7 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 			Columns: []string{workbookcategory.ProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -227,7 +243,7 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 			Columns: []string{workbookcategory.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -236,15 +252,15 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 		_node.WorkbookID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := wcc.mutation.WorkbookCategoryClosuresIDs(); len(nodes) > 0 {
+	if nodes := wcc.mutation.WorkbookCategoryClassificationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClosuresTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClosuresColumn},
+			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclosure.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -300,10 +316,6 @@ func (wccb *WorkbookCategoryCreateBulk) Save(ctx context.Context) ([]*WorkbookCa
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

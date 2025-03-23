@@ -13,10 +13,12 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookcategoryclassification"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ProblemCreate is the builder for creating a Problem entity.
@@ -55,8 +57,8 @@ func (pc *ProblemCreate) SetNillableUpdatedAt(t *time.Time) *ProblemCreate {
 }
 
 // SetAnswerTypeID sets the "answer_type_id" field.
-func (pc *ProblemCreate) SetAnswerTypeID(i int) *ProblemCreate {
-	pc.mutation.SetAnswerTypeID(i)
+func (pc *ProblemCreate) SetAnswerTypeID(u uuid.UUID) *ProblemCreate {
+	pc.mutation.SetAnswerTypeID(u)
 	return pc
 }
 
@@ -67,14 +69,42 @@ func (pc *ProblemCreate) SetStatement(s string) *ProblemCreate {
 }
 
 // SetWorkbookID sets the "workbook_id" field.
-func (pc *ProblemCreate) SetWorkbookID(i int) *ProblemCreate {
-	pc.mutation.SetWorkbookID(i)
+func (pc *ProblemCreate) SetWorkbookID(u uuid.UUID) *ProblemCreate {
+	pc.mutation.SetWorkbookID(u)
 	return pc
 }
 
 // SetWorkbookCategoryID sets the "workbook_category_id" field.
-func (pc *ProblemCreate) SetWorkbookCategoryID(i int) *ProblemCreate {
-	pc.mutation.SetWorkbookCategoryID(i)
+func (pc *ProblemCreate) SetWorkbookCategoryID(u uuid.UUID) *ProblemCreate {
+	pc.mutation.SetWorkbookCategoryID(u)
+	return pc
+}
+
+// SetNillableWorkbookCategoryID sets the "workbook_category_id" field if the given value is not nil.
+func (pc *ProblemCreate) SetNillableWorkbookCategoryID(u *uuid.UUID) *ProblemCreate {
+	if u != nil {
+		pc.SetWorkbookCategoryID(*u)
+	}
+	return pc
+}
+
+// SetWorkbookCategoryClassificationID sets the "workbook_category_classification_id" field.
+func (pc *ProblemCreate) SetWorkbookCategoryClassificationID(u uuid.UUID) *ProblemCreate {
+	pc.mutation.SetWorkbookCategoryClassificationID(u)
+	return pc
+}
+
+// SetNillableWorkbookCategoryClassificationID sets the "workbook_category_classification_id" field if the given value is not nil.
+func (pc *ProblemCreate) SetNillableWorkbookCategoryClassificationID(u *uuid.UUID) *ProblemCreate {
+	if u != nil {
+		pc.SetWorkbookCategoryClassificationID(*u)
+	}
+	return pc
+}
+
+// SetID sets the "id" field.
+func (pc *ProblemCreate) SetID(u uuid.UUID) *ProblemCreate {
+	pc.mutation.SetID(u)
 	return pc
 }
 
@@ -83,49 +113,57 @@ func (pc *ProblemCreate) SetAnswerType(a *AnswerType) *ProblemCreate {
 	return pc.SetAnswerTypeID(a.ID)
 }
 
-// AddAnswerDescriptionIDs adds the "answer_descriptions" edge to the AnswerDescription entity by IDs.
-func (pc *ProblemCreate) AddAnswerDescriptionIDs(ids ...int) *ProblemCreate {
-	pc.mutation.AddAnswerDescriptionIDs(ids...)
+// SetAnswerDescriptionsID sets the "answer_descriptions" edge to the AnswerDescription entity by ID.
+func (pc *ProblemCreate) SetAnswerDescriptionsID(id uuid.UUID) *ProblemCreate {
+	pc.mutation.SetAnswerDescriptionsID(id)
 	return pc
 }
 
-// AddAnswerDescriptions adds the "answer_descriptions" edges to the AnswerDescription entity.
-func (pc *ProblemCreate) AddAnswerDescriptions(a ...*AnswerDescription) *ProblemCreate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetNillableAnswerDescriptionsID sets the "answer_descriptions" edge to the AnswerDescription entity by ID if the given value is not nil.
+func (pc *ProblemCreate) SetNillableAnswerDescriptionsID(id *uuid.UUID) *ProblemCreate {
+	if id != nil {
+		pc = pc.SetAnswerDescriptionsID(*id)
 	}
-	return pc.AddAnswerDescriptionIDs(ids...)
+	return pc
+}
+
+// SetAnswerDescriptions sets the "answer_descriptions" edge to the AnswerDescription entity.
+func (pc *ProblemCreate) SetAnswerDescriptions(a *AnswerDescription) *ProblemCreate {
+	return pc.SetAnswerDescriptionsID(a.ID)
 }
 
 // AddAnswerMultiChoiceIDs adds the "answer_multi_choices" edge to the AnswerMultiChoices entity by IDs.
-func (pc *ProblemCreate) AddAnswerMultiChoiceIDs(ids ...int) *ProblemCreate {
+func (pc *ProblemCreate) AddAnswerMultiChoiceIDs(ids ...uuid.UUID) *ProblemCreate {
 	pc.mutation.AddAnswerMultiChoiceIDs(ids...)
 	return pc
 }
 
 // AddAnswerMultiChoices adds the "answer_multi_choices" edges to the AnswerMultiChoices entity.
 func (pc *ProblemCreate) AddAnswerMultiChoices(a ...*AnswerMultiChoices) *ProblemCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
 	return pc.AddAnswerMultiChoiceIDs(ids...)
 }
 
-// AddAnswerTruthIDs adds the "answer_truths" edge to the AnswerTruth entity by IDs.
-func (pc *ProblemCreate) AddAnswerTruthIDs(ids ...int) *ProblemCreate {
-	pc.mutation.AddAnswerTruthIDs(ids...)
+// SetAnswerTruthsID sets the "answer_truths" edge to the AnswerTruth entity by ID.
+func (pc *ProblemCreate) SetAnswerTruthsID(id uuid.UUID) *ProblemCreate {
+	pc.mutation.SetAnswerTruthsID(id)
 	return pc
 }
 
-// AddAnswerTruths adds the "answer_truths" edges to the AnswerTruth entity.
-func (pc *ProblemCreate) AddAnswerTruths(a ...*AnswerTruth) *ProblemCreate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetNillableAnswerTruthsID sets the "answer_truths" edge to the AnswerTruth entity by ID if the given value is not nil.
+func (pc *ProblemCreate) SetNillableAnswerTruthsID(id *uuid.UUID) *ProblemCreate {
+	if id != nil {
+		pc = pc.SetAnswerTruthsID(*id)
 	}
-	return pc.AddAnswerTruthIDs(ids...)
+	return pc
+}
+
+// SetAnswerTruths sets the "answer_truths" edge to the AnswerTruth entity.
+func (pc *ProblemCreate) SetAnswerTruths(a *AnswerTruth) *ProblemCreate {
+	return pc.SetAnswerTruthsID(a.ID)
 }
 
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
@@ -136,6 +174,11 @@ func (pc *ProblemCreate) SetWorkbook(w *Workbook) *ProblemCreate {
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (pc *ProblemCreate) SetWorkbookCategory(w *WorkbookCategory) *ProblemCreate {
 	return pc.SetWorkbookCategoryID(w.ID)
+}
+
+// SetWorkbookCategoryClassification sets the "workbook_category_classification" edge to the WorkbookCategoryClassification entity.
+func (pc *ProblemCreate) SetWorkbookCategoryClassification(w *WorkbookCategoryClassification) *ProblemCreate {
+	return pc.SetWorkbookCategoryClassificationID(w.ID)
 }
 
 // Mutation returns the ProblemMutation object of the builder.
@@ -205,17 +248,11 @@ func (pc *ProblemCreate) check() error {
 	if _, ok := pc.mutation.WorkbookID(); !ok {
 		return &ValidationError{Name: "workbook_id", err: errors.New(`ent: missing required field "Problem.workbook_id"`)}
 	}
-	if _, ok := pc.mutation.WorkbookCategoryID(); !ok {
-		return &ValidationError{Name: "workbook_category_id", err: errors.New(`ent: missing required field "Problem.workbook_category_id"`)}
-	}
 	if len(pc.mutation.AnswerTypeIDs()) == 0 {
 		return &ValidationError{Name: "answer_type", err: errors.New(`ent: missing required edge "Problem.answer_type"`)}
 	}
 	if len(pc.mutation.WorkbookIDs()) == 0 {
 		return &ValidationError{Name: "workbook", err: errors.New(`ent: missing required edge "Problem.workbook"`)}
-	}
-	if len(pc.mutation.WorkbookCategoryIDs()) == 0 {
-		return &ValidationError{Name: "workbook_category", err: errors.New(`ent: missing required edge "Problem.workbook_category"`)}
 	}
 	return nil
 }
@@ -231,8 +268,13 @@ func (pc *ProblemCreate) sqlSave(ctx context.Context) (*Problem, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	pc.mutation.id = &_node.ID
 	pc.mutation.done = true
 	return _node, nil
@@ -241,8 +283,12 @@ func (pc *ProblemCreate) sqlSave(ctx context.Context) (*Problem, error) {
 func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Problem{config: pc.config}
-		_spec = sqlgraph.NewCreateSpec(problem.Table, sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(problem.Table, sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID))
 	)
+	if id, ok := pc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := pc.mutation.CreatedAt(); ok {
 		_spec.SetField(problem.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -263,7 +309,7 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 			Columns: []string{problem.AnswerTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(answertype.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -274,13 +320,13 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pc.mutation.AnswerDescriptionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   problem.AnswerDescriptionsTable,
 			Columns: []string{problem.AnswerDescriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -296,7 +342,7 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 			Columns: []string{problem.AnswerMultiChoicesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -306,13 +352,13 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pc.mutation.AnswerTruthsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   problem.AnswerTruthsTable,
 			Columns: []string{problem.AnswerTruthsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -328,7 +374,7 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 			Columns: []string{problem.WorkbookColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -345,13 +391,30 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 			Columns: []string{problem.WorkbookCategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.WorkbookCategoryID = nodes[0]
+		_node.WorkbookCategoryID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.WorkbookCategoryClassificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   problem.WorkbookCategoryClassificationTable,
+			Columns: []string{problem.WorkbookCategoryClassificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.WorkbookCategoryClassificationID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -402,10 +465,6 @@ func (pcb *ProblemCreateBulk) Save(ctx context.Context) ([]*Problem, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

@@ -40,7 +40,7 @@ func (amcd *AnswerMultiChoicesDelete) ExecX(ctx context.Context) int {
 }
 
 func (amcd *AnswerMultiChoicesDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(answermultichoices.Table, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(answermultichoices.Table, sqlgraph.NewFieldSpec(answermultichoices.FieldID, field.TypeUUID))
 	if ps := amcd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

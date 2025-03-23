@@ -26,8 +26,8 @@ const (
 	EdgeProblems = "problems"
 	// EdgeWorkbook holds the string denoting the workbook edge name in mutations.
 	EdgeWorkbook = "workbook"
-	// EdgeWorkbookCategoryClosures holds the string denoting the workbook_category_closures edge name in mutations.
-	EdgeWorkbookCategoryClosures = "workbook_category_closures"
+	// EdgeWorkbookCategoryClassifications holds the string denoting the workbook_category_classifications edge name in mutations.
+	EdgeWorkbookCategoryClassifications = "workbook_category_classifications"
 	// Table holds the table name of the workbookcategory in the database.
 	Table = "workbook_categories"
 	// ProblemsTable is the table that holds the problems relation/edge.
@@ -44,13 +44,13 @@ const (
 	WorkbookInverseTable = "workbooks"
 	// WorkbookColumn is the table column denoting the workbook relation/edge.
 	WorkbookColumn = "workbook_id"
-	// WorkbookCategoryClosuresTable is the table that holds the workbook_category_closures relation/edge.
-	WorkbookCategoryClosuresTable = "workbook_category_closures"
-	// WorkbookCategoryClosuresInverseTable is the table name for the WorkbookCategoryClosure entity.
-	// It exists in this package in order to avoid circular dependency with the "workbookcategoryclosure" package.
-	WorkbookCategoryClosuresInverseTable = "workbook_category_closures"
-	// WorkbookCategoryClosuresColumn is the table column denoting the workbook_category_closures relation/edge.
-	WorkbookCategoryClosuresColumn = "workbook_category_workbook_category_closures"
+	// WorkbookCategoryClassificationsTable is the table that holds the workbook_category_classifications relation/edge.
+	WorkbookCategoryClassificationsTable = "workbook_category_classifications"
+	// WorkbookCategoryClassificationsInverseTable is the table name for the WorkbookCategoryClassification entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookcategoryclassification" package.
+	WorkbookCategoryClassificationsInverseTable = "workbook_category_classifications"
+	// WorkbookCategoryClassificationsColumn is the table column denoting the workbook_category_classifications relation/edge.
+	WorkbookCategoryClassificationsColumn = "workbook_category_workbook_category_classifications"
 )
 
 // Columns holds all SQL columns for workbookcategory fields.
@@ -132,17 +132,17 @@ func ByWorkbookField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByWorkbookCategoryClosuresCount orders the results by workbook_category_closures count.
-func ByWorkbookCategoryClosuresCount(opts ...sql.OrderTermOption) OrderOption {
+// ByWorkbookCategoryClassificationsCount orders the results by workbook_category_classifications count.
+func ByWorkbookCategoryClassificationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newWorkbookCategoryClosuresStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newWorkbookCategoryClassificationsStep(), opts...)
 	}
 }
 
-// ByWorkbookCategoryClosures orders the results by workbook_category_closures terms.
-func ByWorkbookCategoryClosures(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByWorkbookCategoryClassifications orders the results by workbook_category_classifications terms.
+func ByWorkbookCategoryClassifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryClosuresStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryClassificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newProblemsStep() *sqlgraph.Step {
@@ -159,10 +159,10 @@ func newWorkbookStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookTable, WorkbookColumn),
 	)
 }
-func newWorkbookCategoryClosuresStep() *sqlgraph.Step {
+func newWorkbookCategoryClassificationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WorkbookCategoryClosuresInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryClosuresTable, WorkbookCategoryClosuresColumn),
+		sqlgraph.To(WorkbookCategoryClassificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryClassificationsTable, WorkbookCategoryClassificationsColumn),
 	)
 }

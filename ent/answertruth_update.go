@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerTruthUpdate is the builder for updating AnswerTruth entities.
@@ -50,15 +51,15 @@ func (atu *AnswerTruthUpdate) SetUpdatedAt(t time.Time) *AnswerTruthUpdate {
 }
 
 // SetProblemID sets the "problem_id" field.
-func (atu *AnswerTruthUpdate) SetProblemID(i int) *AnswerTruthUpdate {
-	atu.mutation.SetProblemID(i)
+func (atu *AnswerTruthUpdate) SetProblemID(u uuid.UUID) *AnswerTruthUpdate {
+	atu.mutation.SetProblemID(u)
 	return atu
 }
 
 // SetNillableProblemID sets the "problem_id" field if the given value is not nil.
-func (atu *AnswerTruthUpdate) SetNillableProblemID(i *int) *AnswerTruthUpdate {
-	if i != nil {
-		atu.SetProblemID(*i)
+func (atu *AnswerTruthUpdate) SetNillableProblemID(u *uuid.UUID) *AnswerTruthUpdate {
+	if u != nil {
+		atu.SetProblemID(*u)
 	}
 	return atu
 }
@@ -141,7 +142,7 @@ func (atu *AnswerTruthUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := atu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeUUID))
 	if ps := atu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -160,26 +161,26 @@ func (atu *AnswerTruthUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if atu.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answertruth.ProblemTable,
 			Columns: []string{answertruth.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := atu.mutation.ProblemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answertruth.ProblemTable,
 			Columns: []string{answertruth.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -228,15 +229,15 @@ func (atuo *AnswerTruthUpdateOne) SetUpdatedAt(t time.Time) *AnswerTruthUpdateOn
 }
 
 // SetProblemID sets the "problem_id" field.
-func (atuo *AnswerTruthUpdateOne) SetProblemID(i int) *AnswerTruthUpdateOne {
-	atuo.mutation.SetProblemID(i)
+func (atuo *AnswerTruthUpdateOne) SetProblemID(u uuid.UUID) *AnswerTruthUpdateOne {
+	atuo.mutation.SetProblemID(u)
 	return atuo
 }
 
 // SetNillableProblemID sets the "problem_id" field if the given value is not nil.
-func (atuo *AnswerTruthUpdateOne) SetNillableProblemID(i *int) *AnswerTruthUpdateOne {
-	if i != nil {
-		atuo.SetProblemID(*i)
+func (atuo *AnswerTruthUpdateOne) SetNillableProblemID(u *uuid.UUID) *AnswerTruthUpdateOne {
+	if u != nil {
+		atuo.SetProblemID(*u)
 	}
 	return atuo
 }
@@ -332,7 +333,7 @@ func (atuo *AnswerTruthUpdateOne) sqlSave(ctx context.Context) (_node *AnswerTru
 	if err := atuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(answertruth.Table, answertruth.Columns, sqlgraph.NewFieldSpec(answertruth.FieldID, field.TypeUUID))
 	id, ok := atuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AnswerTruth.id" for update`)}
@@ -368,26 +369,26 @@ func (atuo *AnswerTruthUpdateOne) sqlSave(ctx context.Context) (_node *AnswerTru
 	}
 	if atuo.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answertruth.ProblemTable,
 			Columns: []string{answertruth.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := atuo.mutation.ProblemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   answertruth.ProblemTable,
 			Columns: []string{answertruth.ProblemColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

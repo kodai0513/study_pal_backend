@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RoleUpdate is the builder for updating Role entities.
@@ -65,14 +66,14 @@ func (ru *RoleUpdate) SetNillableName(s *string) *RoleUpdate {
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (ru *RoleUpdate) AddWorkbookMemberIDs(ids ...int) *RoleUpdate {
+func (ru *RoleUpdate) AddWorkbookMemberIDs(ids ...uuid.UUID) *RoleUpdate {
 	ru.mutation.AddWorkbookMemberIDs(ids...)
 	return ru
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (ru *RoleUpdate) AddWorkbookMembers(w ...*WorkbookMember) *RoleUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -80,14 +81,14 @@ func (ru *RoleUpdate) AddWorkbookMembers(w ...*WorkbookMember) *RoleUpdate {
 }
 
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
-func (ru *RoleUpdate) AddPermissionIDs(ids ...int) *RoleUpdate {
+func (ru *RoleUpdate) AddPermissionIDs(ids ...uuid.UUID) *RoleUpdate {
 	ru.mutation.AddPermissionIDs(ids...)
 	return ru
 }
 
 // AddPermissions adds the "permissions" edges to the Permission entity.
 func (ru *RoleUpdate) AddPermissions(p ...*Permission) *RoleUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -106,14 +107,14 @@ func (ru *RoleUpdate) ClearWorkbookMembers() *RoleUpdate {
 }
 
 // RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
-func (ru *RoleUpdate) RemoveWorkbookMemberIDs(ids ...int) *RoleUpdate {
+func (ru *RoleUpdate) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *RoleUpdate {
 	ru.mutation.RemoveWorkbookMemberIDs(ids...)
 	return ru
 }
 
 // RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
 func (ru *RoleUpdate) RemoveWorkbookMembers(w ...*WorkbookMember) *RoleUpdate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -127,14 +128,14 @@ func (ru *RoleUpdate) ClearPermissions() *RoleUpdate {
 }
 
 // RemovePermissionIDs removes the "permissions" edge to Permission entities by IDs.
-func (ru *RoleUpdate) RemovePermissionIDs(ids ...int) *RoleUpdate {
+func (ru *RoleUpdate) RemovePermissionIDs(ids ...uuid.UUID) *RoleUpdate {
 	ru.mutation.RemovePermissionIDs(ids...)
 	return ru
 }
 
 // RemovePermissions removes "permissions" edges to Permission entities.
 func (ru *RoleUpdate) RemovePermissions(p ...*Permission) *RoleUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -191,7 +192,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ru.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(role.Table, role.Columns, sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(role.Table, role.Columns, sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID))
 	if ps := ru.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -216,7 +217,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -229,7 +230,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -245,7 +246,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -261,7 +262,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -274,7 +275,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -290,7 +291,7 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -353,14 +354,14 @@ func (ruo *RoleUpdateOne) SetNillableName(s *string) *RoleUpdateOne {
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (ruo *RoleUpdateOne) AddWorkbookMemberIDs(ids ...int) *RoleUpdateOne {
+func (ruo *RoleUpdateOne) AddWorkbookMemberIDs(ids ...uuid.UUID) *RoleUpdateOne {
 	ruo.mutation.AddWorkbookMemberIDs(ids...)
 	return ruo
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (ruo *RoleUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *RoleUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -368,14 +369,14 @@ func (ruo *RoleUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *RoleUpdateOn
 }
 
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
-func (ruo *RoleUpdateOne) AddPermissionIDs(ids ...int) *RoleUpdateOne {
+func (ruo *RoleUpdateOne) AddPermissionIDs(ids ...uuid.UUID) *RoleUpdateOne {
 	ruo.mutation.AddPermissionIDs(ids...)
 	return ruo
 }
 
 // AddPermissions adds the "permissions" edges to the Permission entity.
 func (ruo *RoleUpdateOne) AddPermissions(p ...*Permission) *RoleUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -394,14 +395,14 @@ func (ruo *RoleUpdateOne) ClearWorkbookMembers() *RoleUpdateOne {
 }
 
 // RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
-func (ruo *RoleUpdateOne) RemoveWorkbookMemberIDs(ids ...int) *RoleUpdateOne {
+func (ruo *RoleUpdateOne) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *RoleUpdateOne {
 	ruo.mutation.RemoveWorkbookMemberIDs(ids...)
 	return ruo
 }
 
 // RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
 func (ruo *RoleUpdateOne) RemoveWorkbookMembers(w ...*WorkbookMember) *RoleUpdateOne {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -415,14 +416,14 @@ func (ruo *RoleUpdateOne) ClearPermissions() *RoleUpdateOne {
 }
 
 // RemovePermissionIDs removes the "permissions" edge to Permission entities by IDs.
-func (ruo *RoleUpdateOne) RemovePermissionIDs(ids ...int) *RoleUpdateOne {
+func (ruo *RoleUpdateOne) RemovePermissionIDs(ids ...uuid.UUID) *RoleUpdateOne {
 	ruo.mutation.RemovePermissionIDs(ids...)
 	return ruo
 }
 
 // RemovePermissions removes "permissions" edges to Permission entities.
 func (ruo *RoleUpdateOne) RemovePermissions(p ...*Permission) *RoleUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -492,7 +493,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 	if err := ruo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(role.Table, role.Columns, sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(role.Table, role.Columns, sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID))
 	id, ok := ruo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Role.id" for update`)}
@@ -534,7 +535,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -547,7 +548,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -563,7 +564,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -579,7 +580,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -592,7 +593,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -608,7 +609,7 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

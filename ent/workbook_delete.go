@@ -40,7 +40,7 @@ func (wd *WorkbookDelete) ExecX(ctx context.Context) int {
 }
 
 func (wd *WorkbookDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(workbook.Table, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(workbook.Table, sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID))
 	if ps := wd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

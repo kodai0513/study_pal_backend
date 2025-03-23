@@ -40,7 +40,7 @@ func (wmd *WorkbookMemberDelete) ExecX(ctx context.Context) int {
 }
 
 func (wmd *WorkbookMemberDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(workbookmember.Table, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(workbookmember.Table, sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID))
 	if ps := wmd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

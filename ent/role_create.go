@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RoleCreate is the builder for creating a Role entity.
@@ -56,15 +57,21 @@ func (rc *RoleCreate) SetName(s string) *RoleCreate {
 	return rc
 }
 
+// SetID sets the "id" field.
+func (rc *RoleCreate) SetID(u uuid.UUID) *RoleCreate {
+	rc.mutation.SetID(u)
+	return rc
+}
+
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
-func (rc *RoleCreate) AddWorkbookMemberIDs(ids ...int) *RoleCreate {
+func (rc *RoleCreate) AddWorkbookMemberIDs(ids ...uuid.UUID) *RoleCreate {
 	rc.mutation.AddWorkbookMemberIDs(ids...)
 	return rc
 }
 
 // AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
 func (rc *RoleCreate) AddWorkbookMembers(w ...*WorkbookMember) *RoleCreate {
-	ids := make([]int, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -72,14 +79,14 @@ func (rc *RoleCreate) AddWorkbookMembers(w ...*WorkbookMember) *RoleCreate {
 }
 
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
-func (rc *RoleCreate) AddPermissionIDs(ids ...int) *RoleCreate {
+func (rc *RoleCreate) AddPermissionIDs(ids ...uuid.UUID) *RoleCreate {
 	rc.mutation.AddPermissionIDs(ids...)
 	return rc
 }
 
 // AddPermissions adds the "permissions" edges to the Permission entity.
 func (rc *RoleCreate) AddPermissions(p ...*Permission) *RoleCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -164,8 +171,13 @@ func (rc *RoleCreate) sqlSave(ctx context.Context) (*Role, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	rc.mutation.id = &_node.ID
 	rc.mutation.done = true
 	return _node, nil
@@ -174,8 +186,12 @@ func (rc *RoleCreate) sqlSave(ctx context.Context) (*Role, error) {
 func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Role{config: rc.config}
-		_spec = sqlgraph.NewCreateSpec(role.Table, sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(role.Table, sqlgraph.NewFieldSpec(role.FieldID, field.TypeUUID))
 	)
+	if id, ok := rc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := rc.mutation.CreatedAt(); ok {
 		_spec.SetField(role.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -196,7 +212,7 @@ func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 			Columns: []string{role.WorkbookMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -212,7 +228,7 @@ func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 			Columns: role.PermissionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -268,10 +284,6 @@ func (rcb *RoleCreateBulk) Save(ctx context.Context) ([]*Role, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

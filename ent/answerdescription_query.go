@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AnswerDescriptionQuery is the builder for querying AnswerDescription entities.
@@ -74,7 +75,7 @@ func (adq *AnswerDescriptionQuery) QueryProblem() *ProblemQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(answerdescription.Table, answerdescription.FieldID, selector),
 			sqlgraph.To(problem.Table, problem.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, answerdescription.ProblemTable, answerdescription.ProblemColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, answerdescription.ProblemTable, answerdescription.ProblemColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(adq.driver.Dialect(), step)
 		return fromU, nil
@@ -106,8 +107,8 @@ func (adq *AnswerDescriptionQuery) FirstX(ctx context.Context) *AnswerDescriptio
 
 // FirstID returns the first AnswerDescription ID from the query.
 // Returns a *NotFoundError when no AnswerDescription ID was found.
-func (adq *AnswerDescriptionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (adq *AnswerDescriptionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = adq.Limit(1).IDs(setContextOp(ctx, adq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -119,7 +120,7 @@ func (adq *AnswerDescriptionQuery) FirstID(ctx context.Context) (id int, err err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (adq *AnswerDescriptionQuery) FirstIDX(ctx context.Context) int {
+func (adq *AnswerDescriptionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := adq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +158,8 @@ func (adq *AnswerDescriptionQuery) OnlyX(ctx context.Context) *AnswerDescription
 // OnlyID is like Only, but returns the only AnswerDescription ID in the query.
 // Returns a *NotSingularError when more than one AnswerDescription ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (adq *AnswerDescriptionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (adq *AnswerDescriptionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = adq.Limit(2).IDs(setContextOp(ctx, adq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -174,7 +175,7 @@ func (adq *AnswerDescriptionQuery) OnlyID(ctx context.Context) (id int, err erro
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (adq *AnswerDescriptionQuery) OnlyIDX(ctx context.Context) int {
+func (adq *AnswerDescriptionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := adq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +203,7 @@ func (adq *AnswerDescriptionQuery) AllX(ctx context.Context) []*AnswerDescriptio
 }
 
 // IDs executes the query and returns a list of AnswerDescription IDs.
-func (adq *AnswerDescriptionQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (adq *AnswerDescriptionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if adq.ctx.Unique == nil && adq.path != nil {
 		adq.Unique(true)
 	}
@@ -214,7 +215,7 @@ func (adq *AnswerDescriptionQuery) IDs(ctx context.Context) (ids []int, err erro
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (adq *AnswerDescriptionQuery) IDsX(ctx context.Context) []int {
+func (adq *AnswerDescriptionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := adq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -402,8 +403,8 @@ func (adq *AnswerDescriptionQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 }
 
 func (adq *AnswerDescriptionQuery) loadProblem(ctx context.Context, query *ProblemQuery, nodes []*AnswerDescription, init func(*AnswerDescription), assign func(*AnswerDescription, *Problem)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AnswerDescription)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*AnswerDescription)
 	for i := range nodes {
 		fk := nodes[i].ProblemID
 		if _, ok := nodeids[fk]; !ok {
@@ -441,7 +442,7 @@ func (adq *AnswerDescriptionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (adq *AnswerDescriptionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(answerdescription.Table, answerdescription.Columns, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(answerdescription.Table, answerdescription.Columns, sqlgraph.NewFieldSpec(answerdescription.FieldID, field.TypeUUID))
 	_spec.From = adq.sql
 	if unique := adq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
