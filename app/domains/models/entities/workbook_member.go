@@ -1,22 +1,19 @@
 package entities
 
 import (
-	"study-pal-backend/app/domains/models/value_objects/roles"
-	"study-pal-backend/app/domains/models/value_objects/users"
-	"study-pal-backend/app/domains/models/value_objects/workbook_members"
-	"study-pal-backend/app/domains/models/value_objects/workbooks"
+	"study-pal-backend/app/master_datas/master_roles"
 
 	"github.com/google/uuid"
 )
 
 type WorkbookMember struct {
-	id         workbook_members.WorkbookMemberId
-	roleId     roles.RoleId
-	userId     users.UserId
-	workbookId workbooks.WorkbookId
+	id         uuid.UUID
+	roleId     uuid.UUID
+	userId     uuid.UUID
+	workbookId uuid.UUID
 }
 
-func NewWorkbookMember(id workbook_members.WorkbookMemberId, roleId roles.RoleId, userId users.UserId, workbookId workbooks.WorkbookId) *WorkbookMember {
+func NewWorkbookMember(id uuid.UUID, roleId uuid.UUID, userId uuid.UUID, workbookId uuid.UUID) *WorkbookMember {
 	return &WorkbookMember{
 		id:         id,
 		roleId:     roleId,
@@ -26,17 +23,29 @@ func NewWorkbookMember(id workbook_members.WorkbookMemberId, roleId roles.RoleId
 }
 
 func (w *WorkbookMember) Id() uuid.UUID {
-	return w.id.Value()
+	return w.id
+}
+
+func (w *WorkbookMember) IsAdmin() bool {
+	return w.roleId == master_roles.Admin
+}
+
+func (w *WorkbookMember) IsEditor() bool {
+	return w.roleId == master_roles.Editor
+}
+
+func (w *WorkbookMember) IsReader() bool {
+	return w.roleId == master_roles.Reader
 }
 
 func (w *WorkbookMember) RoleId() uuid.UUID {
-	return w.roleId.Value()
+	return w.roleId
 }
 
 func (w *WorkbookMember) UserId() uuid.UUID {
-	return w.userId.Value()
+	return w.userId
 }
 
 func (w *WorkbookMember) WorkbookId() uuid.UUID {
-	return w.workbookId.Value()
+	return w.workbookId
 }

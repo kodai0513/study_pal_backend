@@ -78,6 +78,8 @@ func main() {
 		workbooks := v1.Group("/workbooks")
 		{
 			workbooks.POST("/", authRequired, workbookController.Create)
+			workbooks.PUT("/:workbook_id", authRequired, workbookController.Update)
+			workbooks.DELETE("/:workbook_id", authRequired, workbookController.Delete)
 		}
 	}
 

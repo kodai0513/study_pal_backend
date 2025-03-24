@@ -94,7 +94,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "page_id", Type: field.TypeInt, Unique: true, SchemaType: map[string]string{"postgres": "SERIAL"}},
+		{Name: "page_id", Type: field.TypeInt, Unique: true, Nullable: true},
 		{Name: "description", Type: field.TypeString, Size: 400},
 		{Name: "post_id", Type: field.TypeUUID},
 	}

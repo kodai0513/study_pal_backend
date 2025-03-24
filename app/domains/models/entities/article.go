@@ -2,18 +2,17 @@ package entities
 
 import (
 	"study-pal-backend/app/domains/models/value_objects/articles"
-	"study-pal-backend/app/domains/models/value_objects/users"
 
 	"github.com/google/uuid"
 )
 
 type Article struct {
-	id          articles.ArticleId
+	id          uuid.UUID
 	description articles.Description
-	userId      users.UserId
+	userId      uuid.UUID
 }
 
-func NewArticle(id articles.ArticleId, description articles.Description, userId users.UserId) *Article {
+func NewArticle(id uuid.UUID, description articles.Description, userId uuid.UUID) *Article {
 	return &Article{
 		id:          id,
 		description: description,
@@ -22,7 +21,7 @@ func NewArticle(id articles.ArticleId, description articles.Description, userId 
 }
 
 func (a *Article) Id() uuid.UUID {
-	return a.id.Value()
+	return a.id
 }
 
 func (a *Article) Description() string {
@@ -30,5 +29,5 @@ func (a *Article) Description() string {
 }
 
 func (a *Article) UserId() uuid.UUID {
-	return a.userId.Value()
+	return a.userId
 }

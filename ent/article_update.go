@@ -71,6 +71,12 @@ func (au *ArticleUpdate) AddPageID(i int) *ArticleUpdate {
 	return au
 }
 
+// ClearPageID clears the value of the "page_id" field.
+func (au *ArticleUpdate) ClearPageID() *ArticleUpdate {
+	au.mutation.ClearPageID()
+	return au
+}
+
 // SetDescription sets the "description" field.
 func (au *ArticleUpdate) SetDescription(s string) *ArticleUpdate {
 	au.mutation.SetDescription(s)
@@ -188,6 +194,9 @@ func (au *ArticleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.AddedPageID(); ok {
 		_spec.AddField(article.FieldPageID, field.TypeInt, value)
 	}
+	if au.mutation.PageIDCleared() {
+		_spec.ClearField(article.FieldPageID, field.TypeInt)
+	}
 	if value, ok := au.mutation.Description(); ok {
 		_spec.SetField(article.FieldDescription, field.TypeString, value)
 	}
@@ -278,6 +287,12 @@ func (auo *ArticleUpdateOne) SetNillablePageID(i *int) *ArticleUpdateOne {
 // AddPageID adds i to the "page_id" field.
 func (auo *ArticleUpdateOne) AddPageID(i int) *ArticleUpdateOne {
 	auo.mutation.AddPageID(i)
+	return auo
+}
+
+// ClearPageID clears the value of the "page_id" field.
+func (auo *ArticleUpdateOne) ClearPageID() *ArticleUpdateOne {
+	auo.mutation.ClearPageID()
 	return auo
 }
 
@@ -427,6 +442,9 @@ func (auo *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err e
 	}
 	if value, ok := auo.mutation.AddedPageID(); ok {
 		_spec.AddField(article.FieldPageID, field.TypeInt, value)
+	}
+	if auo.mutation.PageIDCleared() {
+		_spec.ClearField(article.FieldPageID, field.TypeInt)
 	}
 	if value, ok := auo.mutation.Description(); ok {
 		_spec.SetField(article.FieldDescription, field.TypeString, value)

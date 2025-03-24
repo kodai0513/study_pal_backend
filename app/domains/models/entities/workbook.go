@@ -1,31 +1,30 @@
 package entities
 
 import (
-	"study-pal-backend/app/domains/models/value_objects/roles"
-	"study-pal-backend/app/domains/models/value_objects/users"
-	"study-pal-backend/app/domains/models/value_objects/workbook_members"
+	"errors"
 	"study-pal-backend/app/domains/models/value_objects/workbooks"
+	"study-pal-backend/app/master_datas/master_roles"
 
 	"github.com/google/uuid"
 )
 
 type Workbook struct {
-	id              workbooks.WorkbookId
-	description     workbooks.Description
-	isPublic        workbooks.IsPublic
-	title           workbooks.Title
-	userId          users.UserId
-	workbookMembers []*WorkbookMember
+	id                 uuid.UUID
+	description        workbooks.Description
+	isPublic           bool
+	problems           []*Problem
+	title              workbooks.Title
+	userId             uuid.UUID
+	workbookCategories []*WorkbookCategory
+	workbookMembers    []*WorkbookMember
 }
 
-func CreateWorkbook(id workbooks.WorkbookId, description workbooks.Description, userId users.UserId, title workbooks.Title) *Workbook {
-	workbookMemberId := workbook_members.CreateWorkbookMemberId()
-	adminRoleId := roles.AdminRoleId()
-	workbookMembers := []*WorkbookMember{NewWorkbookMember(workbookMemberId, adminRoleId, userId, id)}
+func CreateWorkbook(id uuid.UUID, description workbooks.Description, userId uuid.UUID, title workbooks.Title) *Workbook {
+	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Admin, userId, id)}
 
 	return &Workbook{
 		id:              id,
-		isPublic:        workbooks.NewIsPublic(false),
+		isPublic:        false,
 		description:     description,
 		title:           title,
 		userId:          userId,
@@ -34,11 +33,11 @@ func CreateWorkbook(id workbooks.WorkbookId, description workbooks.Description, 
 }
 
 func NewWorkbook(
-	id workbooks.WorkbookId,
-	isPublic workbooks.IsPublic,
+	id uuid.UUID,
+	isPublic bool,
 	description workbooks.Description,
 	title workbooks.Title,
-	userId users.UserId,
+	userId uuid.UUID,
 	workbookMembers []*WorkbookMember,
 ) *Workbook {
 	return &Workbook{
@@ -51,13 +50,38 @@ func NewWorkbook(
 	}
 }
 
-func (w *Workbook) ChangePublic(publishableWorkbook bool) error {
-	w.isPublic = workbooks.NewIsPublic(true)
+func (w *Workbook) AddProblems(problem *Problem) error {
+	if problem.workbookCategoryId != uuid.Nil || problem.workbookCategoryClassificationId != uuid.Nil {
+		return errors.New("only unclassified questions can be added")
+	}
+
+	w.problems = append(w.problems, problem)
+
 	return nil
 }
 
+func (w *Workbook) ChangePublic() error {
+	if len(w.problems) == 0 && len(w.workbookCategories) == 0 {
+		return errors.New("cannot be included without classification")
+	}
+	w.isPublic = true
+	return nil
+}
+
+func (w *Workbook) ChangePrivate() {
+	w.isPublic = false
+}
+
+func (w *Workbook) SetDescription(value workbooks.Description) {
+	w.description = value
+}
+
+func (w *Workbook) SetTitle(value workbooks.Title) {
+	w.title = value
+}
+
 func (w *Workbook) Id() uuid.UUID {
-	return w.id.Value()
+	return w.id
 }
 
 func (w *Workbook) Description() string {
@@ -65,7 +89,7 @@ func (w *Workbook) Description() string {
 }
 
 func (w *Workbook) IsPublic() bool {
-	return w.isPublic.Value()
+	return w.isPublic
 }
 
 func (w *Workbook) Title() string {
@@ -73,7 +97,7 @@ func (w *Workbook) Title() string {
 }
 
 func (w *Workbook) UserId() uuid.UUID {
-	return w.userId.Value()
+	return w.userId
 }
 
 func (w *Workbook) WorkbookMembers() []*WorkbookMember {

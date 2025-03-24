@@ -31,11 +31,10 @@ func (u *UserRepositoryImpl) FindByName(name string) *entities.User {
 		return nil
 	}
 
-	id := users.NewUserId(result.ID)
 	email, _ := users.NewEmail(result.Email)
 	resultName, _ := users.NewName(result.Name)
 	nickName, _ := users.NewNickName(result.NickName)
 	password := users.NewPassword(result.Password)
 
-	return entities.NewUser(id, email, resultName, nickName, password)
+	return entities.NewUser(result.ID, email, resultName, nickName, password)
 }

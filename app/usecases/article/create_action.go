@@ -3,7 +3,6 @@ package article
 import (
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/articles"
-	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
@@ -38,14 +37,12 @@ func (c *CreateAction) Execute(command *createActionCommand) usecase_error.Useca
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
-	userId := users.NewUserId(command.postId)
 
 	if usecaseErrGroup.IsError() {
 		return usecaseErrGroup
 	}
 
-	articleId := articles.CreateArticleId()
-	article := entities.NewArticle(articleId, description, userId)
+	article := entities.NewArticle(uuid.New(), description, command.postId)
 	c.articleRepository.Create(article)
 
 	return nil

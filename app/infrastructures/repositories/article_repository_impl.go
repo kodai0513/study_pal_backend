@@ -4,7 +4,6 @@ import (
 	"context"
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/articles"
-	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/article"
@@ -56,9 +55,7 @@ func (a *ArticleRepositoryImpl) FindById(id uuid.UUID) *entities.Article {
 		return nil
 	}
 
-	resultId := articles.NewArticleId(result.ID)
 	resultDescription, _ := articles.NewDescription(result.Description)
-	userId := users.NewUserId(result.PostID)
 
-	return entities.NewArticle(resultId, resultDescription, userId)
+	return entities.NewArticle(result.ID, resultDescription, result.PostID)
 }

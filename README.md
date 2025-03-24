@@ -1,3 +1,26 @@
+# ent.の使用上の注意点
+
+### クエリの発行するメソッドは○○Xという命名のメソッドを使用する(致命的なエラーをerrorの戻り値ではなくpanicによって発生させれるため)
+```
+w.client.Workbook.Create().
+		SetID(workbook.Id()).
+		SetCreatedID(workbook.UserId()).
+		SetDescription(workbook.Description()).
+		SetIsPublic(workbook.IsPublic()).
+		SetTitle(workbook.Title()).
+		Save(w.ctx)
+```
+
+```
+w.client.Workbook.Create().
+		SetID(workbook.Id()).
+		SetCreatedID(workbook.UserId()).
+		SetDescription(workbook.Description()).
+		SetIsPublic(workbook.IsPublic()).
+		SetTitle(workbook.Title()).
+		SaveX(w.ctx)
+```
+
 # マイグレーション手順
 
 ### コマンドを実行しスキーマを定義

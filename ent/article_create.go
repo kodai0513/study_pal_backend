@@ -56,6 +56,14 @@ func (ac *ArticleCreate) SetPageID(i int) *ArticleCreate {
 	return ac
 }
 
+// SetNillablePageID sets the "page_id" field if the given value is not nil.
+func (ac *ArticleCreate) SetNillablePageID(i *int) *ArticleCreate {
+	if i != nil {
+		ac.SetPageID(*i)
+	}
+	return ac
+}
+
 // SetDescription sets the "description" field.
 func (ac *ArticleCreate) SetDescription(s string) *ArticleCreate {
 	ac.mutation.SetDescription(s)
@@ -131,9 +139,6 @@ func (ac *ArticleCreate) check() error {
 	}
 	if _, ok := ac.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Article.updated_at"`)}
-	}
-	if _, ok := ac.mutation.PageID(); !ok {
-		return &ValidationError{Name: "page_id", err: errors.New(`ent: missing required field "Article.page_id"`)}
 	}
 	if _, ok := ac.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Article.description"`)}

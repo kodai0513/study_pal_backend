@@ -4,7 +4,6 @@ import (
 	"errors"
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/articles"
-	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
@@ -37,29 +36,27 @@ func NewUpdateAction(articleRepository repositories.ArticleRepository) *UpdateAc
 
 func (c *UpdateAction) Execute(command *updateActionCommand) usecase_error.UsecaseErrorGroup {
 	usecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
-	articleId := articles.NewArticleId(command.articleId)
 	description, err := articles.NewDescription(command.description)
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
-	userId := users.NewUserId(command.postId)
 
 	if usecaseErrGroup.IsError() {
 		return usecaseErrGroup
 	}
 
-	targetArticle := c.articleRepository.FindById(articleId.Value())
+	targetArticle := c.articleRepository.FindById(command.articleId)
 	if targetArticle == nil {
 		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("article not found")))
 	}
 
-	if userId.Value() != targetArticle.UserId() {
+	if command.postId != targetArticle.UserId() {
 		return usecase_error.NewUsecaseErrorGroupWithMessage(
 			usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, errors.New("you are not authorized to edit that article")),
 		)
 	}
 
-	article := entities.NewArticle(articleId, description, userId)
+	article := entities.NewArticle(command.articleId, description, command.postId)
 	c.articleRepository.Update(article)
 
 	return nil

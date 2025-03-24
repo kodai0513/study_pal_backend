@@ -1,19 +1,16 @@
 package entities
 
 import (
-	"study-pal-backend/app/domains/models/value_objects/answer_truths"
-	"study-pal-backend/app/domains/models/value_objects/problems"
-
 	"github.com/google/uuid"
 )
 
 type AnswerTruth struct {
-	id        answer_truths.AnswerTruthId
-	problemId problems.ProblemId
-	truth     answer_truths.Truth
+	id        uuid.UUID
+	problemId uuid.UUID
+	truth     bool
 }
 
-func NewAnswerTruth(id answer_truths.AnswerTruthId, problemId problems.ProblemId, truth answer_truths.Truth) *AnswerTruth {
+func NewAnswerTruth(id uuid.UUID, problemId uuid.UUID, truth bool) *AnswerTruth {
 	return &AnswerTruth{
 		id:        id,
 		problemId: problemId,
@@ -22,13 +19,13 @@ func NewAnswerTruth(id answer_truths.AnswerTruthId, problemId problems.ProblemId
 }
 
 func (a *AnswerTruth) Id() uuid.UUID {
-	return a.id.Value()
+	return a.id
 }
 
 func (a *AnswerTruth) ProblemId() uuid.UUID {
-	return a.problemId.Value()
+	return a.problemId
 }
 
 func (a *AnswerTruth) Truth() bool {
-	return a.truth.Value()
+	return a.truth
 }

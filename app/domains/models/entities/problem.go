@@ -2,41 +2,37 @@ package entities
 
 import (
 	"errors"
-	"study-pal-backend/app/domains/models/value_objects/answer_types"
 	"study-pal-backend/app/domains/models/value_objects/problems"
-	"study-pal-backend/app/domains/models/value_objects/workbook_categories"
-	"study-pal-backend/app/domains/models/value_objects/workbook_category_classifications"
-	"study-pal-backend/app/domains/models/value_objects/workbooks"
 	"study-pal-backend/app/master_datas/master_answer_types"
 
 	"github.com/google/uuid"
 )
 
 type Problem struct {
-	id                               problems.ProblemId
+	id                               uuid.UUID
 	answerDescription                *AnswerDescription
 	answerMultiChoices               []*AnswerMultiChoice
 	answerTruth                      *AnswerTruth
-	answerTypeId                     answer_types.AnswerTypeId
+	answerTypeId                     uuid.UUID
 	statement                        problems.Statement
-	workbookCategoryClassificationId workbook_category_classifications.WorkbookCategoryClassificationId
-	workbookCategoryId               workbook_categories.WorkbookCategoryId
-	workbookId                       workbooks.WorkbookId
+	workbookCategoryClassificationId uuid.UUID
+	workbookCategoryId               uuid.UUID
+	workbookId                       uuid.UUID
 }
 
-func NewProblem(id problems.ProblemId, answerTypeId answer_types.AnswerTypeId, statement problems.Statement, workbookId workbooks.WorkbookId) *Problem {
+func NewProblem(id uuid.UUID, answerTypeId uuid.UUID, statement problems.Statement, workbookId uuid.UUID) *Problem {
 	return &Problem{
 		id:                               id,
 		answerTypeId:                     answerTypeId,
 		statement:                        statement,
-		workbookCategoryClassificationId: workbook_category_classifications.NewWorkbookCategoryClassificationId(uuid.UUID{}),
-		workbookCategoryId:               workbook_categories.NewWorkbookCategoryId(uuid.UUID{}),
+		workbookCategoryClassificationId: uuid.Nil,
+		workbookCategoryId:               uuid.Nil,
 		workbookId:                       workbookId,
 	}
 }
 
 func (p *Problem) AddAnswerMultiChoice(answerMultiChoice *AnswerMultiChoice) error {
-	if p.answerTypeId.Value() != master_answer_types.MultiChoice {
+	if p.answerTypeId != master_answer_types.MultiChoice {
 		return errors.New("cannot add that answer type")
 	}
 	if len(p.answerMultiChoices) > 30 {
@@ -55,7 +51,7 @@ func (p *Problem) AddAnswerMultiChoice(answerMultiChoice *AnswerMultiChoice) err
 }
 
 func (p *Problem) SetAnswerDescription(answerDescription *AnswerDescription) error {
-	if p.answerTypeId.Value() != master_answer_types.Description {
+	if p.answerTypeId != master_answer_types.Description {
 		return errors.New("cannot add that answer type")
 	}
 
@@ -64,7 +60,7 @@ func (p *Problem) SetAnswerDescription(answerDescription *AnswerDescription) err
 }
 
 func (p *Problem) SetAnswerTruth(answerTruth *AnswerTruth) error {
-	if p.answerTypeId.Value() != master_answer_types.Truth {
+	if p.answerTypeId != master_answer_types.Truth {
 		return errors.New("cannot add that answer type")
 	}
 
@@ -72,11 +68,11 @@ func (p *Problem) SetAnswerTruth(answerTruth *AnswerTruth) error {
 	return nil
 }
 
-func (p *Problem) SetWorkbookCategoryClassificationId(workbookCategoryClassificationId workbook_category_classifications.WorkbookCategoryClassificationId) {
+func (p *Problem) SetWorkbookCategoryClassificationId(workbookCategoryClassificationId uuid.UUID) {
 	p.workbookCategoryClassificationId = workbookCategoryClassificationId
 }
 
-func (p *Problem) SetWorkbookCategoryId(workbookCategoryId workbook_categories.WorkbookCategoryId) {
+func (p *Problem) SetWorkbookCategoryId(workbookCategoryId uuid.UUID) {
 	p.workbookCategoryId = workbookCategoryId
 }
 
@@ -93,23 +89,23 @@ func (p *Problem) AnswerTruth() *AnswerTruth {
 }
 
 func (p *Problem) IsAnswerTypeDescription() bool {
-	return p.answerTypeId.Value() == master_answer_types.Description
+	return p.answerTypeId == master_answer_types.Description
 }
 
 func (p *Problem) IsAnswerTypeMultiChoice() bool {
-	return p.answerTypeId.Value() == master_answer_types.MultiChoice
+	return p.answerTypeId == master_answer_types.MultiChoice
 }
 
 func (p *Problem) IsAnswerTypeTruth() bool {
-	return p.answerTypeId.Value() == master_answer_types.Truth
+	return p.answerTypeId == master_answer_types.Truth
 }
 
 func (p *Problem) AnswerTypeId() uuid.UUID {
-	return p.answerTypeId.Value()
+	return p.answerTypeId
 }
 
 func (p *Problem) Id() uuid.UUID {
-	return p.id.Value()
+	return p.id
 }
 
 func (p *Problem) Statement() string {
@@ -117,13 +113,13 @@ func (p *Problem) Statement() string {
 }
 
 func (p *Problem) WorkbookCategoryClassificationId() uuid.UUID {
-	return p.workbookCategoryClassificationId.Value()
+	return p.workbookCategoryClassificationId
 }
 
 func (p *Problem) WorkbookCategoryId() uuid.UUID {
-	return p.workbookCategoryId.Value()
+	return p.workbookCategoryId
 }
 
 func (p *Problem) WorkbookId() uuid.UUID {
-	return p.workbookId.Value()
+	return p.workbookId
 }

@@ -2,7 +2,6 @@ package workbooks
 
 import (
 	"study-pal-backend/app/domains/models/entities"
-	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/models/value_objects/workbooks"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/app/usecases/shared/usecase_error"
@@ -36,7 +35,6 @@ func NewCreateAction(workbookRepository repositories.WorkbookRepository) *Create
 
 func (a *CreateAction) Execute(command *CreateActionCommand) usecase_error.UsecaseErrorGroup {
 	usecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
-	workbookId := workbooks.CreateWorkbookId()
 	description, err := workbooks.NewDescription(command.description)
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
@@ -45,13 +43,12 @@ func (a *CreateAction) Execute(command *CreateActionCommand) usecase_error.Useca
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
-	userId := users.NewUserId(command.userId)
 
 	if usecaseErrGroup.IsError() {
 		return usecaseErrGroup
 	}
 
-	workbook := entities.CreateWorkbook(workbookId, description, userId, title)
+	workbook := entities.CreateWorkbook(uuid.New(), description, command.userId, title)
 	a.workbookRepository.Create(workbook)
 	return nil
 }

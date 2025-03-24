@@ -2528,10 +2528,24 @@ func (m *ArticleMutation) AddedPageID() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearPageID clears the value of the "page_id" field.
+func (m *ArticleMutation) ClearPageID() {
+	m.page_id = nil
+	m.addpage_id = nil
+	m.clearedFields[article.FieldPageID] = struct{}{}
+}
+
+// PageIDCleared returns if the "page_id" field was cleared in this mutation.
+func (m *ArticleMutation) PageIDCleared() bool {
+	_, ok := m.clearedFields[article.FieldPageID]
+	return ok
+}
+
 // ResetPageID resets all changes to the "page_id" field.
 func (m *ArticleMutation) ResetPageID() {
 	m.page_id = nil
 	m.addpage_id = nil
+	delete(m.clearedFields, article.FieldPageID)
 }
 
 // SetDescription sets the "description" field.
@@ -2808,7 +2822,11 @@ func (m *ArticleMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ArticleMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(article.FieldPageID) {
+		fields = append(fields, article.FieldPageID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2821,6 +2839,11 @@ func (m *ArticleMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ArticleMutation) ClearField(name string) error {
+	switch name {
+	case article.FieldPageID:
+		m.ClearPageID()
+		return nil
+	}
 	return fmt.Errorf("unknown Article nullable field %s", name)
 }
 

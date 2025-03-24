@@ -201,6 +201,16 @@ func PageIDLTE(v int) predicate.Article {
 	return predicate.Article(sql.FieldLTE(FieldPageID, v))
 }
 
+// PageIDIsNil applies the IsNil predicate on the "page_id" field.
+func PageIDIsNil() predicate.Article {
+	return predicate.Article(sql.FieldIsNull(FieldPageID))
+}
+
+// PageIDNotNil applies the NotNil predicate on the "page_id" field.
+func PageIDNotNil() predicate.Article {
+	return predicate.Article(sql.FieldNotNull(FieldPageID))
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldDescription, v))

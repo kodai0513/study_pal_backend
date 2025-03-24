@@ -2,23 +2,22 @@ package entities
 
 import (
 	"study-pal-backend/app/domains/models/value_objects/answer_multi_choices"
-	"study-pal-backend/app/domains/models/value_objects/problems"
 
 	"github.com/google/uuid"
 )
 
 type AnswerMultiChoice struct {
-	id        answer_multi_choices.AnswerMultiChoiceId
-	isCorrect answer_multi_choices.IsCorrect
+	id        uuid.UUID
+	isCorrect bool
 	name      answer_multi_choices.Name
-	problemId problems.ProblemId
+	problemId uuid.UUID
 }
 
 func NewAnswerMultiChoice(
-	id answer_multi_choices.AnswerMultiChoiceId,
-	isCorrect answer_multi_choices.IsCorrect,
+	id uuid.UUID,
+	isCorrect bool,
 	name answer_multi_choices.Name,
-	problemId problems.ProblemId,
+	problemId uuid.UUID,
 ) *AnswerMultiChoice {
 	return &AnswerMultiChoice{
 		id:        id,
@@ -29,11 +28,11 @@ func NewAnswerMultiChoice(
 }
 
 func (a *AnswerMultiChoice) Id() uuid.UUID {
-	return a.id.Value()
+	return a.id
 }
 
 func (a *AnswerMultiChoice) IsCorrect() bool {
-	return a.isCorrect.Value()
+	return a.isCorrect
 }
 
 func (a *AnswerMultiChoice) Name() string {
@@ -41,5 +40,5 @@ func (a *AnswerMultiChoice) Name() string {
 }
 
 func (a *AnswerMultiChoice) ProblemId() uuid.UUID {
-	return a.problemId.Value()
+	return a.problemId
 }

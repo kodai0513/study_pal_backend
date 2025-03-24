@@ -40,7 +40,7 @@ func VerifyToken(jwtSecretKey string, token string) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return uuid.UUID{}, err
+		return uuid.Nil, err
 	}
 
 	claims := parseToken.Claims.(jwt.MapClaims)

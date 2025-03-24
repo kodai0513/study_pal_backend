@@ -72,7 +72,7 @@ type UpdateArticleRequest struct {
 //	@Tags			article
 //	@Accept			json
 //	@Produce		json
-//	@Param			article_id	path		string					true	"投稿ID"
+//	@Param			article_id	path		string					true	"Article ID"
 //	@Param			request		body		UpdateArticleRequest	true	"投稿更新リクエスト"
 //	@Success		200			{object}	nil
 //	@Failure		400			{object}	app_types.ErrorResponse
@@ -89,6 +89,8 @@ func (a *ArticleController) Update(c *gin.Context) {
 			http.StatusBadRequest,
 			app_types.NewErrorResponse([]string{err.Error()}),
 		)
+		c.Abort()
+		return
 	}
 	userId, _ := c.Get("user_id")
 	usecaseErrGroup := article.NewUpdateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
@@ -117,7 +119,7 @@ func (a *ArticleController) Update(c *gin.Context) {
 //	@Tags			article
 //	@Accept			json
 //	@Produce		json
-//	@Param			article_id	path		string	true	"投稿ID"
+//	@Param			article_id	path		string	true	"Article ID"
 //	@Success		204			{object}	nil
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
@@ -131,6 +133,8 @@ func (a *ArticleController) Delete(c *gin.Context) {
 			http.StatusBadRequest,
 			app_types.NewErrorResponse([]string{err.Error()}),
 		)
+		c.Abort()
+		return
 	}
 	userId, _ := c.Get("user_id")
 	usecaseErrGroup := article.NewDeleteAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(

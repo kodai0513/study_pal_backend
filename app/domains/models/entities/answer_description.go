@@ -2,18 +2,17 @@ package entities
 
 import (
 	"study-pal-backend/app/domains/models/value_objects/answer_descriptions"
-	"study-pal-backend/app/domains/models/value_objects/problems"
 
 	"github.com/google/uuid"
 )
 
 type AnswerDescription struct {
-	id        answer_descriptions.AnswerDescriptionId
+	id        uuid.UUID
 	name      answer_descriptions.Name
-	problemId problems.ProblemId
+	problemId uuid.UUID
 }
 
-func NewAnswerDescription(id answer_descriptions.AnswerDescriptionId, name answer_descriptions.Name, problemId problems.ProblemId) *AnswerDescription {
+func NewAnswerDescription(id uuid.UUID, name answer_descriptions.Name, problemId uuid.UUID) *AnswerDescription {
 	return &AnswerDescription{
 		id:        id,
 		name:      name,
@@ -22,7 +21,7 @@ func NewAnswerDescription(id answer_descriptions.AnswerDescriptionId, name answe
 }
 
 func (a *AnswerDescription) Id() uuid.UUID {
-	return a.id.Value()
+	return a.id
 }
 
 func (a *AnswerDescription) Name() string {
@@ -30,5 +29,5 @@ func (a *AnswerDescription) Name() string {
 }
 
 func (a *AnswerDescription) ProblemId() uuid.UUID {
-	return a.problemId.Value()
+	return a.problemId
 }

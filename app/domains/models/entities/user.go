@@ -7,14 +7,14 @@ import (
 )
 
 type User struct {
-	id       users.UserId
+	id       uuid.UUID
 	email    users.Email
 	name     users.Name
 	nickName users.NickName
 	password users.Password
 }
 
-func NewUser(id users.UserId, email users.Email, name users.Name, nickName users.NickName, password users.Password) *User {
+func NewUser(id uuid.UUID, email users.Email, name users.Name, nickName users.NickName, password users.Password) *User {
 	return &User{
 		id:       id,
 		email:    email,
@@ -25,7 +25,7 @@ func NewUser(id users.UserId, email users.Email, name users.Name, nickName users
 }
 
 func (u *User) Id() uuid.UUID {
-	return u.id.Value()
+	return u.id
 }
 
 func (u *User) Email() string {

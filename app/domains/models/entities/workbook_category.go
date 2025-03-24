@@ -2,18 +2,19 @@ package entities
 
 import (
 	"study-pal-backend/app/domains/models/value_objects/workbook_categories"
-	"study-pal-backend/app/domains/models/value_objects/workbooks"
 
 	"github.com/google/uuid"
 )
 
 type WorkbookCategory struct {
-	id         workbook_categories.WorkbookCategoryId
-	name       workbook_categories.Name
-	workbookId workbooks.WorkbookId
+	id   uuid.UUID
+	name workbook_categories.Name
+	//problems                        []*Problem
+	//workbookCategoryClassifications []*WorkbookCategoryClassification
+	workbookId uuid.UUID
 }
 
-func NewWorkbookCategory(id workbook_categories.WorkbookCategoryId, name workbook_categories.Name, workbookId workbooks.WorkbookId) *WorkbookCategory {
+func NewWorkbookCategory(id uuid.UUID, name workbook_categories.Name, workbookId uuid.UUID) *WorkbookCategory {
 	return &WorkbookCategory{
 		id:         id,
 		name:       name,
@@ -26,5 +27,5 @@ func (w *WorkbookCategory) Name() string {
 }
 
 func (w *WorkbookCategory) WorkbookId() uuid.UUID {
-	return w.workbookId.Value()
+	return w.workbookId
 }
