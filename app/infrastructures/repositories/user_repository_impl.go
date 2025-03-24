@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"context"
-	"study-pal-backend/app/domains/models/shared"
-	"study-pal-backend/app/domains/models/users"
+	"study-pal-backend/app/domains/models/entities"
+	"study-pal-backend/app/domains/models/value_objects/users"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/user"
@@ -21,7 +21,7 @@ func NewUserRepositoryImpl(client *ent.Client, ctx context.Context) repositories
 	}
 }
 
-func (u *UserRepositoryImpl) FindByName(name string) *users.User {
+func (u *UserRepositoryImpl) FindByName(name string) *entities.User {
 	result := u.client.User.
 		Query().
 		Where(user.NameEQ(name)).
@@ -31,11 +31,10 @@ func (u *UserRepositoryImpl) FindByName(name string) *users.User {
 		return nil
 	}
 
-	id, _ := shared.NewId(result.ID)
 	email, _ := users.NewEmail(result.Email)
 	resultName, _ := users.NewName(result.Name)
 	nickName, _ := users.NewNickName(result.NickName)
 	password := users.NewPassword(result.Password)
 
-	return users.NewUser(id, email, resultName, nickName, password)
+	return entities.NewUser(result.ID, email, resultName, nickName, password)
 }

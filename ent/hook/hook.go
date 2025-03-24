@@ -8,6 +8,54 @@ import (
 	"study-pal-backend/ent"
 )
 
+// The AnswerDescriptionFunc type is an adapter to allow the use of ordinary
+// function as AnswerDescription mutator.
+type AnswerDescriptionFunc func(context.Context, *ent.AnswerDescriptionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AnswerDescriptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AnswerDescriptionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AnswerDescriptionMutation", m)
+}
+
+// The AnswerMultiChoicesFunc type is an adapter to allow the use of ordinary
+// function as AnswerMultiChoices mutator.
+type AnswerMultiChoicesFunc func(context.Context, *ent.AnswerMultiChoicesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AnswerMultiChoicesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AnswerMultiChoicesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AnswerMultiChoicesMutation", m)
+}
+
+// The AnswerTruthFunc type is an adapter to allow the use of ordinary
+// function as AnswerTruth mutator.
+type AnswerTruthFunc func(context.Context, *ent.AnswerTruthMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AnswerTruthFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AnswerTruthMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AnswerTruthMutation", m)
+}
+
+// The AnswerTypeFunc type is an adapter to allow the use of ordinary
+// function as AnswerType mutator.
+type AnswerTypeFunc func(context.Context, *ent.AnswerTypeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AnswerTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AnswerTypeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AnswerTypeMutation", m)
+}
+
 // The ArticleFunc type is an adapter to allow the use of ordinary
 // function as Article mutator.
 type ArticleFunc func(context.Context, *ent.ArticleMutation) (ent.Value, error)
@@ -20,6 +68,42 @@ func (f ArticleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ArticleMutation", m)
 }
 
+// The PermissionFunc type is an adapter to allow the use of ordinary
+// function as Permission mutator.
+type PermissionFunc func(context.Context, *ent.PermissionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PermissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PermissionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PermissionMutation", m)
+}
+
+// The ProblemFunc type is an adapter to allow the use of ordinary
+// function as Problem mutator.
+type ProblemFunc func(context.Context, *ent.ProblemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProblemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProblemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProblemMutation", m)
+}
+
+// The RoleFunc type is an adapter to allow the use of ordinary
+// function as Role mutator.
+type RoleFunc func(context.Context, *ent.RoleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RoleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RoleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RoleMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
@@ -30,6 +114,54 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+}
+
+// The WorkbookFunc type is an adapter to allow the use of ordinary
+// function as Workbook mutator.
+type WorkbookFunc func(context.Context, *ent.WorkbookMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WorkbookFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WorkbookMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookMutation", m)
+}
+
+// The WorkbookCategoryFunc type is an adapter to allow the use of ordinary
+// function as WorkbookCategory mutator.
+type WorkbookCategoryFunc func(context.Context, *ent.WorkbookCategoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WorkbookCategoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WorkbookCategoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookCategoryMutation", m)
+}
+
+// The WorkbookCategoryClassificationFunc type is an adapter to allow the use of ordinary
+// function as WorkbookCategoryClassification mutator.
+type WorkbookCategoryClassificationFunc func(context.Context, *ent.WorkbookCategoryClassificationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WorkbookCategoryClassificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WorkbookCategoryClassificationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookCategoryClassificationMutation", m)
+}
+
+// The WorkbookMemberFunc type is an adapter to allow the use of ordinary
+// function as WorkbookMember mutator.
+type WorkbookMemberFunc func(context.Context, *ent.WorkbookMemberMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WorkbookMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WorkbookMemberMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookMemberMutation", m)
 }
 
 // Condition is a hook condition function.

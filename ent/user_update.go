@@ -9,11 +9,13 @@ import (
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbookmember"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -46,14 +48,6 @@ func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
 // SetUpdatedAt sets the "updated_at" field.
 func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetUpdatedAt(t)
-	return uu
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableUpdatedAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetUpdatedAt(*t)
-	}
 	return uu
 }
 
@@ -114,18 +108,33 @@ func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
 }
 
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
-func (uu *UserUpdate) AddArticleIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) AddArticleIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddArticleIDs(ids...)
 	return uu
 }
 
 // AddArticles adds the "articles" edges to the Article entity.
 func (uu *UserUpdate) AddArticles(a ...*Article) *UserUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
 	return uu.AddArticleIDs(ids...)
+}
+
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (uu *UserUpdate) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddWorkbookMemberIDs(ids...)
+	return uu
+}
+
+// AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
+func (uu *UserUpdate) AddWorkbookMembers(w ...*WorkbookMember) *UserUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWorkbookMemberIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -140,22 +149,44 @@ func (uu *UserUpdate) ClearArticles() *UserUpdate {
 }
 
 // RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
-func (uu *UserUpdate) RemoveArticleIDs(ids ...int) *UserUpdate {
+func (uu *UserUpdate) RemoveArticleIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.RemoveArticleIDs(ids...)
 	return uu
 }
 
 // RemoveArticles removes "articles" edges to Article entities.
 func (uu *UserUpdate) RemoveArticles(a ...*Article) *UserUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
 	return uu.RemoveArticleIDs(ids...)
 }
 
+// ClearWorkbookMembers clears all "workbook_members" edges to the WorkbookMember entity.
+func (uu *UserUpdate) ClearWorkbookMembers() *UserUpdate {
+	uu.mutation.ClearWorkbookMembers()
+	return uu
+}
+
+// RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
+func (uu *UserUpdate) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveWorkbookMemberIDs(ids...)
+	return uu
+}
+
+// RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
+func (uu *UserUpdate) RemoveWorkbookMembers(w ...*WorkbookMember) *UserUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWorkbookMemberIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	uu.defaults()
 	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
 }
 
@@ -181,11 +212,29 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uu *UserUpdate) defaults() {
+	if _, ok := uu.mutation.UpdatedAt(); !ok {
+		v := user.UpdateDefaultUpdatedAt()
+		uu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uu *UserUpdate) check() error {
+	if v, ok := uu.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
 	if v, ok := uu.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
+		}
+	}
+	if v, ok := uu.mutation.NickName(); ok {
+		if err := user.NickNameValidator(v); err != nil {
+			return &ValidationError{Name: "nick_name", err: fmt.Errorf(`ent: validator failed for field "User.nick_name": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.Password(); ok {
@@ -200,7 +249,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := uu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -234,7 +283,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -247,7 +296,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -263,7 +312,52 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.WorkbookMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWorkbookMembersIDs(); len(nodes) > 0 && !uu.mutation.WorkbookMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WorkbookMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -308,14 +402,6 @@ func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
 // SetUpdatedAt sets the "updated_at" field.
 func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetUpdatedAt(t)
-	return uuo
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableUpdatedAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetUpdatedAt(*t)
-	}
 	return uuo
 }
 
@@ -376,18 +462,33 @@ func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 }
 
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
-func (uuo *UserUpdateOne) AddArticleIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddArticleIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddArticleIDs(ids...)
 	return uuo
 }
 
 // AddArticles adds the "articles" edges to the Article entity.
 func (uuo *UserUpdateOne) AddArticles(a ...*Article) *UserUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
 	return uuo.AddArticleIDs(ids...)
+}
+
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (uuo *UserUpdateOne) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddWorkbookMemberIDs(ids...)
+	return uuo
+}
+
+// AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
+func (uuo *UserUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWorkbookMemberIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -402,18 +503,39 @@ func (uuo *UserUpdateOne) ClearArticles() *UserUpdateOne {
 }
 
 // RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
-func (uuo *UserUpdateOne) RemoveArticleIDs(ids ...int) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveArticleIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.RemoveArticleIDs(ids...)
 	return uuo
 }
 
 // RemoveArticles removes "articles" edges to Article entities.
 func (uuo *UserUpdateOne) RemoveArticles(a ...*Article) *UserUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
 	return uuo.RemoveArticleIDs(ids...)
+}
+
+// ClearWorkbookMembers clears all "workbook_members" edges to the WorkbookMember entity.
+func (uuo *UserUpdateOne) ClearWorkbookMembers() *UserUpdateOne {
+	uuo.mutation.ClearWorkbookMembers()
+	return uuo
+}
+
+// RemoveWorkbookMemberIDs removes the "workbook_members" edge to WorkbookMember entities by IDs.
+func (uuo *UserUpdateOne) RemoveWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveWorkbookMemberIDs(ids...)
+	return uuo
+}
+
+// RemoveWorkbookMembers removes "workbook_members" edges to WorkbookMember entities.
+func (uuo *UserUpdateOne) RemoveWorkbookMembers(w ...*WorkbookMember) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWorkbookMemberIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -431,6 +553,7 @@ func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne 
 
 // Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	uuo.defaults()
 	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
 }
 
@@ -456,11 +579,29 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uuo *UserUpdateOne) defaults() {
+	if _, ok := uuo.mutation.UpdatedAt(); !ok {
+		v := user.UpdateDefaultUpdatedAt()
+		uuo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uuo *UserUpdateOne) check() error {
+	if v, ok := uuo.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
 	if v, ok := uuo.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
+		}
+	}
+	if v, ok := uuo.mutation.NickName(); ok {
+		if err := user.NickNameValidator(v); err != nil {
+			return &ValidationError{Name: "nick_name", err: fmt.Errorf(`ent: validator failed for field "User.nick_name": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.Password(); ok {
@@ -475,7 +616,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if err := uuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	id, ok := uuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
@@ -526,7 +667,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -539,7 +680,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -555,7 +696,52 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WorkbookMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWorkbookMembersIDs(); len(nodes) > 0 && !uuo.mutation.WorkbookMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WorkbookMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -57,6 +57,7 @@ func main() {
 	articleController := controllers.NewArticleController(appData)
 	authController := controllers.NewAuthController(appData)
 	timelineController := controllers.NewTimelineController(appData)
+	workbookController := controllers.NewWorkbookController(appData)
 
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -65,15 +66,21 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	{
-		article := v1.Group("/articles")
+		articles := v1.Group("/articles")
 		{
-			article.POST("/", authRequired, articleController.Create)
-			article.PUT("/:article_id", authRequired, articleController.Update)
-			article.DELETE("/:article_id", authRequired, articleController.Delete)
+			articles.POST("/", authRequired, articleController.Create)
+			articles.PUT("/:article_id", authRequired, articleController.Update)
+			articles.DELETE("/:article_id", authRequired, articleController.Delete)
 		}
 		v1.POST("/login", authController.Login)
 		v1.POST("/refresh-token", authController.RefreshToken)
 		v1.GET("/timelines", timelineController.Index)
+		workbooks := v1.Group("/workbooks")
+		{
+			workbooks.POST("/", authRequired, workbookController.Create)
+			workbooks.PUT("/:workbook_id", authRequired, workbookController.Update)
+			workbooks.DELETE("/:workbook_id", authRequired, workbookController.Delete)
+		}
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

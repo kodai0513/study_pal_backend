@@ -3,17 +3,19 @@ package timelines
 import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/usecases/shared/usecase_error"
+
+	"github.com/google/uuid"
 )
 
 type TimelineDto struct {
-	id           int
+	id           uuid.UUID
 	description  string
-	postId       int
+	postId       uuid.UUID
 	postName     string
 	postNickName string
 }
 
-func NewTimelineDto(id int, description string, postId int, postName string, postNickName string) *TimelineDto {
+func NewTimelineDto(id uuid.UUID, description string, postId uuid.UUID, postName string, postNickName string) *TimelineDto {
 	return &TimelineDto{
 		id:           id,
 		description:  description,
@@ -23,7 +25,7 @@ func NewTimelineDto(id int, description string, postId int, postName string, pos
 	}
 }
 
-func (t *TimelineDto) Id() int {
+func (t *TimelineDto) Id() uuid.UUID {
 	return t.id
 }
 
@@ -31,7 +33,7 @@ func (t *TimelineDto) Description() string {
 	return t.description
 }
 
-func (t *TimelineDto) PostId() int {
+func (t *TimelineDto) PostId() uuid.UUID {
 	return t.postId
 }
 

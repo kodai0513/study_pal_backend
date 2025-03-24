@@ -8,6 +8,7 @@ import (
 	"study-pal-backend/app/utils/type_converts"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type TimelineController struct {
@@ -21,11 +22,11 @@ func NewTimelineController(appData *app_types.AppData) *TimelineController {
 }
 
 type TimelineResponse struct {
-	Id           int    `json:"id"`
-	Description  string `json:"description"`
-	PostId       int    `json:"post_id"`
-	PostName     string `json:"post_name"`
-	PostNickName string `json:"post_nick_name"`
+	Id           uuid.UUID `json:"id"`
+	Description  string    `json:"description"`
+	PostId       uuid.UUID `json:"post_id"`
+	PostName     string    `json:"post_name"`
+	PostNickName string    `json:"post_nick_name"`
 }
 
 type IndexResponse struct {

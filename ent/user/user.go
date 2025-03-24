@@ -28,6 +28,8 @@ const (
 	FieldPassword = "password"
 	// EdgeArticles holds the string denoting the articles edge name in mutations.
 	EdgeArticles = "articles"
+	// EdgeWorkbookMembers holds the string denoting the workbook_members edge name in mutations.
+	EdgeWorkbookMembers = "workbook_members"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ArticlesTable is the table that holds the articles relation/edge.
@@ -37,6 +39,13 @@ const (
 	ArticlesInverseTable = "articles"
 	// ArticlesColumn is the table column denoting the articles relation/edge.
 	ArticlesColumn = "post_id"
+	// WorkbookMembersTable is the table that holds the workbook_members relation/edge.
+	WorkbookMembersTable = "workbook_members"
+	// WorkbookMembersInverseTable is the table name for the WorkbookMember entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookmember" package.
+	WorkbookMembersInverseTable = "workbook_members"
+	// WorkbookMembersColumn is the table column denoting the workbook_members relation/edge.
+	WorkbookMembersColumn = "member_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -65,8 +74,14 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	EmailValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// NickNameValidator is a validator for the "nick_name" field. It is called by the builders before save.
+	NickNameValidator func(string) error
 	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	PasswordValidator func(string) error
 )
@@ -122,10 +137,31 @@ func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newArticlesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByWorkbookMembersCount orders the results by workbook_members count.
+func ByWorkbookMembersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWorkbookMembersStep(), opts...)
+	}
+}
+
+// ByWorkbookMembers orders the results by workbook_members terms.
+func ByWorkbookMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newArticlesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ArticlesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+	)
+}
+func newWorkbookMembersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkbookMembersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookMembersTable, WorkbookMembersColumn),
 	)
 }

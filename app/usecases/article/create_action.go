@@ -1,18 +1,21 @@
 package article
 
 import (
-	"study-pal-backend/app/domains/models/articles"
+	"study-pal-backend/app/domains/models/entities"
+	"study-pal-backend/app/domains/models/value_objects/articles"
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/app/usecases/shared/usecase_error"
+
+	"github.com/google/uuid"
 )
 
-type CreateActionCommand struct {
+type createActionCommand struct {
 	description string
-	postId      int
+	postId      uuid.UUID
 }
 
-func NewCreateActionCommand(description string, postId int) *CreateActionCommand {
-	return &CreateActionCommand{
+func NewCreateActionCommand(description string, postId uuid.UUID) *createActionCommand {
+	return &createActionCommand{
 		description: description,
 		postId:      postId,
 	}
@@ -28,13 +31,9 @@ func NewCreateAction(articleRepository repositories.ArticleRepository) *CreateAc
 	}
 }
 
-func (c *CreateAction) Execute(command *CreateActionCommand) usecase_error.UsecaseErrorGroup {
+func (c *CreateAction) Execute(command *createActionCommand) usecase_error.UsecaseErrorGroup {
 	usecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
 	description, err := articles.NewDescription(command.description)
-	if err != nil {
-		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
-	}
-	postId, err := articles.NewPostId(command.postId)
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
@@ -43,8 +42,8 @@ func (c *CreateAction) Execute(command *CreateActionCommand) usecase_error.Useca
 		return usecaseErrGroup
 	}
 
-	article := articles.NewArticle(nil, description, postId)
-	c.articleRepository.Save(article)
+	article := entities.NewArticle(uuid.New(), description, command.postId)
+	c.articleRepository.Create(article)
 
 	return nil
 }

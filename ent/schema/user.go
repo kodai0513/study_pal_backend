@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/mixin"
+	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -18,6 +19,7 @@ type User struct {
 
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }
@@ -25,21 +27,17 @@ func (User) Mixin() []ent.Mixin {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("email").Unique(),
-		field.String("name").
-			MaxLen(30).
-			Unique().
-			Match(regexp.MustCompile("[a-zA-Z_0-9]+$")),
-		field.String("nick_name"),
-		field.String("password").
-			NotEmpty(),
+		field.String("email").MaxLen(255).NotEmpty().Unique(),
+		field.String("name").MaxLen(255).Unique().Match(regexp.MustCompile("[a-zA-Z_0-9]+$")),
+		field.String("nick_name").MaxLen(255).NotEmpty(),
+		field.String("password").NotEmpty(),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To(article.Table, Article.Type).
-			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(article.Table, Article.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

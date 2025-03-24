@@ -10,13 +10,14 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // User is the model entity for the User schema.
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -39,9 +40,11 @@ type User struct {
 type UserEdges struct {
 	// Articles holds the value of the articles edge.
 	Articles []*Article `json:"articles,omitempty"`
+	// WorkbookMembers holds the value of the workbook_members edge.
+	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ArticlesOrErr returns the Articles value or an error if the edge
@@ -53,17 +56,26 @@ func (e UserEdges) ArticlesOrErr() ([]*Article, error) {
 	return nil, &NotLoadedError{edge: "articles"}
 }
 
+// WorkbookMembersOrErr returns the WorkbookMembers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
+	if e.loadedTypes[1] {
+		return e.WorkbookMembers, nil
+	}
+	return nil, &NotLoadedError{edge: "workbook_members"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID:
-			values[i] = new(sql.NullInt64)
 		case user.FieldEmail, user.FieldName, user.FieldNickName, user.FieldPassword:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case user.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -80,11 +92,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				u.ID = *value
 			}
-			u.ID = int(value.Int64)
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -137,6 +149,11 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryArticles queries the "articles" edge of the User entity.
 func (u *User) QueryArticles() *ArticleQuery {
 	return NewUserClient(u.config).QueryArticles(u)
+}
+
+// QueryWorkbookMembers queries the "workbook_members" edge of the User entity.
+func (u *User) QueryWorkbookMembers() *WorkbookMemberQuery {
+	return NewUserClient(u.config).QueryWorkbookMembers(u)
 }
 
 // Update returns a builder for updating this User.

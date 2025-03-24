@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbookmember"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -73,19 +75,40 @@ func (uc *UserCreate) SetPassword(s string) *UserCreate {
 	return uc
 }
 
+// SetID sets the "id" field.
+func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
+	uc.mutation.SetID(u)
+	return uc
+}
+
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
-func (uc *UserCreate) AddArticleIDs(ids ...int) *UserCreate {
+func (uc *UserCreate) AddArticleIDs(ids ...uuid.UUID) *UserCreate {
 	uc.mutation.AddArticleIDs(ids...)
 	return uc
 }
 
 // AddArticles adds the "articles" edges to the Article entity.
 func (uc *UserCreate) AddArticles(a ...*Article) *UserCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
 	return uc.AddArticleIDs(ids...)
+}
+
+// AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
+func (uc *UserCreate) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddWorkbookMemberIDs(ids...)
+	return uc
+}
+
+// AddWorkbookMembers adds the "workbook_members" edges to the WorkbookMember entity.
+func (uc *UserCreate) AddWorkbookMembers(w ...*WorkbookMember) *UserCreate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWorkbookMemberIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -144,6 +167,11 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
+	if v, ok := uc.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
@@ -154,6 +182,11 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.NickName(); !ok {
 		return &ValidationError{Name: "nick_name", err: errors.New(`ent: missing required field "User.nick_name"`)}
+	}
+	if v, ok := uc.mutation.NickName(); ok {
+		if err := user.NickNameValidator(v); err != nil {
+			return &ValidationError{Name: "nick_name", err: fmt.Errorf(`ent: validator failed for field "User.nick_name": %w`, err)}
+		}
 	}
 	if _, ok := uc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
@@ -177,8 +210,13 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	uc.mutation.id = &_node.ID
 	uc.mutation.done = true
 	return _node, nil
@@ -187,8 +225,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	)
+	if id, ok := uc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -221,7 +263,23 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WorkbookMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookMembersTable,
+			Columns: []string{user.WorkbookMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -277,10 +335,6 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

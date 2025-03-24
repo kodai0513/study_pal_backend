@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // ArticleQuery is the builder for querying Article entities.
@@ -106,8 +107,8 @@ func (aq *ArticleQuery) FirstX(ctx context.Context) *Article {
 
 // FirstID returns the first Article ID from the query.
 // Returns a *NotFoundError when no Article ID was found.
-func (aq *ArticleQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *ArticleQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -119,7 +120,7 @@ func (aq *ArticleQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *ArticleQuery) FirstIDX(ctx context.Context) int {
+func (aq *ArticleQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +158,8 @@ func (aq *ArticleQuery) OnlyX(ctx context.Context) *Article {
 // OnlyID is like Only, but returns the only Article ID in the query.
 // Returns a *NotSingularError when more than one Article ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *ArticleQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *ArticleQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -174,7 +175,7 @@ func (aq *ArticleQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *ArticleQuery) OnlyIDX(ctx context.Context) int {
+func (aq *ArticleQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +203,7 @@ func (aq *ArticleQuery) AllX(ctx context.Context) []*Article {
 }
 
 // IDs executes the query and returns a list of Article IDs.
-func (aq *ArticleQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (aq *ArticleQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if aq.ctx.Unique == nil && aq.path != nil {
 		aq.Unique(true)
 	}
@@ -214,7 +215,7 @@ func (aq *ArticleQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *ArticleQuery) IDsX(ctx context.Context) []int {
+func (aq *ArticleQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -402,8 +403,8 @@ func (aq *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 }
 
 func (aq *ArticleQuery) loadPost(ctx context.Context, query *UserQuery, nodes []*Article, init func(*Article), assign func(*Article, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Article)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Article)
 	for i := range nodes {
 		fk := nodes[i].PostID
 		if _, ok := nodeids[fk]; !ok {
@@ -441,7 +442,7 @@ func (aq *ArticleQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *ArticleQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(article.Table, article.Columns, sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(article.Table, article.Columns, sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID))
 	_spec.From = aq.sql
 	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
