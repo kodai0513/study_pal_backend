@@ -1,3 +1,38 @@
+# 開発方針について
+
+### ドメイン層など整合性が必要な構造体、interfaceを通して利用する構造体、アプリケーション上でグロバールに参照する構造体に関してはに関してはコンストラクタを利用する
+```
+type Article struct {
+	id          uuid.UUID
+	description articles.Description
+	userId      uuid.UUID
+}
+
+func NewArticle(id uuid.UUID, description articles.Description, userId uuid.UUID) *Article {
+	return &Article{
+		id:          id,
+		description: description,
+		userId:      userId,
+	}
+}
+
+func (a *Article) Id() uuid.UUID {
+	return a.id
+}
+
+func (a *Article) Description() string {
+	return a.description.Value()
+}
+
+func (a *Article) UserId() uuid.UUID {
+	return a.userId
+}
+
+```
+
+### 繰り返し処理はなるべき下記のライブラリで書くこと
+https://github.com/samber/lo
+
 # ent.の使用上の注意点
 
 ### クエリの発行するメソッドは○○Xという命名のメソッドを使用する(致命的なエラーをerrorの戻り値ではなくpanicによって発生させれるため)

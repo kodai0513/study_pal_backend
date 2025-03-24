@@ -54,10 +54,10 @@ func main() {
 	devModeLogin, _ := strconv.ParseBool(os.Getenv("DEV_MODE_LOGIN"))
 	jwtSecretKey := os.Getenv("JWT_SERCRET_KEY")
 	appData := app_types.NewAppData(client, jwtSecretKey)
-	articleController := controllers.NewArticleController(appData)
-	authController := controllers.NewAuthController(appData)
-	timelineController := controllers.NewTimelineController(appData)
-	workbookController := controllers.NewWorkbookController(appData)
+	articleController := controllers.ArticleController{AppData: appData}
+	authController := controllers.AuthController{AppData: appData}
+	timelineController := controllers.TimelineController{AppData: appData}
+	workbookController := controllers.WorkbookController{AppData: appData}
 
 	r := gin.New()
 	r.Use(gin.Logger())

@@ -8,41 +8,11 @@ import (
 )
 
 type TimelineDto struct {
-	id           uuid.UUID
-	description  string
-	postId       uuid.UUID
-	postName     string
-	postNickName string
-}
-
-func NewTimelineDto(id uuid.UUID, description string, postId uuid.UUID, postName string, postNickName string) *TimelineDto {
-	return &TimelineDto{
-		id:           id,
-		description:  description,
-		postId:       postId,
-		postName:     postName,
-		postNickName: postNickName,
-	}
-}
-
-func (t *TimelineDto) Id() uuid.UUID {
-	return t.id
-}
-
-func (t *TimelineDto) Description() string {
-	return t.description
-}
-
-func (t *TimelineDto) PostId() uuid.UUID {
-	return t.postId
-}
-
-func (t *TimelineDto) PostName() string {
-	return t.postName
-}
-
-func (t *TimelineDto) PostNickName() string {
-	return t.postNickName
+	Id           uuid.UUID
+	Description  string
+	UserId       uuid.UUID
+	UserName     string
+	UserNickName string
 }
 
 type TimelineQueryService interface {

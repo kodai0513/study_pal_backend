@@ -7,13 +7,7 @@ import (
 )
 
 type ProblemController struct {
-	appData *app_types.AppData
-}
-
-func NewProblemController(appData *app_types.AppData) *ProblemController {
-	return &ProblemController{
-		appData: appData,
-	}
+	AppData *app_types.AppData
 }
 
 type Problem struct {

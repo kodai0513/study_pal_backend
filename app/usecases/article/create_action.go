@@ -9,41 +9,32 @@ import (
 	"github.com/google/uuid"
 )
 
-type createActionCommand struct {
-	description string
-	postId      uuid.UUID
-}
-
-func NewCreateActionCommand(description string, postId uuid.UUID) *createActionCommand {
-	return &createActionCommand{
-		description: description,
-		postId:      postId,
-	}
+type CreateActionCommand struct {
+	Description string
+	UserId      uuid.UUID
 }
 
 type CreateAction struct {
-	articleRepository repositories.ArticleRepository
+	ArticleRepository repositories.ArticleRepository
 }
 
-func NewCreateAction(articleRepository repositories.ArticleRepository) *CreateAction {
-	return &CreateAction{
-		articleRepository: articleRepository,
-	}
-}
-
-func (c *CreateAction) Execute(command *createActionCommand) usecase_error.UsecaseErrorGroup {
+func (c *CreateAction) Execute(command *CreateActionCommand) (*ArticleDto, usecase_error.UsecaseErrorGroup) {
 	usecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
-	description, err := articles.NewDescription(command.description)
+	description, err := articles.NewDescription(command.Description)
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
 
 	if usecaseErrGroup.IsError() {
-		return usecaseErrGroup
+		return nil, usecaseErrGroup
 	}
 
-	article := entities.NewArticle(uuid.New(), description, command.postId)
-	c.articleRepository.Create(article)
-
-	return nil
+	article := entities.NewArticle(uuid.New(), description, command.UserId)
+	resultArticle := c.ArticleRepository.Create(article)
+	return &ArticleDto{
+			Id:          resultArticle.Id(),
+			Description: resultArticle.Description(),
+			UserId:      resultArticle.UserId(),
+		},
+		nil
 }

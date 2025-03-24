@@ -12,17 +12,17 @@ import (
 )
 
 type ArticleController struct {
-	appData *app_types.AppData
-}
-
-func NewArticleController(appData *app_types.AppData) *ArticleController {
-	return &ArticleController{
-		appData: appData,
-	}
+	AppData *app_types.AppData
 }
 
 type CreateArticleRequest struct {
 	Description string `json:"description"`
+}
+
+type CreateArticleResponse struct {
+	Id          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	UserId      uuid.UUID `json:"user_id"`
 }
 
 // article godoc
@@ -33,7 +33,7 @@ type CreateArticleRequest struct {
 //	@Accept			json
 //	@Produce		json
 //	@Param			request	body		CreateArticleRequest	true	"投稿作成リクエスト"
-//	@Success		201		{object}	nil
+//	@Success		201		{object}	CreateArticleResponse
 //	@Failure		400		{object}	app_types.ErrorResponse
 //	@Failure		401		{object}	app_types.ErrorResponse
 //	@Failure		500		{object}	app_types.ErrorResponse
@@ -42,14 +42,22 @@ func (a *ArticleController) Create(c *gin.Context) {
 	var request CreateArticleRequest
 	c.BindJSON(&request)
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := article.NewCreateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		article.NewCreateActionCommand(request.Description, userId.(uuid.UUID)),
+	action := article.CreateAction{
+		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
+	}
+	articleDto, usecaseErrGroup := action.Execute(
+		&article.CreateActionCommand{
+			Description: request.Description,
+			UserId:      userId.(uuid.UUID),
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return
@@ -57,12 +65,22 @@ func (a *ArticleController) Create(c *gin.Context) {
 
 	c.SecureJSON(
 		http.StatusCreated,
-		gin.H{},
+		&CreateArticleResponse{
+			Id:          articleDto.Id,
+			Description: articleDto.Description,
+			UserId:      articleDto.UserId,
+		},
 	)
 }
 
 type UpdateArticleRequest struct {
 	Description string `json:"description"`
+}
+
+type UpdateArticleResponse struct {
+	Id          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	UserId      uuid.UUID `json:"user_id"`
 }
 
 // article godoc
@@ -87,20 +105,31 @@ func (a *ArticleController) Update(c *gin.Context) {
 	if err != nil {
 		c.SecureJSON(
 			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
 		)
 		c.Abort()
 		return
 	}
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := article.NewUpdateAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		article.NewUpdateActionCommand(articleId, request.Description, userId.(uuid.UUID)),
+	action := &article.UpdateAction{
+		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
+	}
+	articleDto, usecaseErrGroup := action.Execute(
+		&article.UpdateActionCommand{
+			ArticleId:   articleId,
+			Description: request.Description,
+			UserId:      userId.(uuid.UUID),
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return
@@ -108,7 +137,11 @@ func (a *ArticleController) Update(c *gin.Context) {
 
 	c.SecureJSON(
 		http.StatusOK,
-		gin.H{},
+		&UpdateArticleResponse{
+			Id:          articleDto.Id,
+			Description: articleDto.Description,
+			UserId:      articleDto.UserId,
+		},
 	)
 }
 
@@ -131,20 +164,30 @@ func (a *ArticleController) Delete(c *gin.Context) {
 	if err != nil {
 		c.SecureJSON(
 			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
 		)
 		c.Abort()
 		return
 	}
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := article.NewDeleteAction(repositories.NewArticleRepositoryImpl(c, a.appData.Client())).Execute(
-		article.NewDeleteActionCommand(articleId, userId.(uuid.UUID)),
+	action := article.DeleteAction{
+		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
+	}
+	usecaseErrGroup := action.Execute(
+		&article.DeleteActionCommand{
+			ArticleId: articleId,
+			UserId:    userId.(uuid.UUID),
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return

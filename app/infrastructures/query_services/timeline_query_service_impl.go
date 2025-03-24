@@ -9,30 +9,32 @@ import (
 	"study-pal-backend/app/utils/type_converts"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/article"
+
+	"github.com/samber/lo"
 )
 
 type TimelineQueryServiceImpl struct {
-	ctx    context.Context
 	client *ent.Client
+	ctx    context.Context
 }
 
-func NewTimelineQueryServiceImpl(ctx context.Context, client *ent.Client) timeline_query_service.TimelineQueryService {
+func NewTimelineQueryServiceImpl(client *ent.Client, ctx context.Context) timeline_query_service.TimelineQueryService {
 	return &TimelineQueryServiceImpl{
-		ctx:    ctx,
 		client: client,
+		ctx:    ctx,
 	}
 }
 
 func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_query_service.TimelineDto, *app_types.Page, usecase_error.UsecaseErrorGroup) {
-	limit := page.PageSize() + 1
+	limit := page.PageSize + 1
 	baseQuery := func() []*ent.Article {
 		return t.client.Article.Query().WithPost().Limit(limit).AllX(t.ctx)
 	}
 	nextQuery := func() []*ent.Article {
-		return t.client.Article.Query().WithPost().Where(article.PageIDGTE(type_converts.StringToInt(page.NextPageId(), 0))).Limit(limit).AllX(t.ctx)
+		return t.client.Article.Query().WithPost().Where(article.PageIDGTE(type_converts.StringToInt(page.NextPageId, 0))).Limit(limit).AllX(t.ctx)
 	}
 
-	resutls, nextPage, err := create_pages.CreatePage[ent.Article](
+	results, nextPage, err := create_pages.CreatePage[ent.Article](
 		&baseQuery,
 		&nextQuery,
 		nil,
@@ -44,16 +46,18 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_quer
 		return nil, nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
 
-	var timelineDtos []*timeline_query_service.TimelineDto
-	for _, result := range resutls {
-		timelineDtos = append(timelineDtos, timeline_query_service.NewTimelineDto(
-			result.ID,
-			result.Description,
-			result.PostID,
-			result.Edges.Post.Name,
-			result.Edges.Post.NickName,
-		))
-	}
+	timelineDtos := lo.Map(
+		results,
+		func(article *ent.Article, index int) *timeline_query_service.TimelineDto {
+			return &timeline_query_service.TimelineDto{
+				Id:           article.ID,
+				Description:  article.Description,
+				UserId:       article.PostID,
+				UserNickName: article.Edges.Post.Name,
+				UserName:     article.Edges.Post.NickName,
+			}
+		},
+	)
 
 	return timelineDtos, nextPage, nil
 }

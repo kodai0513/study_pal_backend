@@ -11,29 +11,16 @@ import (
 )
 
 type DeleteActionCommand struct {
-	userId     uuid.UUID
-	workbookId uuid.UUID
-}
-
-func NewDeleteActionCommand(userId uuid.UUID, workbookId uuid.UUID) *DeleteActionCommand {
-	return &DeleteActionCommand{
-		userId:     userId,
-		workbookId: workbookId,
-	}
+	UserId     uuid.UUID
+	WorkbookId uuid.UUID
 }
 
 type DeleteAction struct {
-	workbookRepository repositories.WorkbookRepository
-}
-
-func NewDeleteAction(workbookRepository repositories.WorkbookRepository) *DeleteAction {
-	return &DeleteAction{
-		workbookRepository: workbookRepository,
-	}
+	WorkbookRepository repositories.WorkbookRepository
 }
 
 func (a *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.UsecaseErrorGroup {
-	workbook := a.workbookRepository.FindById(command.workbookId)
+	workbook := a.WorkbookRepository.FindById(command.WorkbookId)
 	if workbook == nil {
 		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("workbook not found")))
 	}
@@ -41,7 +28,7 @@ func (a *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.Useca
 	isSelfAdminUser := len(lo.Filter(
 		workbook.WorkbookMembers(),
 		func(workbookMember *entities.WorkbookMember, index int) bool {
-			return workbookMember.UserId() == command.userId && workbookMember.IsAdmin()
+			return workbookMember.UserId() == command.UserId && workbookMember.IsAdmin()
 		},
 	)) > 0
 
@@ -51,6 +38,6 @@ func (a *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.Useca
 		)
 	}
 
-	a.workbookRepository.Delete(workbook.Id())
+	a.WorkbookRepository.Delete(workbook.Id())
 	return nil
 }

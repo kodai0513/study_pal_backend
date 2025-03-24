@@ -7,8 +7,8 @@ import (
 )
 
 type ArticleRepository interface {
-	Create(article *entities.Article)
-	Update(article *entities.Article)
+	Create(article *entities.Article) *entities.Article
 	Delete(id uuid.UUID)
 	FindById(id uuid.UUID) *entities.Article
+	Update(article *entities.Article) *entities.Article
 }

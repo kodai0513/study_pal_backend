@@ -11,13 +11,7 @@ import (
 )
 
 type AuthController struct {
-	appData *app_types.AppData
-}
-
-func NewAuthController(appData *app_types.AppData) *AuthController {
-	return &AuthController{
-		appData: appData,
-	}
+	AppData *app_types.AppData
 }
 
 type RefreshTokenRequest struct {
@@ -41,14 +35,23 @@ type RefreshTokenResponse struct {
 //	@Failure		500		{object}	app_types.ErrorResponse
 //	@Router			/refresh-token [post]
 func (a *AuthController) RefreshToken(c *gin.Context) {
-	var refreshTokenRequest RefreshTokenRequest
-	c.BindJSON(&refreshTokenRequest)
-	refreshTokenDto, usecaseErrGroup := auth.NewRefreshTokenAction(*a.appData).Execute(auth.NewRefreshTokenCommand(refreshTokenRequest.RefreshToken))
+	var request RefreshTokenRequest
+	c.BindJSON(&request)
+	action := auth.RefreshTokenAction{
+		AppData: *a.AppData,
+	}
+	refreshTokenDto, usecaseErrGroup := action.Execute(
+		&auth.RefreshTokenCommand{
+			RefreshToken: request.RefreshToken,
+		},
+	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return
@@ -57,7 +60,7 @@ func (a *AuthController) RefreshToken(c *gin.Context) {
 	c.SecureJSON(
 		http.StatusOK,
 		&RefreshTokenResponse{
-			AccessToken: refreshTokenDto.AccessToken(),
+			AccessToken: refreshTokenDto.AccessToken,
 		},
 	)
 }
@@ -85,16 +88,26 @@ type LoginResponse struct {
 //	@Failure		500		{object}	app_types.ErrorResponse
 //	@Router			/login [post]
 func (a *AuthController) Login(c *gin.Context) {
-	var loginRequest LoginRequest
-	c.BindJSON(&loginRequest)
-	loginDto, usecaseErrGroup := auth.NewLoginAction(*a.appData, repositories.NewUserRepositoryImpl(a.appData.Client(), c)).Execute(
-		auth.NewLoginCommand(loginRequest.Name, loginRequest.Password),
+	var request LoginRequest
+	c.BindJSON(&request)
+	repository := repositories.NewUserRepositoryImpl(a.AppData.Client(), c)
+	action := auth.LoginAction{
+		AppData:        *a.AppData,
+		UserRepository: repository,
+	}
+	loginDto, usecaseErrGroup := action.Execute(
+		&auth.LoginCommand{
+			Name:     request.Name,
+			Password: request.Password,
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return
@@ -103,8 +116,8 @@ func (a *AuthController) Login(c *gin.Context) {
 	c.SecureJSON(
 		http.StatusOK,
 		&LoginResponse{
-			AccessToken:  loginDto.AccessToken(),
-			RefreshToken: loginDto.RefreshToken(),
+			AccessToken:  loginDto.AccessToken,
+			RefreshToken: loginDto.RefreshToken,
 		},
 	)
 }
