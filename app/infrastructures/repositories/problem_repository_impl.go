@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"study-pal-backend/app/domains/models/entities"
-	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/problem"
 
@@ -11,19 +10,12 @@ import (
 )
 
 type ProblemRepositoryImpl struct {
-	ctx    context.Context
-	client *ent.Client
-}
-
-func NewProblemRepositoryImpl(ctx context.Context, client *ent.Client) repositories.ProblemRepository {
-	return &ProblemRepositoryImpl{
-		ctx:    ctx,
-		client: client,
-	}
+	Client *ent.Client
+	Ctx    context.Context
 }
 
 func (p *ProblemRepositoryImpl) CreateBulk(problems []*entities.Problem) {
-	p.client.Problem.MapCreateBulk(problems, func(c *ent.ProblemCreate, i int) {
+	p.Client.Problem.MapCreateBulk(problems, func(c *ent.ProblemCreate, i int) {
 		c.SetID(problems[i].Id()).
 			SetAnswerTypeID(problems[i].AnswerTypeId()).
 			SetStatement(problems[i].Statement()).
@@ -60,9 +52,9 @@ func (p *ProblemRepositoryImpl) CreateBulk(problems []*entities.Problem) {
 				Truth:     problems[i].AnswerTruth().Truth(),
 			})
 		}
-	}).SaveX(p.ctx)
+	}).SaveX(p.Ctx)
 }
 
 func (p *ProblemRepositoryImpl) ExistByWorkbookId(workbookId uuid.UUID) bool {
-	return p.client.Problem.Query().Where(problem.WorkbookIDEQ(workbookId)).ExistX(p.ctx)
+	return p.Client.Problem.Query().Where(problem.WorkbookIDEQ(workbookId)).ExistX(p.Ctx)
 }

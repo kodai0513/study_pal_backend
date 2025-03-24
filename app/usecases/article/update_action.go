@@ -10,54 +10,45 @@ import (
 	"github.com/google/uuid"
 )
 
-type updateActionCommand struct {
-	articleId   uuid.UUID
-	description string
-	postId      uuid.UUID
-}
-
-func NewUpdateActionCommand(articleId uuid.UUID, description string, postId uuid.UUID) *updateActionCommand {
-	return &updateActionCommand{
-		articleId:   articleId,
-		description: description,
-		postId:      postId,
-	}
+type UpdateActionCommand struct {
+	ArticleId   uuid.UUID
+	Description string
+	UserId      uuid.UUID
 }
 
 type UpdateAction struct {
-	articleRepository repositories.ArticleRepository
+	ArticleRepository repositories.ArticleRepository
 }
 
-func NewUpdateAction(articleRepository repositories.ArticleRepository) *UpdateAction {
-	return &UpdateAction{
-		articleRepository: articleRepository,
-	}
-}
-
-func (c *UpdateAction) Execute(command *updateActionCommand) usecase_error.UsecaseErrorGroup {
+func (c *UpdateAction) Execute(command *UpdateActionCommand) (*ArticleDto, usecase_error.UsecaseErrorGroup) {
 	usecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
-	description, err := articles.NewDescription(command.description)
+	description, err := articles.NewDescription(command.Description)
 	if err != nil {
 		usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
 
 	if usecaseErrGroup.IsError() {
-		return usecaseErrGroup
+		return nil, usecaseErrGroup
 	}
 
-	targetArticle := c.articleRepository.FindById(command.articleId)
+	targetArticle := c.ArticleRepository.FindById(command.ArticleId)
 	if targetArticle == nil {
-		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("article not found")))
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("article not found")))
 	}
 
-	if command.postId != targetArticle.UserId() {
-		return usecase_error.NewUsecaseErrorGroupWithMessage(
+	if command.UserId != targetArticle.UserId() {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(
 			usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, errors.New("you are not authorized to edit that article")),
 		)
 	}
 
-	article := entities.NewArticle(command.articleId, description, command.postId)
-	c.articleRepository.Update(article)
+	article := entities.NewArticle(command.ArticleId, description, command.UserId)
+	resultArticle := c.ArticleRepository.Update(article)
 
-	return nil
+	return &ArticleDto{
+			Id:          resultArticle.Id(),
+			Description: resultArticle.Description(),
+			UserId:      resultArticle.UserId(),
+		},
+		nil
 }

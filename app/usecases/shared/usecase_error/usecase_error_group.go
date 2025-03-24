@@ -1,5 +1,9 @@
 package usecase_error
 
+import (
+	"github.com/samber/lo"
+)
+
 type UsecaseErrorGroup interface {
 	AddOnlySameUsecaseError(usecaseErr UsecaseError)
 	Errors() []string
@@ -39,12 +43,12 @@ func (a *usecaseErrorGroup) AddOnlySameUsecaseError(usecaseErr UsecaseError) {
 }
 
 func (a *usecaseErrorGroup) Errors() []string {
-	errs := []string{}
-	for _, err := range a.errors {
-		errs = append(errs, err.Error())
-	}
-
-	return errs
+	return lo.Map(
+		a.errors,
+		func(err UsecaseError, index int) string {
+			return err.Error()
+		},
+	)
 }
 
 func (a *usecaseErrorGroup) IsError() bool {

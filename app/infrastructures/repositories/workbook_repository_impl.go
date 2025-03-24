@@ -14,19 +14,20 @@ import (
 )
 
 type WorkbookRepositoryImpl struct {
-	ctx    context.Context
 	client *ent.Client
+	ctx    context.Context
 }
 
-func NewWorkbookRepositoryImpl(ctx context.Context, client *ent.Client) repositories.WorkbookRepository {
+func NewWorkbookRepositoryImpl(client *ent.Client, ctx context.Context) repositories.WorkbookRepository {
 	return &WorkbookRepositoryImpl{
-		ctx:    ctx,
 		client: client,
+		ctx:    ctx,
 	}
 }
 
-func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) {
-	w.client.Workbook.Create().
+func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) *entities.Workbook {
+	// workbook 登録
+	resultWorkbook := w.client.Workbook.Create().
 		SetID(workbook.Id()).
 		SetCreatedID(workbook.UserId()).
 		SetDescription(workbook.Description()).
@@ -34,12 +35,25 @@ func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) {
 		SetTitle(workbook.Title()).
 		SaveX(w.ctx)
 
-	w.client.WorkbookMember.Create().
+	// workbookMember 登録
+	resultMember := w.client.WorkbookMember.Create().
 		SetID(workbook.WorkbookMembers()[0].Id()).
 		SetRoleID(workbook.WorkbookMembers()[0].RoleId()).
 		SetMemberID(workbook.WorkbookMembers()[0].UserId()).
 		SetWorkbookID(workbook.WorkbookMembers()[0].WorkbookId()).
 		SaveX(w.ctx)
+
+	member := entities.NewWorkbookMember(resultMember.ID, resultMember.RoleID, resultMember.MemberID, resultMember.WorkbookID)
+	description, _ := workbooks.NewDescription(*resultWorkbook.Description)
+	title, _ := workbooks.NewTitle(resultWorkbook.Title)
+	return entities.NewWorkbook(
+		resultWorkbook.ID,
+		resultWorkbook.IsPublic,
+		description,
+		title,
+		resultWorkbook.CreatedID,
+		[]*entities.WorkbookMember{member},
+	)
 }
 
 func (w *WorkbookRepositoryImpl) Delete(workbookId uuid.UUID) {
@@ -57,18 +71,17 @@ func (w *WorkbookRepositoryImpl) FindById(workbookId uuid.UUID) *entities.Workbo
 		return nil
 	}
 
-	var workbookMembers []*entities.WorkbookMember
-	for _, workbookMember := range result.Edges.WorkbookMembers {
-		workbookMembers = append(
-			workbookMembers,
-			entities.NewWorkbookMember(
-				workbookMember.ID,
-				workbookMember.RoleID,
-				workbookMember.MemberID,
-				workbookMember.WorkbookID,
-			),
-		)
-	}
+	workbookMembers := lo.Map(
+		result.Edges.WorkbookMembers,
+		func(member *ent.WorkbookMember, index int) *entities.WorkbookMember {
+			return entities.NewWorkbookMember(
+				member.ID,
+				member.RoleID,
+				member.MemberID,
+				member.WorkbookID,
+			)
+		},
+	)
 	description, _ := workbooks.NewDescription(*result.Description)
 	title, _ := workbooks.NewTitle(result.Title)
 	return entities.NewWorkbook(
@@ -81,13 +94,15 @@ func (w *WorkbookRepositoryImpl) FindById(workbookId uuid.UUID) *entities.Workbo
 	)
 }
 
-func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) {
-	w.client.Workbook.UpdateOneID(workbook.Id()).
+func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) *entities.Workbook {
+	// workbook 更新
+	resultWorkbook := w.client.Workbook.UpdateOneID(workbook.Id()).
 		SetDescription(workbook.Description()).
 		SetTitle(workbook.Title()).
 		SetIsPublic(workbook.IsPublic()).
 		SaveX(w.ctx)
 
+	// workbookMember 更新
 	registerdMemberIds := w.client.WorkbookMember.Query().Where(workbookmember.WorkbookIDEQ(workbook.Id())).IDsX(w.ctx)
 	newRegisterMemberIdKeys := lo.SliceToMap(
 		workbook.WorkbookMembers(),
@@ -121,7 +136,7 @@ func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) {
 		},
 	)
 
-	w.client.WorkbookMember.MapCreateBulk(
+	resultMembers := w.client.WorkbookMember.MapCreateBulk(
 		addRegisterMembers,
 		func(wmc *ent.WorkbookMemberCreate, i int) {
 			wmc.SetID(addRegisterMembers[i].Id()).
@@ -130,4 +145,21 @@ func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) {
 				SetWorkbookID(addRegisterMembers[i].WorkbookId())
 		},
 	).SaveX(w.ctx)
+
+	members := lo.Map(
+		resultMembers,
+		func(member *ent.WorkbookMember, index int) *entities.WorkbookMember {
+			return entities.NewWorkbookMember(member.ID, member.RoleID, member.MemberID, member.WorkbookID)
+		},
+	)
+	description, _ := workbooks.NewDescription(*resultWorkbook.Description)
+	title, _ := workbooks.NewTitle(resultWorkbook.Title)
+	return entities.NewWorkbook(
+		resultWorkbook.ID,
+		resultWorkbook.IsPublic,
+		description,
+		title,
+		resultWorkbook.CreatedID,
+		members,
+	)
 }

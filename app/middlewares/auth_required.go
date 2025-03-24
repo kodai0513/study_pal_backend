@@ -19,7 +19,9 @@ func AuthRequired(devModeLogin bool, secretKey string) gin.HandlerFunc {
 			if authHeader == "" {
 				c.SecureJSON(
 					http.StatusUnauthorized,
-					app_types.NewErrorResponse([]string{"authorization header missing"}),
+					&app_types.ErrorResponse{
+						Errors: []string{"authorization header missing"},
+					},
 				)
 				c.Abort()
 				return
@@ -32,7 +34,9 @@ func AuthRequired(devModeLogin bool, secretKey string) gin.HandlerFunc {
 			if err != nil {
 				c.SecureJSON(
 					http.StatusUnauthorized,
-					app_types.NewErrorResponse([]string{err.Error()}),
+					&app_types.ErrorResponse{
+						Errors: []string{err.Error()},
+					},
 				)
 				c.Abort()
 				return

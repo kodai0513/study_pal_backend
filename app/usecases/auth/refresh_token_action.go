@@ -7,42 +7,27 @@ import (
 )
 
 type RefreshTokenCommand struct {
-	refreshToken string
-}
-
-func NewRefreshTokenCommand(refreshToken string) *RefreshTokenCommand {
-	return &RefreshTokenCommand{
-		refreshToken: refreshToken,
-	}
+	RefreshToken string
 }
 
 type RefreshTokenDto struct {
-	accessToken string
-}
-
-func (l *RefreshTokenDto) AccessToken() string {
-	return l.accessToken
+	AccessToken string
 }
 
 type RefreshTokenAction struct {
-	appData app_types.AppData
-}
-
-func NewRefreshTokenAction(appData app_types.AppData) *RefreshTokenAction {
-	return &RefreshTokenAction{
-		appData: appData,
-	}
+	AppData app_types.AppData
 }
 
 func (l *RefreshTokenAction) Execute(command *RefreshTokenCommand) (*RefreshTokenDto, usecase_error.UsecaseErrorGroup) {
-	userId, err := study_pal_jwts.VerifyToken(l.appData.JwtSecretKey(), command.refreshToken)
+	userId, err := study_pal_jwts.VerifyToken(l.AppData.JwtSecretKey(), command.RefreshToken)
 	if err != nil {
 		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, err))
 	}
 
-	accessToken := study_pal_jwts.CreateAccessToken(l.appData.JwtSecretKey(), userId)
+	accessToken := study_pal_jwts.CreateAccessToken(l.AppData.JwtSecretKey(), userId)
 
 	return &RefreshTokenDto{
-		accessToken: accessToken,
-	}, nil
+			AccessToken: accessToken,
+		},
+		nil
 }

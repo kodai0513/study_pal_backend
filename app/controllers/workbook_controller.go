@@ -12,18 +12,20 @@ import (
 )
 
 type WorkbookController struct {
-	appData *app_types.AppData
+	AppData *app_types.AppData
 }
 
-func NewWorkbookController(appData *app_types.AppData) *WorkbookController {
-	return &WorkbookController{
-		appData: appData,
-	}
-}
-
-type WorkbookCreateRequest struct {
+type CreateWorkbookRequest struct {
 	Description string `json:"description"`
 	Title       string `json:"title"`
+}
+
+type CreateWorkbookResponse struct {
+	Id          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsPublic    bool      `json:"is_public"`
+	Title       string    `json:"title"`
+	UserId      uuid.UUID `json:"user_id"`
 }
 
 // workbook godoc
@@ -33,24 +35,33 @@ type WorkbookCreateRequest struct {
 //	@Tags			workbook
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		WorkbookCreateRequest	true	"問題集作成リクエスト"
-//	@Success		201		{object}	nil
+//	@Param			request	body		CreateWorkbookRequest	true	"問題集作成リクエスト"
+//	@Success		201		{object}	CreateWorkbookResponse
 //	@Failure		400		{object}	app_types.ErrorResponse
 //	@Failure		401		{object}	app_types.ErrorResponse
 //	@Failure		500		{object}	app_types.ErrorResponse
 //	@Router			/workbooks [post]
 func (a *WorkbookController) Create(c *gin.Context) {
-	var request WorkbookCreateRequest
+	var request CreateWorkbookRequest
 	c.BindJSON(&request)
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := workbooks.NewCreateAction(repositories.NewWorkbookRepositoryImpl(c, a.appData.Client())).Execute(
-		workbooks.NewCreateActionCommand(request.Description, request.Title, userId.(uuid.UUID)),
+	action := workbooks.CreateAction{
+		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+	}
+	workbookDto, usecaseErrGroup := action.Execute(
+		&workbooks.CreateActionCommand{
+			Description: request.Description,
+			Title:       request.Title,
+			UserId:      userId.(uuid.UUID),
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return
@@ -58,13 +69,27 @@ func (a *WorkbookController) Create(c *gin.Context) {
 
 	c.SecureJSON(
 		http.StatusCreated,
-		gin.H{},
+		&CreateWorkbookResponse{
+			Id:          workbookDto.Id,
+			Description: workbookDto.Description,
+			IsPublic:    workbookDto.IsPublic,
+			Title:       workbookDto.Title,
+			UserId:      workbookDto.UserId,
+		},
 	)
 }
 
-type WorkbookUpdateRequest struct {
+type UpdateWorkbookRequest struct {
 	Description string `json:"description"`
 	Title       string `json:"title"`
+}
+
+type UpdateWorkbookResponse struct {
+	Id          uuid.UUID `json:"id"`
+	Description string    `json:"description"`
+	IsPublic    bool      `json:"is_public"`
+	Title       string    `json:"title"`
+	UserId      uuid.UUID `json:"user_id"`
 }
 
 // workbook godoc
@@ -74,35 +99,47 @@ type WorkbookUpdateRequest struct {
 //	@Tags			workbook
 //	@Accept			json
 //	@Produce		json
-//	@Param			request		body		WorkbookCreateRequest	true	"問題集編集リクエスト"
+//	@Param			request		body		UpdateWorkbookRequest	true	"問題集編集リクエスト"
 //	@Param			workbook_id	path		string					true	"Workbook ID"
-//	@Success		200			{object}	nil
+//	@Success		200			{object}	UpdateWorkbookResponse
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
 //	@Router			/workbooks/{workbook_id} [put]
 func (a *WorkbookController) Update(c *gin.Context) {
-	var request WorkbookUpdateRequest
+	var request UpdateWorkbookRequest
 	c.BindJSON(&request)
 	workbookIdParam := c.Param("workbook_id")
 	workbookId, err := uuid.Parse(workbookIdParam)
 	if err != nil {
 		c.SecureJSON(
 			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
 		)
 		c.Abort()
 		return
 	}
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := workbooks.NewUpdateAction(repositories.NewWorkbookRepositoryImpl(c, a.appData.Client())).Execute(
-		workbooks.NewUpdateActionCommand(request.Description, request.Title, userId.(uuid.UUID), workbookId),
+	action := workbooks.UpdateAction{
+		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+	}
+	workbookDto, usecaseErrGroup := action.Execute(
+		&workbooks.UpdateActionCommand{
+			Description: request.Description,
+			Title:       request.Title,
+			UserId:      userId.(uuid.UUID),
+			WorkbookId:  workbookId,
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return
@@ -110,7 +147,13 @@ func (a *WorkbookController) Update(c *gin.Context) {
 
 	c.SecureJSON(
 		http.StatusOK,
-		gin.H{},
+		&UpdateWorkbookResponse{
+			Id:          workbookDto.Id,
+			Description: workbookDto.Description,
+			IsPublic:    workbookDto.IsPublic,
+			Title:       workbookDto.Title,
+			UserId:      workbookDto.UserId,
+		},
 	)
 }
 
@@ -133,20 +176,31 @@ func (a *WorkbookController) Delete(c *gin.Context) {
 	if err != nil {
 		c.SecureJSON(
 			http.StatusBadRequest,
-			app_types.NewErrorResponse([]string{err.Error()}),
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
 		)
 		c.Abort()
 		return
 	}
 	userId, _ := c.Get("user_id")
-	usecaseErrGroup := workbooks.NewDeleteAction(repositories.NewWorkbookRepositoryImpl(c, a.appData.Client())).Execute(
-		workbooks.NewDeleteActionCommand(userId.(uuid.UUID), workbookId),
+	action := workbooks.DeleteAction{
+		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+	}
+	usecaseErrGroup := action.Execute(
+		&workbooks.DeleteActionCommand{
+			UserId: userId.(uuid.UUID),
+
+			WorkbookId: workbookId,
+		},
 	)
 
 	if usecaseErrGroup != nil && usecaseErrGroup.IsError() {
 		c.SecureJSON(
 			mappers.UsecaseErrorToHttpStatus(usecaseErrGroup),
-			app_types.NewErrorResponse(usecaseErrGroup.Errors()),
+			&app_types.ErrorResponse{
+				Errors: usecaseErrGroup.Errors(),
+			},
 		)
 		c.Abort()
 		return

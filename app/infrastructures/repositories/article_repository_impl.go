@@ -12,31 +12,37 @@ import (
 )
 
 type ArticleRepositoryImpl struct {
-	ctx    context.Context
 	client *ent.Client
+	ctx    context.Context
 }
 
-func NewArticleRepositoryImpl(ctx context.Context, client *ent.Client) repositories.ArticleRepository {
+func NewArticleRepositoryImpl(client *ent.Client, ctx context.Context) repositories.ArticleRepository {
 	return &ArticleRepositoryImpl{
-		ctx:    ctx,
 		client: client,
+		ctx:    ctx,
 	}
 }
 
-func (a *ArticleRepositoryImpl) Create(article *entities.Article) {
-	a.client.Article.
+func (a *ArticleRepositoryImpl) Create(article *entities.Article) *entities.Article {
+	result := a.client.Article.
 		Create().
 		SetID(article.Id()).
 		SetDescription(article.Description()).
 		SetPostID(article.UserId()).
 		SaveX(a.ctx)
+
+	description, _ := articles.NewDescription(result.Description)
+	return entities.NewArticle(result.ID, description, result.PostID)
 }
 
-func (a *ArticleRepositoryImpl) Update(article *entities.Article) {
-	a.client.Article.
+func (a *ArticleRepositoryImpl) Update(article *entities.Article) *entities.Article {
+	result := a.client.Article.
 		UpdateOneID(article.Id()).
 		SetDescription(article.Description()).
 		SaveX(a.ctx)
+
+	description, _ := articles.NewDescription(result.Description)
+	return entities.NewArticle(result.ID, description, result.PostID)
 }
 
 func (a *ArticleRepositoryImpl) Delete(id uuid.UUID) {

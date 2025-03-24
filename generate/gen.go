@@ -53,37 +53,43 @@ func main() {
 }
 
 func generateAction(generateInfo *generateInfo) {
+	currentPath, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
 	for index, actionType := range []string{"Create", "Update", "Delete"} {
-		data := map[string]string{
+		actionData := map[string]string{
 			"actionCommandName": actionType + "ActionCommand",
 			"actionName":        actionType + "Action",
 			"packageName":       camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
+			"dtoName":           generateInfo.name + "Dto",
 		}
 
-		currentPath, err := os.Getwd()
+		var fileName string
+		if actionType == "Create" || actionType == "Update" {
+			fileName = "templates/create_or_update_action.tmpl"
+		} else {
+			fileName = "templates/delete_action.tmpl"
+		}
+		templByte, err := os.ReadFile(fileName)
 		if err != nil {
 			panic(err)
 		}
 
-		templByte, err := os.ReadFile("templates/action.tmpl")
-		if err != nil {
-			panic(err)
-		}
-
-		outputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(actionType) + "_action.go"
-		if _, err := os.Stat(outputPath); err == nil {
+		actionOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(actionType) + "_action.go"
+		if _, err := os.Stat(actionOutputPath); err == nil {
 			fmt.Println("file has already been created")
 			return
 		}
 
 		if index == 0 {
-			err = os.Mkdir(filepath.Dir(outputPath), 0755)
+			err = os.Mkdir(filepath.Dir(actionOutputPath), 0755)
 			if err != nil {
 				panic(err)
 			}
 		}
 
-		outputFile, err := os.Create(outputPath)
+		outputFile, err := os.Create(actionOutputPath)
 		if err != nil {
 			panic(err)
 		}
@@ -94,22 +100,49 @@ func generateAction(generateInfo *generateInfo) {
 			panic(err)
 		}
 
-		err = tmpl.Execute(outputFile, data)
+		err = tmpl.Execute(outputFile, actionData)
 		if err != nil {
 			panic(err)
 		}
-
-		println("the action file has been successfully created")
 	}
 
+	dtoData := map[string]string{
+		"packageName": camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
+		"dtoName":     generateInfo.name + "Dto",
+	}
+	dtoOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(generateInfo.name) + "_action.go"
+
+	outputFile, err := os.Create(dtoOutputPath)
+	if err != nil {
+		panic(err)
+	}
+	defer outputFile.Close()
+
+	templByte, err := os.ReadFile("templates/dto.tmpl")
+	if err != nil {
+		panic(err)
+	}
+
+	tmpl, err := template.New("").Parse(string(templByte))
+	if err != nil {
+		panic(err)
+	}
+
+	err = tmpl.Execute(outputFile, dtoData)
+	if err != nil {
+		panic(err)
+	}
+	println("the action file has been successfully created")
 }
 
 func generateController(generateInfo *generateInfo) {
 	data := map[string]string{
-		"controllerName": generateInfo.name + "Controller",
-		"godocName":      strings.ToLower(generateInfo.name),
-		"requestName":    generateInfo.name + "IndexRequest",
-		"responseName":   generateInfo.name + "IndexResponse",
+		"controllerName":     generateInfo.name + "Controller",
+		"godocName":          strings.ToLower(generateInfo.name),
+		"createRequestName":  "Create" + generateInfo.name + "Request",
+		"createResponseName": "Create" + generateInfo.name + "Response",
+		"updateRequestName":  "Update" + generateInfo.name + "Request",
+		"updateResponseName": "Update" + generateInfo.name + "Response",
 	}
 
 	currentPath, err := os.Getwd()

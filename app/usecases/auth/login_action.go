@@ -10,63 +10,38 @@ import (
 )
 
 type LoginCommand struct {
-	name     string
-	password string
-}
-
-func NewLoginCommand(name string, password string) *LoginCommand {
-	return &LoginCommand{
-		name:     name,
-		password: password,
-	}
+	Name     string
+	Password string
 }
 
 type LoginDto struct {
-	accessToken  string
-	refreshToken string
-}
-
-func NewLoginDto(accessToken string, refreshToken string) *LoginDto {
-	return &LoginDto{
-		accessToken:  accessToken,
-		refreshToken: refreshToken,
-	}
-}
-
-func (l *LoginDto) AccessToken() string {
-	return l.accessToken
-}
-
-func (l *LoginDto) RefreshToken() string {
-	return l.refreshToken
+	AccessToken  string
+	RefreshToken string
 }
 
 type LoginAction struct {
-	appData        app_types.AppData
-	userRepository repositories.UserRepository
-}
-
-func NewLoginAction(appData app_types.AppData, userRepository repositories.UserRepository) *LoginAction {
-	return &LoginAction{
-		appData:        appData,
-		userRepository: userRepository,
-	}
+	AppData        app_types.AppData
+	UserRepository repositories.UserRepository
 }
 
 func (l *LoginAction) Execute(command *LoginCommand) (*LoginDto, usecase_error.UsecaseErrorGroup) {
-	user := l.userRepository.FindByName(command.name)
+	user := l.UserRepository.FindByName(command.Name)
 
 	if user == nil {
 		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("user not found")))
 	}
 
-	err := password_hashes.CheckPasswordHash(command.password, user.Password())
+	err := password_hashes.CheckPasswordHash(command.Password, user.Password())
 	if err != nil {
 		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 	}
 
-	accessToken := study_pal_jwts.CreateAccessToken(l.appData.JwtSecretKey(), user.Id())
-	refreshToken := study_pal_jwts.CreateRefreshToken(l.appData.JwtSecretKey(), user.Id())
+	accessToken := study_pal_jwts.CreateAccessToken(l.AppData.JwtSecretKey(), user.Id())
+	refreshToken := study_pal_jwts.CreateRefreshToken(l.AppData.JwtSecretKey(), user.Id())
 
-	return NewLoginDto(accessToken, refreshToken), nil
+	return &LoginDto{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+		nil
 }

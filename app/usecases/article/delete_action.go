@@ -8,42 +8,29 @@ import (
 	"github.com/google/uuid"
 )
 
-type deleteActionCommand struct {
-	postId    uuid.UUID
-	articleId uuid.UUID
-}
-
-func NewDeleteActionCommand(articleId uuid.UUID, postId uuid.UUID) *deleteActionCommand {
-	return &deleteActionCommand{
-		articleId: articleId,
-		postId:    postId,
-	}
+type DeleteActionCommand struct {
+	UserId    uuid.UUID
+	ArticleId uuid.UUID
 }
 
 type DeleteAction struct {
-	articleRepository repositories.ArticleRepository
+	ArticleRepository repositories.ArticleRepository
 }
 
-func NewDeleteAction(articleRepository repositories.ArticleRepository) *DeleteAction {
-	return &DeleteAction{
-		articleRepository: articleRepository,
-	}
-}
-
-func (c *DeleteAction) Execute(command *deleteActionCommand) usecase_error.UsecaseErrorGroup {
-	targetArticle := c.articleRepository.FindById(command.articleId)
+func (c *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.UsecaseErrorGroup {
+	targetArticle := c.ArticleRepository.FindById(command.ArticleId)
 
 	if targetArticle == nil {
 		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("article not found")))
 	}
 
-	if command.postId != targetArticle.UserId() {
+	if command.UserId != targetArticle.UserId() {
 		return usecase_error.NewUsecaseErrorGroupWithMessage(
 			usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, errors.New("you are not authorized to delete that article")),
 		)
 	}
 
-	c.articleRepository.Delete(command.articleId)
+	c.ArticleRepository.Delete(command.ArticleId)
 
 	return nil
 }
