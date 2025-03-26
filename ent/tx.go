@@ -34,8 +34,8 @@ type Tx struct {
 	Workbook *WorkbookClient
 	// WorkbookCategory is the client for interacting with the WorkbookCategory builders.
 	WorkbookCategory *WorkbookCategoryClient
-	// WorkbookCategoryClassification is the client for interacting with the WorkbookCategoryClassification builders.
-	WorkbookCategoryClassification *WorkbookCategoryClassificationClient
+	// WorkbookCategoryDetail is the client for interacting with the WorkbookCategoryDetail builders.
+	WorkbookCategoryDetail *WorkbookCategoryDetailClient
 	// WorkbookMember is the client for interacting with the WorkbookMember builders.
 	WorkbookMember *WorkbookMemberClient
 
@@ -180,7 +180,7 @@ func (tx *Tx) init() {
 	tx.User = NewUserClient(tx.config)
 	tx.Workbook = NewWorkbookClient(tx.config)
 	tx.WorkbookCategory = NewWorkbookCategoryClient(tx.config)
-	tx.WorkbookCategoryClassification = NewWorkbookCategoryClassificationClient(tx.config)
+	tx.WorkbookCategoryDetail = NewWorkbookCategoryDetailClient(tx.config)
 	tx.WorkbookMember = NewWorkbookMemberClient(tx.config)
 }
 

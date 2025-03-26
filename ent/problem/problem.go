@@ -26,8 +26,8 @@ const (
 	FieldWorkbookID = "workbook_id"
 	// FieldWorkbookCategoryID holds the string denoting the workbook_category_id field in the database.
 	FieldWorkbookCategoryID = "workbook_category_id"
-	// FieldWorkbookCategoryClassificationID holds the string denoting the workbook_category_classification_id field in the database.
-	FieldWorkbookCategoryClassificationID = "workbook_category_classification_id"
+	// FieldWorkbookCategoryDetailID holds the string denoting the workbook_category_detail_id field in the database.
+	FieldWorkbookCategoryDetailID = "workbook_category_detail_id"
 	// EdgeAnswerType holds the string denoting the answer_type edge name in mutations.
 	EdgeAnswerType = "answer_type"
 	// EdgeAnswerDescriptions holds the string denoting the answer_descriptions edge name in mutations.
@@ -40,8 +40,8 @@ const (
 	EdgeWorkbook = "workbook"
 	// EdgeWorkbookCategory holds the string denoting the workbook_category edge name in mutations.
 	EdgeWorkbookCategory = "workbook_category"
-	// EdgeWorkbookCategoryClassification holds the string denoting the workbook_category_classification edge name in mutations.
-	EdgeWorkbookCategoryClassification = "workbook_category_classification"
+	// EdgeWorkbookCategoryDetail holds the string denoting the workbook_category_detail edge name in mutations.
+	EdgeWorkbookCategoryDetail = "workbook_category_detail"
 	// Table holds the table name of the problem in the database.
 	Table = "problems"
 	// AnswerTypeTable is the table that holds the answer_type relation/edge.
@@ -86,13 +86,13 @@ const (
 	WorkbookCategoryInverseTable = "workbook_categories"
 	// WorkbookCategoryColumn is the table column denoting the workbook_category relation/edge.
 	WorkbookCategoryColumn = "workbook_category_id"
-	// WorkbookCategoryClassificationTable is the table that holds the workbook_category_classification relation/edge.
-	WorkbookCategoryClassificationTable = "problems"
-	// WorkbookCategoryClassificationInverseTable is the table name for the WorkbookCategoryClassification entity.
-	// It exists in this package in order to avoid circular dependency with the "workbookcategoryclassification" package.
-	WorkbookCategoryClassificationInverseTable = "workbook_category_classifications"
-	// WorkbookCategoryClassificationColumn is the table column denoting the workbook_category_classification relation/edge.
-	WorkbookCategoryClassificationColumn = "workbook_category_classification_id"
+	// WorkbookCategoryDetailTable is the table that holds the workbook_category_detail relation/edge.
+	WorkbookCategoryDetailTable = "problems"
+	// WorkbookCategoryDetailInverseTable is the table name for the WorkbookCategoryDetail entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookcategorydetail" package.
+	WorkbookCategoryDetailInverseTable = "workbook_category_details"
+	// WorkbookCategoryDetailColumn is the table column denoting the workbook_category_detail relation/edge.
+	WorkbookCategoryDetailColumn = "workbook_category_detail_id"
 )
 
 // Columns holds all SQL columns for problem fields.
@@ -104,7 +104,7 @@ var Columns = []string{
 	FieldStatement,
 	FieldWorkbookID,
 	FieldWorkbookCategoryID,
-	FieldWorkbookCategoryClassificationID,
+	FieldWorkbookCategoryDetailID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -166,9 +166,9 @@ func ByWorkbookCategoryID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkbookCategoryID, opts...).ToFunc()
 }
 
-// ByWorkbookCategoryClassificationID orders the results by the workbook_category_classification_id field.
-func ByWorkbookCategoryClassificationID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldWorkbookCategoryClassificationID, opts...).ToFunc()
+// ByWorkbookCategoryDetailID orders the results by the workbook_category_detail_id field.
+func ByWorkbookCategoryDetailID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorkbookCategoryDetailID, opts...).ToFunc()
 }
 
 // ByAnswerTypeField orders the results by answer_type field.
@@ -220,10 +220,10 @@ func ByWorkbookCategoryField(field string, opts ...sql.OrderTermOption) OrderOpt
 	}
 }
 
-// ByWorkbookCategoryClassificationField orders the results by workbook_category_classification field.
-func ByWorkbookCategoryClassificationField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByWorkbookCategoryDetailField orders the results by workbook_category_detail field.
+func ByWorkbookCategoryDetailField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryClassificationStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryDetailStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newAnswerTypeStep() *sqlgraph.Step {
@@ -268,10 +268,10 @@ func newWorkbookCategoryStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryTable, WorkbookCategoryColumn),
 	)
 }
-func newWorkbookCategoryClassificationStep() *sqlgraph.Step {
+func newWorkbookCategoryDetailStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WorkbookCategoryClassificationInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryClassificationTable, WorkbookCategoryClassificationColumn),
+		sqlgraph.To(WorkbookCategoryDetailInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryDetailTable, WorkbookCategoryDetailColumn),
 	)
 }

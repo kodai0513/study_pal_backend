@@ -13,7 +13,7 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -88,16 +88,16 @@ func (pc *ProblemCreate) SetNillableWorkbookCategoryID(u *uuid.UUID) *ProblemCre
 	return pc
 }
 
-// SetWorkbookCategoryClassificationID sets the "workbook_category_classification_id" field.
-func (pc *ProblemCreate) SetWorkbookCategoryClassificationID(u uuid.UUID) *ProblemCreate {
-	pc.mutation.SetWorkbookCategoryClassificationID(u)
+// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
+func (pc *ProblemCreate) SetWorkbookCategoryDetailID(u uuid.UUID) *ProblemCreate {
+	pc.mutation.SetWorkbookCategoryDetailID(u)
 	return pc
 }
 
-// SetNillableWorkbookCategoryClassificationID sets the "workbook_category_classification_id" field if the given value is not nil.
-func (pc *ProblemCreate) SetNillableWorkbookCategoryClassificationID(u *uuid.UUID) *ProblemCreate {
+// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
+func (pc *ProblemCreate) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *ProblemCreate {
 	if u != nil {
-		pc.SetWorkbookCategoryClassificationID(*u)
+		pc.SetWorkbookCategoryDetailID(*u)
 	}
 	return pc
 }
@@ -176,9 +176,9 @@ func (pc *ProblemCreate) SetWorkbookCategory(w *WorkbookCategory) *ProblemCreate
 	return pc.SetWorkbookCategoryID(w.ID)
 }
 
-// SetWorkbookCategoryClassification sets the "workbook_category_classification" edge to the WorkbookCategoryClassification entity.
-func (pc *ProblemCreate) SetWorkbookCategoryClassification(w *WorkbookCategoryClassification) *ProblemCreate {
-	return pc.SetWorkbookCategoryClassificationID(w.ID)
+// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
+func (pc *ProblemCreate) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *ProblemCreate {
+	return pc.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the ProblemMutation object of the builder.
@@ -400,21 +400,21 @@ func (pc *ProblemCreate) createSpec() (*Problem, *sqlgraph.CreateSpec) {
 		_node.WorkbookCategoryID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.mutation.WorkbookCategoryClassificationIDs(); len(nodes) > 0 {
+	if nodes := pc.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   problem.WorkbookCategoryClassificationTable,
-			Columns: []string{problem.WorkbookCategoryClassificationColumn},
+			Table:   problem.WorkbookCategoryDetailTable,
+			Columns: []string{problem.WorkbookCategoryDetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.WorkbookCategoryClassificationID = &nodes[0]
+		_node.WorkbookCategoryDetailID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

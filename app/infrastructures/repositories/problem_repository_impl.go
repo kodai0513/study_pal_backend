@@ -21,7 +21,7 @@ func (p *ProblemRepositoryImpl) CreateBulk(problems []*entities.Problem) {
 			SetStatement(problems[i].Statement()).
 			SetWorkbookID(problems[i].WorkbookId()).
 			SetWorkbookCategoryID(problems[i].WorkbookCategoryId()).
-			SetWorkbookCategoryClassificationID(problems[i].WorkbookCategoryClassificationId())
+			SetWorkbookCategoryDetailID(problems[i].WorkbookCategoryDetailId())
 
 		if problems[i].IsAnswerTypeDescription() {
 			c.SetAnswerDescriptions(&ent.AnswerDescription{

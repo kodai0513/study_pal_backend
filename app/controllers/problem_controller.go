@@ -14,15 +14,15 @@ type Problem struct {
 	Name string `json:"name"`
 }
 
-type WorkbookCategoryClassification struct {
+type WorkbookCategoryDetail struct {
 	Name     string     `json:"name"`
 	Problems []*Problem `json:"problems"`
 }
 
 type WorkbookCategory struct {
-	Name                            string                            `json:"name"`
-	Problems                        []*Problem                        `json:"problems"`
-	WorkbookCategoryClassifications []*WorkbookCategoryClassification `json:"workbook_category_classifications"`
+	Name                    string                    `json:"name"`
+	Problems                []*Problem                `json:"problems"`
+	WorkbookCategoryDetails []*WorkbookCategoryDetail `json:"workbook_category_details"`
 }
 
 type ProblemCreateRequest struct {

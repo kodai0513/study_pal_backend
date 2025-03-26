@@ -1,4 +1,4 @@
-package workbook_category_classifications
+package workbook_category_details
 
 import validation "github.com/go-ozzo/ozzo-validation"
 

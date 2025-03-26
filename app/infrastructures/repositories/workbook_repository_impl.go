@@ -36,7 +36,10 @@ func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) *entities.W
 		SaveX(w.ctx)
 
 	// workbookMember 登録
-	resultMember := w.client.WorkbookMember.Create().
+	resultMember := w.client.WorkbookMember.MapCreateBulk(
+		workbook.WorkbookMembers(),
+		func(wmc *ent.WorkbookMemberCreate)
+	).
 		SetID(workbook.WorkbookMembers()[0].Id()).
 		SetRoleID(workbook.WorkbookMembers()[0].RoleId()).
 		SetMemberID(workbook.WorkbookMembers()[0].UserId()).

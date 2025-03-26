@@ -49,3 +49,7 @@ func (w *WorkbookMember) UserId() uuid.UUID {
 func (w *WorkbookMember) WorkbookId() uuid.UUID {
 	return w.workbookId
 }
+
+func (w *WorkbookMember) SetRoleId(roleId uuid.UUID) {
+	w.roleId = roleId
+}

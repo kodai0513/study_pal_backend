@@ -39,8 +39,8 @@ type WorkbookCategoryEdges struct {
 	Problems []*Problem `json:"problems,omitempty"`
 	// Workbook holds the value of the workbook edge.
 	Workbook *Workbook `json:"workbook,omitempty"`
-	// WorkbookCategoryClassifications holds the value of the workbook_category_classifications edge.
-	WorkbookCategoryClassifications []*WorkbookCategoryClassification `json:"workbook_category_classifications,omitempty"`
+	// WorkbookCategoryDetails holds the value of the workbook_category_details edge.
+	WorkbookCategoryDetails []*WorkbookCategoryDetail `json:"workbook_category_details,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -66,13 +66,13 @@ func (e WorkbookCategoryEdges) WorkbookOrErr() (*Workbook, error) {
 	return nil, &NotLoadedError{edge: "workbook"}
 }
 
-// WorkbookCategoryClassificationsOrErr returns the WorkbookCategoryClassifications value or an error if the edge
+// WorkbookCategoryDetailsOrErr returns the WorkbookCategoryDetails value or an error if the edge
 // was not loaded in eager-loading.
-func (e WorkbookCategoryEdges) WorkbookCategoryClassificationsOrErr() ([]*WorkbookCategoryClassification, error) {
+func (e WorkbookCategoryEdges) WorkbookCategoryDetailsOrErr() ([]*WorkbookCategoryDetail, error) {
 	if e.loadedTypes[2] {
-		return e.WorkbookCategoryClassifications, nil
+		return e.WorkbookCategoryDetails, nil
 	}
-	return nil, &NotLoadedError{edge: "workbook_category_classifications"}
+	return nil, &NotLoadedError{edge: "workbook_category_details"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -154,9 +154,9 @@ func (wc *WorkbookCategory) QueryWorkbook() *WorkbookQuery {
 	return NewWorkbookCategoryClient(wc.config).QueryWorkbook(wc)
 }
 
-// QueryWorkbookCategoryClassifications queries the "workbook_category_classifications" edge of the WorkbookCategory entity.
-func (wc *WorkbookCategory) QueryWorkbookCategoryClassifications() *WorkbookCategoryClassificationQuery {
-	return NewWorkbookCategoryClient(wc.config).QueryWorkbookCategoryClassifications(wc)
+// QueryWorkbookCategoryDetails queries the "workbook_category_details" edge of the WorkbookCategory entity.
+func (wc *WorkbookCategory) QueryWorkbookCategoryDetails() *WorkbookCategoryDetailQuery {
+	return NewWorkbookCategoryClient(wc.config).QueryWorkbookCategoryDetails(wc)
 }
 
 // Update returns a builder for updating this WorkbookCategory.

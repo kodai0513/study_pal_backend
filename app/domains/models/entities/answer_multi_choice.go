@@ -42,3 +42,11 @@ func (a *AnswerMultiChoice) Name() string {
 func (a *AnswerMultiChoice) ProblemId() uuid.UUID {
 	return a.problemId
 }
+
+func (a *AnswerMultiChoice) SetIsCorrect(isCorrect bool) {
+	a.isCorrect = isCorrect
+}
+
+func (a *AnswerMultiChoice) SetName(name answer_multi_choices.Name) {
+	a.name = name
+}

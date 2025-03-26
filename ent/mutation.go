@@ -18,7 +18,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"study-pal-backend/ent/workbookmember"
 	"sync"
 	"time"
@@ -37,19 +37,19 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAnswerDescription              = "AnswerDescription"
-	TypeAnswerMultiChoices             = "AnswerMultiChoices"
-	TypeAnswerTruth                    = "AnswerTruth"
-	TypeAnswerType                     = "AnswerType"
-	TypeArticle                        = "Article"
-	TypePermission                     = "Permission"
-	TypeProblem                        = "Problem"
-	TypeRole                           = "Role"
-	TypeUser                           = "User"
-	TypeWorkbook                       = "Workbook"
-	TypeWorkbookCategory               = "WorkbookCategory"
-	TypeWorkbookCategoryClassification = "WorkbookCategoryClassification"
-	TypeWorkbookMember                 = "WorkbookMember"
+	TypeAnswerDescription      = "AnswerDescription"
+	TypeAnswerMultiChoices     = "AnswerMultiChoices"
+	TypeAnswerTruth            = "AnswerTruth"
+	TypeAnswerType             = "AnswerType"
+	TypeArticle                = "Article"
+	TypePermission             = "Permission"
+	TypeProblem                = "Problem"
+	TypeRole                   = "Role"
+	TypeUser                   = "User"
+	TypeWorkbook               = "Workbook"
+	TypeWorkbookCategory       = "WorkbookCategory"
+	TypeWorkbookCategoryDetail = "WorkbookCategoryDetail"
+	TypeWorkbookMember         = "WorkbookMember"
 )
 
 // AnswerDescriptionMutation represents an operation that mutates the AnswerDescription nodes in the graph.
@@ -3480,31 +3480,31 @@ func (m *PermissionMutation) ResetEdge(name string) error {
 // ProblemMutation represents an operation that mutates the Problem nodes in the graph.
 type ProblemMutation struct {
 	config
-	op                                      Op
-	typ                                     string
-	id                                      *uuid.UUID
-	created_at                              *time.Time
-	updated_at                              *time.Time
-	statement                               *string
-	clearedFields                           map[string]struct{}
-	answer_type                             *uuid.UUID
-	clearedanswer_type                      bool
-	answer_descriptions                     *uuid.UUID
-	clearedanswer_descriptions              bool
-	answer_multi_choices                    map[uuid.UUID]struct{}
-	removedanswer_multi_choices             map[uuid.UUID]struct{}
-	clearedanswer_multi_choices             bool
-	answer_truths                           *uuid.UUID
-	clearedanswer_truths                    bool
-	workbook                                *uuid.UUID
-	clearedworkbook                         bool
-	workbook_category                       *uuid.UUID
-	clearedworkbook_category                bool
-	workbook_category_classification        *uuid.UUID
-	clearedworkbook_category_classification bool
-	done                                    bool
-	oldValue                                func(context.Context) (*Problem, error)
-	predicates                              []predicate.Problem
+	op                              Op
+	typ                             string
+	id                              *uuid.UUID
+	created_at                      *time.Time
+	updated_at                      *time.Time
+	statement                       *string
+	clearedFields                   map[string]struct{}
+	answer_type                     *uuid.UUID
+	clearedanswer_type              bool
+	answer_descriptions             *uuid.UUID
+	clearedanswer_descriptions      bool
+	answer_multi_choices            map[uuid.UUID]struct{}
+	removedanswer_multi_choices     map[uuid.UUID]struct{}
+	clearedanswer_multi_choices     bool
+	answer_truths                   *uuid.UUID
+	clearedanswer_truths            bool
+	workbook                        *uuid.UUID
+	clearedworkbook                 bool
+	workbook_category               *uuid.UUID
+	clearedworkbook_category        bool
+	workbook_category_detail        *uuid.UUID
+	clearedworkbook_category_detail bool
+	done                            bool
+	oldValue                        func(context.Context) (*Problem, error)
+	predicates                      []predicate.Problem
 }
 
 var _ ent.Mutation = (*ProblemMutation)(nil)
@@ -3840,53 +3840,53 @@ func (m *ProblemMutation) ResetWorkbookCategoryID() {
 	delete(m.clearedFields, problem.FieldWorkbookCategoryID)
 }
 
-// SetWorkbookCategoryClassificationID sets the "workbook_category_classification_id" field.
-func (m *ProblemMutation) SetWorkbookCategoryClassificationID(u uuid.UUID) {
-	m.workbook_category_classification = &u
+// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
+func (m *ProblemMutation) SetWorkbookCategoryDetailID(u uuid.UUID) {
+	m.workbook_category_detail = &u
 }
 
-// WorkbookCategoryClassificationID returns the value of the "workbook_category_classification_id" field in the mutation.
-func (m *ProblemMutation) WorkbookCategoryClassificationID() (r uuid.UUID, exists bool) {
-	v := m.workbook_category_classification
+// WorkbookCategoryDetailID returns the value of the "workbook_category_detail_id" field in the mutation.
+func (m *ProblemMutation) WorkbookCategoryDetailID() (r uuid.UUID, exists bool) {
+	v := m.workbook_category_detail
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldWorkbookCategoryClassificationID returns the old "workbook_category_classification_id" field's value of the Problem entity.
+// OldWorkbookCategoryDetailID returns the old "workbook_category_detail_id" field's value of the Problem entity.
 // If the Problem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProblemMutation) OldWorkbookCategoryClassificationID(ctx context.Context) (v *uuid.UUID, err error) {
+func (m *ProblemMutation) OldWorkbookCategoryDetailID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWorkbookCategoryClassificationID is only allowed on UpdateOne operations")
+		return v, errors.New("OldWorkbookCategoryDetailID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWorkbookCategoryClassificationID requires an ID field in the mutation")
+		return v, errors.New("OldWorkbookCategoryDetailID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWorkbookCategoryClassificationID: %w", err)
+		return v, fmt.Errorf("querying old value for OldWorkbookCategoryDetailID: %w", err)
 	}
-	return oldValue.WorkbookCategoryClassificationID, nil
+	return oldValue.WorkbookCategoryDetailID, nil
 }
 
-// ClearWorkbookCategoryClassificationID clears the value of the "workbook_category_classification_id" field.
-func (m *ProblemMutation) ClearWorkbookCategoryClassificationID() {
-	m.workbook_category_classification = nil
-	m.clearedFields[problem.FieldWorkbookCategoryClassificationID] = struct{}{}
+// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
+func (m *ProblemMutation) ClearWorkbookCategoryDetailID() {
+	m.workbook_category_detail = nil
+	m.clearedFields[problem.FieldWorkbookCategoryDetailID] = struct{}{}
 }
 
-// WorkbookCategoryClassificationIDCleared returns if the "workbook_category_classification_id" field was cleared in this mutation.
-func (m *ProblemMutation) WorkbookCategoryClassificationIDCleared() bool {
-	_, ok := m.clearedFields[problem.FieldWorkbookCategoryClassificationID]
+// WorkbookCategoryDetailIDCleared returns if the "workbook_category_detail_id" field was cleared in this mutation.
+func (m *ProblemMutation) WorkbookCategoryDetailIDCleared() bool {
+	_, ok := m.clearedFields[problem.FieldWorkbookCategoryDetailID]
 	return ok
 }
 
-// ResetWorkbookCategoryClassificationID resets all changes to the "workbook_category_classification_id" field.
-func (m *ProblemMutation) ResetWorkbookCategoryClassificationID() {
-	m.workbook_category_classification = nil
-	delete(m.clearedFields, problem.FieldWorkbookCategoryClassificationID)
+// ResetWorkbookCategoryDetailID resets all changes to the "workbook_category_detail_id" field.
+func (m *ProblemMutation) ResetWorkbookCategoryDetailID() {
+	m.workbook_category_detail = nil
+	delete(m.clearedFields, problem.FieldWorkbookCategoryDetailID)
 }
 
 // ClearAnswerType clears the "answer_type" edge to the AnswerType entity.
@@ -4102,31 +4102,31 @@ func (m *ProblemMutation) ResetWorkbookCategory() {
 	m.clearedworkbook_category = false
 }
 
-// ClearWorkbookCategoryClassification clears the "workbook_category_classification" edge to the WorkbookCategoryClassification entity.
-func (m *ProblemMutation) ClearWorkbookCategoryClassification() {
-	m.clearedworkbook_category_classification = true
-	m.clearedFields[problem.FieldWorkbookCategoryClassificationID] = struct{}{}
+// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
+func (m *ProblemMutation) ClearWorkbookCategoryDetail() {
+	m.clearedworkbook_category_detail = true
+	m.clearedFields[problem.FieldWorkbookCategoryDetailID] = struct{}{}
 }
 
-// WorkbookCategoryClassificationCleared reports if the "workbook_category_classification" edge to the WorkbookCategoryClassification entity was cleared.
-func (m *ProblemMutation) WorkbookCategoryClassificationCleared() bool {
-	return m.WorkbookCategoryClassificationIDCleared() || m.clearedworkbook_category_classification
+// WorkbookCategoryDetailCleared reports if the "workbook_category_detail" edge to the WorkbookCategoryDetail entity was cleared.
+func (m *ProblemMutation) WorkbookCategoryDetailCleared() bool {
+	return m.WorkbookCategoryDetailIDCleared() || m.clearedworkbook_category_detail
 }
 
-// WorkbookCategoryClassificationIDs returns the "workbook_category_classification" edge IDs in the mutation.
+// WorkbookCategoryDetailIDs returns the "workbook_category_detail" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// WorkbookCategoryClassificationID instead. It exists only for internal usage by the builders.
-func (m *ProblemMutation) WorkbookCategoryClassificationIDs() (ids []uuid.UUID) {
-	if id := m.workbook_category_classification; id != nil {
+// WorkbookCategoryDetailID instead. It exists only for internal usage by the builders.
+func (m *ProblemMutation) WorkbookCategoryDetailIDs() (ids []uuid.UUID) {
+	if id := m.workbook_category_detail; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetWorkbookCategoryClassification resets all changes to the "workbook_category_classification" edge.
-func (m *ProblemMutation) ResetWorkbookCategoryClassification() {
-	m.workbook_category_classification = nil
-	m.clearedworkbook_category_classification = false
+// ResetWorkbookCategoryDetail resets all changes to the "workbook_category_detail" edge.
+func (m *ProblemMutation) ResetWorkbookCategoryDetail() {
+	m.workbook_category_detail = nil
+	m.clearedworkbook_category_detail = false
 }
 
 // Where appends a list predicates to the ProblemMutation builder.
@@ -4182,8 +4182,8 @@ func (m *ProblemMutation) Fields() []string {
 	if m.workbook_category != nil {
 		fields = append(fields, problem.FieldWorkbookCategoryID)
 	}
-	if m.workbook_category_classification != nil {
-		fields = append(fields, problem.FieldWorkbookCategoryClassificationID)
+	if m.workbook_category_detail != nil {
+		fields = append(fields, problem.FieldWorkbookCategoryDetailID)
 	}
 	return fields
 }
@@ -4205,8 +4205,8 @@ func (m *ProblemMutation) Field(name string) (ent.Value, bool) {
 		return m.WorkbookID()
 	case problem.FieldWorkbookCategoryID:
 		return m.WorkbookCategoryID()
-	case problem.FieldWorkbookCategoryClassificationID:
-		return m.WorkbookCategoryClassificationID()
+	case problem.FieldWorkbookCategoryDetailID:
+		return m.WorkbookCategoryDetailID()
 	}
 	return nil, false
 }
@@ -4228,8 +4228,8 @@ func (m *ProblemMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldWorkbookID(ctx)
 	case problem.FieldWorkbookCategoryID:
 		return m.OldWorkbookCategoryID(ctx)
-	case problem.FieldWorkbookCategoryClassificationID:
-		return m.OldWorkbookCategoryClassificationID(ctx)
+	case problem.FieldWorkbookCategoryDetailID:
+		return m.OldWorkbookCategoryDetailID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Problem field %s", name)
 }
@@ -4281,12 +4281,12 @@ func (m *ProblemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWorkbookCategoryID(v)
 		return nil
-	case problem.FieldWorkbookCategoryClassificationID:
+	case problem.FieldWorkbookCategoryDetailID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetWorkbookCategoryClassificationID(v)
+		m.SetWorkbookCategoryDetailID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Problem field %s", name)
@@ -4321,8 +4321,8 @@ func (m *ProblemMutation) ClearedFields() []string {
 	if m.FieldCleared(problem.FieldWorkbookCategoryID) {
 		fields = append(fields, problem.FieldWorkbookCategoryID)
 	}
-	if m.FieldCleared(problem.FieldWorkbookCategoryClassificationID) {
-		fields = append(fields, problem.FieldWorkbookCategoryClassificationID)
+	if m.FieldCleared(problem.FieldWorkbookCategoryDetailID) {
+		fields = append(fields, problem.FieldWorkbookCategoryDetailID)
 	}
 	return fields
 }
@@ -4341,8 +4341,8 @@ func (m *ProblemMutation) ClearField(name string) error {
 	case problem.FieldWorkbookCategoryID:
 		m.ClearWorkbookCategoryID()
 		return nil
-	case problem.FieldWorkbookCategoryClassificationID:
-		m.ClearWorkbookCategoryClassificationID()
+	case problem.FieldWorkbookCategoryDetailID:
+		m.ClearWorkbookCategoryDetailID()
 		return nil
 	}
 	return fmt.Errorf("unknown Problem nullable field %s", name)
@@ -4370,8 +4370,8 @@ func (m *ProblemMutation) ResetField(name string) error {
 	case problem.FieldWorkbookCategoryID:
 		m.ResetWorkbookCategoryID()
 		return nil
-	case problem.FieldWorkbookCategoryClassificationID:
-		m.ResetWorkbookCategoryClassificationID()
+	case problem.FieldWorkbookCategoryDetailID:
+		m.ResetWorkbookCategoryDetailID()
 		return nil
 	}
 	return fmt.Errorf("unknown Problem field %s", name)
@@ -4398,8 +4398,8 @@ func (m *ProblemMutation) AddedEdges() []string {
 	if m.workbook_category != nil {
 		edges = append(edges, problem.EdgeWorkbookCategory)
 	}
-	if m.workbook_category_classification != nil {
-		edges = append(edges, problem.EdgeWorkbookCategoryClassification)
+	if m.workbook_category_detail != nil {
+		edges = append(edges, problem.EdgeWorkbookCategoryDetail)
 	}
 	return edges
 }
@@ -4434,8 +4434,8 @@ func (m *ProblemMutation) AddedIDs(name string) []ent.Value {
 		if id := m.workbook_category; id != nil {
 			return []ent.Value{*id}
 		}
-	case problem.EdgeWorkbookCategoryClassification:
-		if id := m.workbook_category_classification; id != nil {
+	case problem.EdgeWorkbookCategoryDetail:
+		if id := m.workbook_category_detail; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -4486,8 +4486,8 @@ func (m *ProblemMutation) ClearedEdges() []string {
 	if m.clearedworkbook_category {
 		edges = append(edges, problem.EdgeWorkbookCategory)
 	}
-	if m.clearedworkbook_category_classification {
-		edges = append(edges, problem.EdgeWorkbookCategoryClassification)
+	if m.clearedworkbook_category_detail {
+		edges = append(edges, problem.EdgeWorkbookCategoryDetail)
 	}
 	return edges
 }
@@ -4508,8 +4508,8 @@ func (m *ProblemMutation) EdgeCleared(name string) bool {
 		return m.clearedworkbook
 	case problem.EdgeWorkbookCategory:
 		return m.clearedworkbook_category
-	case problem.EdgeWorkbookCategoryClassification:
-		return m.clearedworkbook_category_classification
+	case problem.EdgeWorkbookCategoryDetail:
+		return m.clearedworkbook_category_detail
 	}
 	return false
 }
@@ -4533,8 +4533,8 @@ func (m *ProblemMutation) ClearEdge(name string) error {
 	case problem.EdgeWorkbookCategory:
 		m.ClearWorkbookCategory()
 		return nil
-	case problem.EdgeWorkbookCategoryClassification:
-		m.ClearWorkbookCategoryClassification()
+	case problem.EdgeWorkbookCategoryDetail:
+		m.ClearWorkbookCategoryDetail()
 		return nil
 	}
 	return fmt.Errorf("unknown Problem unique edge %s", name)
@@ -4562,8 +4562,8 @@ func (m *ProblemMutation) ResetEdge(name string) error {
 	case problem.EdgeWorkbookCategory:
 		m.ResetWorkbookCategory()
 		return nil
-	case problem.EdgeWorkbookCategoryClassification:
-		m.ResetWorkbookCategoryClassification()
+	case problem.EdgeWorkbookCategoryDetail:
+		m.ResetWorkbookCategoryDetail()
 		return nil
 	}
 	return fmt.Errorf("unknown Problem edge %s", name)
@@ -6827,24 +6827,24 @@ func (m *WorkbookMutation) ResetEdge(name string) error {
 // WorkbookCategoryMutation represents an operation that mutates the WorkbookCategory nodes in the graph.
 type WorkbookCategoryMutation struct {
 	config
-	op                                       Op
-	typ                                      string
-	id                                       *uuid.UUID
-	created_at                               *time.Time
-	updated_at                               *time.Time
-	name                                     *string
-	clearedFields                            map[string]struct{}
-	problems                                 map[uuid.UUID]struct{}
-	removedproblems                          map[uuid.UUID]struct{}
-	clearedproblems                          bool
-	workbook                                 *uuid.UUID
-	clearedworkbook                          bool
-	workbook_category_classifications        map[uuid.UUID]struct{}
-	removedworkbook_category_classifications map[uuid.UUID]struct{}
-	clearedworkbook_category_classifications bool
-	done                                     bool
-	oldValue                                 func(context.Context) (*WorkbookCategory, error)
-	predicates                               []predicate.WorkbookCategory
+	op                               Op
+	typ                              string
+	id                               *uuid.UUID
+	created_at                       *time.Time
+	updated_at                       *time.Time
+	name                             *string
+	clearedFields                    map[string]struct{}
+	problems                         map[uuid.UUID]struct{}
+	removedproblems                  map[uuid.UUID]struct{}
+	clearedproblems                  bool
+	workbook                         *uuid.UUID
+	clearedworkbook                  bool
+	workbook_category_details        map[uuid.UUID]struct{}
+	removedworkbook_category_details map[uuid.UUID]struct{}
+	clearedworkbook_category_details bool
+	done                             bool
+	oldValue                         func(context.Context) (*WorkbookCategory, error)
+	predicates                       []predicate.WorkbookCategory
 }
 
 var _ ent.Mutation = (*WorkbookCategoryMutation)(nil)
@@ -7176,58 +7176,58 @@ func (m *WorkbookCategoryMutation) ResetWorkbook() {
 	m.clearedworkbook = false
 }
 
-// AddWorkbookCategoryClassificationIDs adds the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by ids.
-func (m *WorkbookCategoryMutation) AddWorkbookCategoryClassificationIDs(ids ...uuid.UUID) {
-	if m.workbook_category_classifications == nil {
-		m.workbook_category_classifications = make(map[uuid.UUID]struct{})
+// AddWorkbookCategoryDetailIDs adds the "workbook_category_details" edge to the WorkbookCategoryDetail entity by ids.
+func (m *WorkbookCategoryMutation) AddWorkbookCategoryDetailIDs(ids ...uuid.UUID) {
+	if m.workbook_category_details == nil {
+		m.workbook_category_details = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.workbook_category_classifications[ids[i]] = struct{}{}
+		m.workbook_category_details[ids[i]] = struct{}{}
 	}
 }
 
-// ClearWorkbookCategoryClassifications clears the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity.
-func (m *WorkbookCategoryMutation) ClearWorkbookCategoryClassifications() {
-	m.clearedworkbook_category_classifications = true
+// ClearWorkbookCategoryDetails clears the "workbook_category_details" edge to the WorkbookCategoryDetail entity.
+func (m *WorkbookCategoryMutation) ClearWorkbookCategoryDetails() {
+	m.clearedworkbook_category_details = true
 }
 
-// WorkbookCategoryClassificationsCleared reports if the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity was cleared.
-func (m *WorkbookCategoryMutation) WorkbookCategoryClassificationsCleared() bool {
-	return m.clearedworkbook_category_classifications
+// WorkbookCategoryDetailsCleared reports if the "workbook_category_details" edge to the WorkbookCategoryDetail entity was cleared.
+func (m *WorkbookCategoryMutation) WorkbookCategoryDetailsCleared() bool {
+	return m.clearedworkbook_category_details
 }
 
-// RemoveWorkbookCategoryClassificationIDs removes the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by IDs.
-func (m *WorkbookCategoryMutation) RemoveWorkbookCategoryClassificationIDs(ids ...uuid.UUID) {
-	if m.removedworkbook_category_classifications == nil {
-		m.removedworkbook_category_classifications = make(map[uuid.UUID]struct{})
+// RemoveWorkbookCategoryDetailIDs removes the "workbook_category_details" edge to the WorkbookCategoryDetail entity by IDs.
+func (m *WorkbookCategoryMutation) RemoveWorkbookCategoryDetailIDs(ids ...uuid.UUID) {
+	if m.removedworkbook_category_details == nil {
+		m.removedworkbook_category_details = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.workbook_category_classifications, ids[i])
-		m.removedworkbook_category_classifications[ids[i]] = struct{}{}
+		delete(m.workbook_category_details, ids[i])
+		m.removedworkbook_category_details[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedWorkbookCategoryClassifications returns the removed IDs of the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity.
-func (m *WorkbookCategoryMutation) RemovedWorkbookCategoryClassificationsIDs() (ids []uuid.UUID) {
-	for id := range m.removedworkbook_category_classifications {
+// RemovedWorkbookCategoryDetails returns the removed IDs of the "workbook_category_details" edge to the WorkbookCategoryDetail entity.
+func (m *WorkbookCategoryMutation) RemovedWorkbookCategoryDetailsIDs() (ids []uuid.UUID) {
+	for id := range m.removedworkbook_category_details {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// WorkbookCategoryClassificationsIDs returns the "workbook_category_classifications" edge IDs in the mutation.
-func (m *WorkbookCategoryMutation) WorkbookCategoryClassificationsIDs() (ids []uuid.UUID) {
-	for id := range m.workbook_category_classifications {
+// WorkbookCategoryDetailsIDs returns the "workbook_category_details" edge IDs in the mutation.
+func (m *WorkbookCategoryMutation) WorkbookCategoryDetailsIDs() (ids []uuid.UUID) {
+	for id := range m.workbook_category_details {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetWorkbookCategoryClassifications resets all changes to the "workbook_category_classifications" edge.
-func (m *WorkbookCategoryMutation) ResetWorkbookCategoryClassifications() {
-	m.workbook_category_classifications = nil
-	m.clearedworkbook_category_classifications = false
-	m.removedworkbook_category_classifications = nil
+// ResetWorkbookCategoryDetails resets all changes to the "workbook_category_details" edge.
+func (m *WorkbookCategoryMutation) ResetWorkbookCategoryDetails() {
+	m.workbook_category_details = nil
+	m.clearedworkbook_category_details = false
+	m.removedworkbook_category_details = nil
 }
 
 // Where appends a list predicates to the WorkbookCategoryMutation builder.
@@ -7421,8 +7421,8 @@ func (m *WorkbookCategoryMutation) AddedEdges() []string {
 	if m.workbook != nil {
 		edges = append(edges, workbookcategory.EdgeWorkbook)
 	}
-	if m.workbook_category_classifications != nil {
-		edges = append(edges, workbookcategory.EdgeWorkbookCategoryClassifications)
+	if m.workbook_category_details != nil {
+		edges = append(edges, workbookcategory.EdgeWorkbookCategoryDetails)
 	}
 	return edges
 }
@@ -7441,9 +7441,9 @@ func (m *WorkbookCategoryMutation) AddedIDs(name string) []ent.Value {
 		if id := m.workbook; id != nil {
 			return []ent.Value{*id}
 		}
-	case workbookcategory.EdgeWorkbookCategoryClassifications:
-		ids := make([]ent.Value, 0, len(m.workbook_category_classifications))
-		for id := range m.workbook_category_classifications {
+	case workbookcategory.EdgeWorkbookCategoryDetails:
+		ids := make([]ent.Value, 0, len(m.workbook_category_details))
+		for id := range m.workbook_category_details {
 			ids = append(ids, id)
 		}
 		return ids
@@ -7457,8 +7457,8 @@ func (m *WorkbookCategoryMutation) RemovedEdges() []string {
 	if m.removedproblems != nil {
 		edges = append(edges, workbookcategory.EdgeProblems)
 	}
-	if m.removedworkbook_category_classifications != nil {
-		edges = append(edges, workbookcategory.EdgeWorkbookCategoryClassifications)
+	if m.removedworkbook_category_details != nil {
+		edges = append(edges, workbookcategory.EdgeWorkbookCategoryDetails)
 	}
 	return edges
 }
@@ -7473,9 +7473,9 @@ func (m *WorkbookCategoryMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case workbookcategory.EdgeWorkbookCategoryClassifications:
-		ids := make([]ent.Value, 0, len(m.removedworkbook_category_classifications))
-		for id := range m.removedworkbook_category_classifications {
+	case workbookcategory.EdgeWorkbookCategoryDetails:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_category_details))
+		for id := range m.removedworkbook_category_details {
 			ids = append(ids, id)
 		}
 		return ids
@@ -7492,8 +7492,8 @@ func (m *WorkbookCategoryMutation) ClearedEdges() []string {
 	if m.clearedworkbook {
 		edges = append(edges, workbookcategory.EdgeWorkbook)
 	}
-	if m.clearedworkbook_category_classifications {
-		edges = append(edges, workbookcategory.EdgeWorkbookCategoryClassifications)
+	if m.clearedworkbook_category_details {
+		edges = append(edges, workbookcategory.EdgeWorkbookCategoryDetails)
 	}
 	return edges
 }
@@ -7506,8 +7506,8 @@ func (m *WorkbookCategoryMutation) EdgeCleared(name string) bool {
 		return m.clearedproblems
 	case workbookcategory.EdgeWorkbook:
 		return m.clearedworkbook
-	case workbookcategory.EdgeWorkbookCategoryClassifications:
-		return m.clearedworkbook_category_classifications
+	case workbookcategory.EdgeWorkbookCategoryDetails:
+		return m.clearedworkbook_category_details
 	}
 	return false
 }
@@ -7533,15 +7533,15 @@ func (m *WorkbookCategoryMutation) ResetEdge(name string) error {
 	case workbookcategory.EdgeWorkbook:
 		m.ResetWorkbook()
 		return nil
-	case workbookcategory.EdgeWorkbookCategoryClassifications:
-		m.ResetWorkbookCategoryClassifications()
+	case workbookcategory.EdgeWorkbookCategoryDetails:
+		m.ResetWorkbookCategoryDetails()
 		return nil
 	}
 	return fmt.Errorf("unknown WorkbookCategory edge %s", name)
 }
 
-// WorkbookCategoryClassificationMutation represents an operation that mutates the WorkbookCategoryClassification nodes in the graph.
-type WorkbookCategoryClassificationMutation struct {
+// WorkbookCategoryDetailMutation represents an operation that mutates the WorkbookCategoryDetail nodes in the graph.
+type WorkbookCategoryDetailMutation struct {
 	config
 	op                   Op
 	typ                  string
@@ -7555,21 +7555,21 @@ type WorkbookCategoryClassificationMutation struct {
 	removedproblems      map[uuid.UUID]struct{}
 	clearedproblems      bool
 	done                 bool
-	oldValue             func(context.Context) (*WorkbookCategoryClassification, error)
-	predicates           []predicate.WorkbookCategoryClassification
+	oldValue             func(context.Context) (*WorkbookCategoryDetail, error)
+	predicates           []predicate.WorkbookCategoryDetail
 }
 
-var _ ent.Mutation = (*WorkbookCategoryClassificationMutation)(nil)
+var _ ent.Mutation = (*WorkbookCategoryDetailMutation)(nil)
 
-// workbookcategoryclassificationOption allows management of the mutation configuration using functional options.
-type workbookcategoryclassificationOption func(*WorkbookCategoryClassificationMutation)
+// workbookcategorydetailOption allows management of the mutation configuration using functional options.
+type workbookcategorydetailOption func(*WorkbookCategoryDetailMutation)
 
-// newWorkbookCategoryClassificationMutation creates new mutation for the WorkbookCategoryClassification entity.
-func newWorkbookCategoryClassificationMutation(c config, op Op, opts ...workbookcategoryclassificationOption) *WorkbookCategoryClassificationMutation {
-	m := &WorkbookCategoryClassificationMutation{
+// newWorkbookCategoryDetailMutation creates new mutation for the WorkbookCategoryDetail entity.
+func newWorkbookCategoryDetailMutation(c config, op Op, opts ...workbookcategorydetailOption) *WorkbookCategoryDetailMutation {
+	m := &WorkbookCategoryDetailMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeWorkbookCategoryClassification,
+		typ:           TypeWorkbookCategoryDetail,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -7578,20 +7578,20 @@ func newWorkbookCategoryClassificationMutation(c config, op Op, opts ...workbook
 	return m
 }
 
-// withWorkbookCategoryClassificationID sets the ID field of the mutation.
-func withWorkbookCategoryClassificationID(id uuid.UUID) workbookcategoryclassificationOption {
-	return func(m *WorkbookCategoryClassificationMutation) {
+// withWorkbookCategoryDetailID sets the ID field of the mutation.
+func withWorkbookCategoryDetailID(id uuid.UUID) workbookcategorydetailOption {
+	return func(m *WorkbookCategoryDetailMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *WorkbookCategoryClassification
+			value *WorkbookCategoryDetail
 		)
-		m.oldValue = func(ctx context.Context) (*WorkbookCategoryClassification, error) {
+		m.oldValue = func(ctx context.Context) (*WorkbookCategoryDetail, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().WorkbookCategoryClassification.Get(ctx, id)
+					value, err = m.Client().WorkbookCategoryDetail.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -7600,10 +7600,10 @@ func withWorkbookCategoryClassificationID(id uuid.UUID) workbookcategoryclassifi
 	}
 }
 
-// withWorkbookCategoryClassification sets the old WorkbookCategoryClassification of the mutation.
-func withWorkbookCategoryClassification(node *WorkbookCategoryClassification) workbookcategoryclassificationOption {
-	return func(m *WorkbookCategoryClassificationMutation) {
-		m.oldValue = func(context.Context) (*WorkbookCategoryClassification, error) {
+// withWorkbookCategoryDetail sets the old WorkbookCategoryDetail of the mutation.
+func withWorkbookCategoryDetail(node *WorkbookCategoryDetail) workbookcategorydetailOption {
+	return func(m *WorkbookCategoryDetailMutation) {
+		m.oldValue = func(context.Context) (*WorkbookCategoryDetail, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -7612,7 +7612,7 @@ func withWorkbookCategoryClassification(node *WorkbookCategoryClassification) wo
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m WorkbookCategoryClassificationMutation) Client() *Client {
+func (m WorkbookCategoryDetailMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -7620,7 +7620,7 @@ func (m WorkbookCategoryClassificationMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m WorkbookCategoryClassificationMutation) Tx() (*Tx, error) {
+func (m WorkbookCategoryDetailMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -7630,14 +7630,14 @@ func (m WorkbookCategoryClassificationMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of WorkbookCategoryClassification entities.
-func (m *WorkbookCategoryClassificationMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of WorkbookCategoryDetail entities.
+func (m *WorkbookCategoryDetailMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *WorkbookCategoryClassificationMutation) ID() (id uuid.UUID, exists bool) {
+func (m *WorkbookCategoryDetailMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -7648,7 +7648,7 @@ func (m *WorkbookCategoryClassificationMutation) ID() (id uuid.UUID, exists bool
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *WorkbookCategoryClassificationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *WorkbookCategoryDetailMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -7657,19 +7657,19 @@ func (m *WorkbookCategoryClassificationMutation) IDs(ctx context.Context) ([]uui
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().WorkbookCategoryClassification.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().WorkbookCategoryDetail.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *WorkbookCategoryClassificationMutation) SetCreatedAt(t time.Time) {
+func (m *WorkbookCategoryDetailMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *WorkbookCategoryClassificationMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *WorkbookCategoryDetailMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -7677,10 +7677,10 @@ func (m *WorkbookCategoryClassificationMutation) CreatedAt() (r time.Time, exist
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the WorkbookCategoryClassification entity.
-// If the WorkbookCategoryClassification object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the WorkbookCategoryDetail entity.
+// If the WorkbookCategoryDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkbookCategoryClassificationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *WorkbookCategoryDetailMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -7695,17 +7695,17 @@ func (m *WorkbookCategoryClassificationMutation) OldCreatedAt(ctx context.Contex
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *WorkbookCategoryClassificationMutation) ResetCreatedAt() {
+func (m *WorkbookCategoryDetailMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *WorkbookCategoryClassificationMutation) SetUpdatedAt(t time.Time) {
+func (m *WorkbookCategoryDetailMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *WorkbookCategoryClassificationMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *WorkbookCategoryDetailMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -7713,10 +7713,10 @@ func (m *WorkbookCategoryClassificationMutation) UpdatedAt() (r time.Time, exist
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the WorkbookCategoryClassification entity.
-// If the WorkbookCategoryClassification object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the WorkbookCategoryDetail entity.
+// If the WorkbookCategoryDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkbookCategoryClassificationMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *WorkbookCategoryDetailMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -7731,17 +7731,17 @@ func (m *WorkbookCategoryClassificationMutation) OldUpdatedAt(ctx context.Contex
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *WorkbookCategoryClassificationMutation) ResetUpdatedAt() {
+func (m *WorkbookCategoryDetailMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
 // SetName sets the "name" field.
-func (m *WorkbookCategoryClassificationMutation) SetName(s string) {
+func (m *WorkbookCategoryDetailMutation) SetName(s string) {
 	m.name = &s
 }
 
 // Name returns the value of the "name" field in the mutation.
-func (m *WorkbookCategoryClassificationMutation) Name() (r string, exists bool) {
+func (m *WorkbookCategoryDetailMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -7749,10 +7749,10 @@ func (m *WorkbookCategoryClassificationMutation) Name() (r string, exists bool) 
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the WorkbookCategoryClassification entity.
-// If the WorkbookCategoryClassification object wasn't provided to the builder, the object is fetched from the database.
+// OldName returns the old "name" field's value of the WorkbookCategoryDetail entity.
+// If the WorkbookCategoryDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkbookCategoryClassificationMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *WorkbookCategoryDetailMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
@@ -7767,17 +7767,17 @@ func (m *WorkbookCategoryClassificationMutation) OldName(ctx context.Context) (v
 }
 
 // ResetName resets all changes to the "name" field.
-func (m *WorkbookCategoryClassificationMutation) ResetName() {
+func (m *WorkbookCategoryDetailMutation) ResetName() {
 	m.name = nil
 }
 
 // SetWorkbookCategoryID sets the "workbook_category_id" field.
-func (m *WorkbookCategoryClassificationMutation) SetWorkbookCategoryID(u uuid.UUID) {
+func (m *WorkbookCategoryDetailMutation) SetWorkbookCategoryID(u uuid.UUID) {
 	m.workbook_category_id = &u
 }
 
 // WorkbookCategoryID returns the value of the "workbook_category_id" field in the mutation.
-func (m *WorkbookCategoryClassificationMutation) WorkbookCategoryID() (r uuid.UUID, exists bool) {
+func (m *WorkbookCategoryDetailMutation) WorkbookCategoryID() (r uuid.UUID, exists bool) {
 	v := m.workbook_category_id
 	if v == nil {
 		return
@@ -7785,10 +7785,10 @@ func (m *WorkbookCategoryClassificationMutation) WorkbookCategoryID() (r uuid.UU
 	return *v, true
 }
 
-// OldWorkbookCategoryID returns the old "workbook_category_id" field's value of the WorkbookCategoryClassification entity.
-// If the WorkbookCategoryClassification object wasn't provided to the builder, the object is fetched from the database.
+// OldWorkbookCategoryID returns the old "workbook_category_id" field's value of the WorkbookCategoryDetail entity.
+// If the WorkbookCategoryDetail object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WorkbookCategoryClassificationMutation) OldWorkbookCategoryID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *WorkbookCategoryDetailMutation) OldWorkbookCategoryID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWorkbookCategoryID is only allowed on UpdateOne operations")
 	}
@@ -7803,12 +7803,12 @@ func (m *WorkbookCategoryClassificationMutation) OldWorkbookCategoryID(ctx conte
 }
 
 // ResetWorkbookCategoryID resets all changes to the "workbook_category_id" field.
-func (m *WorkbookCategoryClassificationMutation) ResetWorkbookCategoryID() {
+func (m *WorkbookCategoryDetailMutation) ResetWorkbookCategoryID() {
 	m.workbook_category_id = nil
 }
 
 // AddProblemIDs adds the "problems" edge to the Problem entity by ids.
-func (m *WorkbookCategoryClassificationMutation) AddProblemIDs(ids ...uuid.UUID) {
+func (m *WorkbookCategoryDetailMutation) AddProblemIDs(ids ...uuid.UUID) {
 	if m.problems == nil {
 		m.problems = make(map[uuid.UUID]struct{})
 	}
@@ -7818,17 +7818,17 @@ func (m *WorkbookCategoryClassificationMutation) AddProblemIDs(ids ...uuid.UUID)
 }
 
 // ClearProblems clears the "problems" edge to the Problem entity.
-func (m *WorkbookCategoryClassificationMutation) ClearProblems() {
+func (m *WorkbookCategoryDetailMutation) ClearProblems() {
 	m.clearedproblems = true
 }
 
 // ProblemsCleared reports if the "problems" edge to the Problem entity was cleared.
-func (m *WorkbookCategoryClassificationMutation) ProblemsCleared() bool {
+func (m *WorkbookCategoryDetailMutation) ProblemsCleared() bool {
 	return m.clearedproblems
 }
 
 // RemoveProblemIDs removes the "problems" edge to the Problem entity by IDs.
-func (m *WorkbookCategoryClassificationMutation) RemoveProblemIDs(ids ...uuid.UUID) {
+func (m *WorkbookCategoryDetailMutation) RemoveProblemIDs(ids ...uuid.UUID) {
 	if m.removedproblems == nil {
 		m.removedproblems = make(map[uuid.UUID]struct{})
 	}
@@ -7839,7 +7839,7 @@ func (m *WorkbookCategoryClassificationMutation) RemoveProblemIDs(ids ...uuid.UU
 }
 
 // RemovedProblems returns the removed IDs of the "problems" edge to the Problem entity.
-func (m *WorkbookCategoryClassificationMutation) RemovedProblemsIDs() (ids []uuid.UUID) {
+func (m *WorkbookCategoryDetailMutation) RemovedProblemsIDs() (ids []uuid.UUID) {
 	for id := range m.removedproblems {
 		ids = append(ids, id)
 	}
@@ -7847,7 +7847,7 @@ func (m *WorkbookCategoryClassificationMutation) RemovedProblemsIDs() (ids []uui
 }
 
 // ProblemsIDs returns the "problems" edge IDs in the mutation.
-func (m *WorkbookCategoryClassificationMutation) ProblemsIDs() (ids []uuid.UUID) {
+func (m *WorkbookCategoryDetailMutation) ProblemsIDs() (ids []uuid.UUID) {
 	for id := range m.problems {
 		ids = append(ids, id)
 	}
@@ -7855,21 +7855,21 @@ func (m *WorkbookCategoryClassificationMutation) ProblemsIDs() (ids []uuid.UUID)
 }
 
 // ResetProblems resets all changes to the "problems" edge.
-func (m *WorkbookCategoryClassificationMutation) ResetProblems() {
+func (m *WorkbookCategoryDetailMutation) ResetProblems() {
 	m.problems = nil
 	m.clearedproblems = false
 	m.removedproblems = nil
 }
 
-// Where appends a list predicates to the WorkbookCategoryClassificationMutation builder.
-func (m *WorkbookCategoryClassificationMutation) Where(ps ...predicate.WorkbookCategoryClassification) {
+// Where appends a list predicates to the WorkbookCategoryDetailMutation builder.
+func (m *WorkbookCategoryDetailMutation) Where(ps ...predicate.WorkbookCategoryDetail) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the WorkbookCategoryClassificationMutation builder. Using this method,
+// WhereP appends storage-level predicates to the WorkbookCategoryDetailMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *WorkbookCategoryClassificationMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.WorkbookCategoryClassification, len(ps))
+func (m *WorkbookCategoryDetailMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WorkbookCategoryDetail, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -7877,36 +7877,36 @@ func (m *WorkbookCategoryClassificationMutation) WhereP(ps ...func(*sql.Selector
 }
 
 // Op returns the operation name.
-func (m *WorkbookCategoryClassificationMutation) Op() Op {
+func (m *WorkbookCategoryDetailMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *WorkbookCategoryClassificationMutation) SetOp(op Op) {
+func (m *WorkbookCategoryDetailMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (WorkbookCategoryClassification).
-func (m *WorkbookCategoryClassificationMutation) Type() string {
+// Type returns the node type of this mutation (WorkbookCategoryDetail).
+func (m *WorkbookCategoryDetailMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *WorkbookCategoryClassificationMutation) Fields() []string {
+func (m *WorkbookCategoryDetailMutation) Fields() []string {
 	fields := make([]string, 0, 4)
 	if m.created_at != nil {
-		fields = append(fields, workbookcategoryclassification.FieldCreatedAt)
+		fields = append(fields, workbookcategorydetail.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, workbookcategoryclassification.FieldUpdatedAt)
+		fields = append(fields, workbookcategorydetail.FieldUpdatedAt)
 	}
 	if m.name != nil {
-		fields = append(fields, workbookcategoryclassification.FieldName)
+		fields = append(fields, workbookcategorydetail.FieldName)
 	}
 	if m.workbook_category_id != nil {
-		fields = append(fields, workbookcategoryclassification.FieldWorkbookCategoryID)
+		fields = append(fields, workbookcategorydetail.FieldWorkbookCategoryID)
 	}
 	return fields
 }
@@ -7914,15 +7914,15 @@ func (m *WorkbookCategoryClassificationMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *WorkbookCategoryClassificationMutation) Field(name string) (ent.Value, bool) {
+func (m *WorkbookCategoryDetailMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case workbookcategoryclassification.FieldCreatedAt:
+	case workbookcategorydetail.FieldCreatedAt:
 		return m.CreatedAt()
-	case workbookcategoryclassification.FieldUpdatedAt:
+	case workbookcategorydetail.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case workbookcategoryclassification.FieldName:
+	case workbookcategorydetail.FieldName:
 		return m.Name()
-	case workbookcategoryclassification.FieldWorkbookCategoryID:
+	case workbookcategorydetail.FieldWorkbookCategoryID:
 		return m.WorkbookCategoryID()
 	}
 	return nil, false
@@ -7931,47 +7931,47 @@ func (m *WorkbookCategoryClassificationMutation) Field(name string) (ent.Value, 
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *WorkbookCategoryClassificationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *WorkbookCategoryDetailMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case workbookcategoryclassification.FieldCreatedAt:
+	case workbookcategorydetail.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case workbookcategoryclassification.FieldUpdatedAt:
+	case workbookcategorydetail.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case workbookcategoryclassification.FieldName:
+	case workbookcategorydetail.FieldName:
 		return m.OldName(ctx)
-	case workbookcategoryclassification.FieldWorkbookCategoryID:
+	case workbookcategorydetail.FieldWorkbookCategoryID:
 		return m.OldWorkbookCategoryID(ctx)
 	}
-	return nil, fmt.Errorf("unknown WorkbookCategoryClassification field %s", name)
+	return nil, fmt.Errorf("unknown WorkbookCategoryDetail field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *WorkbookCategoryClassificationMutation) SetField(name string, value ent.Value) error {
+func (m *WorkbookCategoryDetailMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case workbookcategoryclassification.FieldCreatedAt:
+	case workbookcategorydetail.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case workbookcategoryclassification.FieldUpdatedAt:
+	case workbookcategorydetail.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case workbookcategoryclassification.FieldName:
+	case workbookcategorydetail.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
 		return nil
-	case workbookcategoryclassification.FieldWorkbookCategoryID:
+	case workbookcategorydetail.FieldWorkbookCategoryID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -7979,84 +7979,84 @@ func (m *WorkbookCategoryClassificationMutation) SetField(name string, value ent
 		m.SetWorkbookCategoryID(v)
 		return nil
 	}
-	return fmt.Errorf("unknown WorkbookCategoryClassification field %s", name)
+	return fmt.Errorf("unknown WorkbookCategoryDetail field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *WorkbookCategoryClassificationMutation) AddedFields() []string {
+func (m *WorkbookCategoryDetailMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *WorkbookCategoryClassificationMutation) AddedField(name string) (ent.Value, bool) {
+func (m *WorkbookCategoryDetailMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *WorkbookCategoryClassificationMutation) AddField(name string, value ent.Value) error {
+func (m *WorkbookCategoryDetailMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown WorkbookCategoryClassification numeric field %s", name)
+	return fmt.Errorf("unknown WorkbookCategoryDetail numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *WorkbookCategoryClassificationMutation) ClearedFields() []string {
+func (m *WorkbookCategoryDetailMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *WorkbookCategoryClassificationMutation) FieldCleared(name string) bool {
+func (m *WorkbookCategoryDetailMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *WorkbookCategoryClassificationMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown WorkbookCategoryClassification nullable field %s", name)
+func (m *WorkbookCategoryDetailMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown WorkbookCategoryDetail nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *WorkbookCategoryClassificationMutation) ResetField(name string) error {
+func (m *WorkbookCategoryDetailMutation) ResetField(name string) error {
 	switch name {
-	case workbookcategoryclassification.FieldCreatedAt:
+	case workbookcategorydetail.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case workbookcategoryclassification.FieldUpdatedAt:
+	case workbookcategorydetail.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case workbookcategoryclassification.FieldName:
+	case workbookcategorydetail.FieldName:
 		m.ResetName()
 		return nil
-	case workbookcategoryclassification.FieldWorkbookCategoryID:
+	case workbookcategorydetail.FieldWorkbookCategoryID:
 		m.ResetWorkbookCategoryID()
 		return nil
 	}
-	return fmt.Errorf("unknown WorkbookCategoryClassification field %s", name)
+	return fmt.Errorf("unknown WorkbookCategoryDetail field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *WorkbookCategoryClassificationMutation) AddedEdges() []string {
+func (m *WorkbookCategoryDetailMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.problems != nil {
-		edges = append(edges, workbookcategoryclassification.EdgeProblems)
+		edges = append(edges, workbookcategorydetail.EdgeProblems)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *WorkbookCategoryClassificationMutation) AddedIDs(name string) []ent.Value {
+func (m *WorkbookCategoryDetailMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case workbookcategoryclassification.EdgeProblems:
+	case workbookcategorydetail.EdgeProblems:
 		ids := make([]ent.Value, 0, len(m.problems))
 		for id := range m.problems {
 			ids = append(ids, id)
@@ -8067,19 +8067,19 @@ func (m *WorkbookCategoryClassificationMutation) AddedIDs(name string) []ent.Val
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *WorkbookCategoryClassificationMutation) RemovedEdges() []string {
+func (m *WorkbookCategoryDetailMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.removedproblems != nil {
-		edges = append(edges, workbookcategoryclassification.EdgeProblems)
+		edges = append(edges, workbookcategorydetail.EdgeProblems)
 	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *WorkbookCategoryClassificationMutation) RemovedIDs(name string) []ent.Value {
+func (m *WorkbookCategoryDetailMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case workbookcategoryclassification.EdgeProblems:
+	case workbookcategorydetail.EdgeProblems:
 		ids := make([]ent.Value, 0, len(m.removedproblems))
 		for id := range m.removedproblems {
 			ids = append(ids, id)
@@ -8090,19 +8090,19 @@ func (m *WorkbookCategoryClassificationMutation) RemovedIDs(name string) []ent.V
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *WorkbookCategoryClassificationMutation) ClearedEdges() []string {
+func (m *WorkbookCategoryDetailMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.clearedproblems {
-		edges = append(edges, workbookcategoryclassification.EdgeProblems)
+		edges = append(edges, workbookcategorydetail.EdgeProblems)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *WorkbookCategoryClassificationMutation) EdgeCleared(name string) bool {
+func (m *WorkbookCategoryDetailMutation) EdgeCleared(name string) bool {
 	switch name {
-	case workbookcategoryclassification.EdgeProblems:
+	case workbookcategorydetail.EdgeProblems:
 		return m.clearedproblems
 	}
 	return false
@@ -8110,21 +8110,21 @@ func (m *WorkbookCategoryClassificationMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *WorkbookCategoryClassificationMutation) ClearEdge(name string) error {
+func (m *WorkbookCategoryDetailMutation) ClearEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown WorkbookCategoryClassification unique edge %s", name)
+	return fmt.Errorf("unknown WorkbookCategoryDetail unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *WorkbookCategoryClassificationMutation) ResetEdge(name string) error {
+func (m *WorkbookCategoryDetailMutation) ResetEdge(name string) error {
 	switch name {
-	case workbookcategoryclassification.EdgeProblems:
+	case workbookcategorydetail.EdgeProblems:
 		m.ResetProblems()
 		return nil
 	}
-	return fmt.Errorf("unknown WorkbookCategoryClassification edge %s", name)
+	return fmt.Errorf("unknown WorkbookCategoryDetail edge %s", name)
 }
 
 // WorkbookMemberMutation represents an operation that mutates the WorkbookMember nodes in the graph.

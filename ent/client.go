@@ -22,7 +22,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -59,8 +59,8 @@ type Client struct {
 	Workbook *WorkbookClient
 	// WorkbookCategory is the client for interacting with the WorkbookCategory builders.
 	WorkbookCategory *WorkbookCategoryClient
-	// WorkbookCategoryClassification is the client for interacting with the WorkbookCategoryClassification builders.
-	WorkbookCategoryClassification *WorkbookCategoryClassificationClient
+	// WorkbookCategoryDetail is the client for interacting with the WorkbookCategoryDetail builders.
+	WorkbookCategoryDetail *WorkbookCategoryDetailClient
 	// WorkbookMember is the client for interacting with the WorkbookMember builders.
 	WorkbookMember *WorkbookMemberClient
 }
@@ -85,7 +85,7 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 	c.Workbook = NewWorkbookClient(c.config)
 	c.WorkbookCategory = NewWorkbookCategoryClient(c.config)
-	c.WorkbookCategoryClassification = NewWorkbookCategoryClassificationClient(c.config)
+	c.WorkbookCategoryDetail = NewWorkbookCategoryDetailClient(c.config)
 	c.WorkbookMember = NewWorkbookMemberClient(c.config)
 }
 
@@ -177,21 +177,21 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                            ctx,
-		config:                         cfg,
-		AnswerDescription:              NewAnswerDescriptionClient(cfg),
-		AnswerMultiChoices:             NewAnswerMultiChoicesClient(cfg),
-		AnswerTruth:                    NewAnswerTruthClient(cfg),
-		AnswerType:                     NewAnswerTypeClient(cfg),
-		Article:                        NewArticleClient(cfg),
-		Permission:                     NewPermissionClient(cfg),
-		Problem:                        NewProblemClient(cfg),
-		Role:                           NewRoleClient(cfg),
-		User:                           NewUserClient(cfg),
-		Workbook:                       NewWorkbookClient(cfg),
-		WorkbookCategory:               NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryClassification: NewWorkbookCategoryClassificationClient(cfg),
-		WorkbookMember:                 NewWorkbookMemberClient(cfg),
+		ctx:                    ctx,
+		config:                 cfg,
+		AnswerDescription:      NewAnswerDescriptionClient(cfg),
+		AnswerMultiChoices:     NewAnswerMultiChoicesClient(cfg),
+		AnswerTruth:            NewAnswerTruthClient(cfg),
+		AnswerType:             NewAnswerTypeClient(cfg),
+		Article:                NewArticleClient(cfg),
+		Permission:             NewPermissionClient(cfg),
+		Problem:                NewProblemClient(cfg),
+		Role:                   NewRoleClient(cfg),
+		User:                   NewUserClient(cfg),
+		Workbook:               NewWorkbookClient(cfg),
+		WorkbookCategory:       NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryDetail: NewWorkbookCategoryDetailClient(cfg),
+		WorkbookMember:         NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -209,21 +209,21 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                            ctx,
-		config:                         cfg,
-		AnswerDescription:              NewAnswerDescriptionClient(cfg),
-		AnswerMultiChoices:             NewAnswerMultiChoicesClient(cfg),
-		AnswerTruth:                    NewAnswerTruthClient(cfg),
-		AnswerType:                     NewAnswerTypeClient(cfg),
-		Article:                        NewArticleClient(cfg),
-		Permission:                     NewPermissionClient(cfg),
-		Problem:                        NewProblemClient(cfg),
-		Role:                           NewRoleClient(cfg),
-		User:                           NewUserClient(cfg),
-		Workbook:                       NewWorkbookClient(cfg),
-		WorkbookCategory:               NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryClassification: NewWorkbookCategoryClassificationClient(cfg),
-		WorkbookMember:                 NewWorkbookMemberClient(cfg),
+		ctx:                    ctx,
+		config:                 cfg,
+		AnswerDescription:      NewAnswerDescriptionClient(cfg),
+		AnswerMultiChoices:     NewAnswerMultiChoicesClient(cfg),
+		AnswerTruth:            NewAnswerTruthClient(cfg),
+		AnswerType:             NewAnswerTypeClient(cfg),
+		Article:                NewArticleClient(cfg),
+		Permission:             NewPermissionClient(cfg),
+		Problem:                NewProblemClient(cfg),
+		Role:                   NewRoleClient(cfg),
+		User:                   NewUserClient(cfg),
+		Workbook:               NewWorkbookClient(cfg),
+		WorkbookCategory:       NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryDetail: NewWorkbookCategoryDetailClient(cfg),
+		WorkbookMember:         NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -255,7 +255,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AnswerDescription, c.AnswerMultiChoices, c.AnswerTruth, c.AnswerType,
 		c.Article, c.Permission, c.Problem, c.Role, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryClassification, c.WorkbookMember,
+		c.WorkbookCategory, c.WorkbookCategoryDetail, c.WorkbookMember,
 	} {
 		n.Use(hooks...)
 	}
@@ -267,7 +267,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AnswerDescription, c.AnswerMultiChoices, c.AnswerTruth, c.AnswerType,
 		c.Article, c.Permission, c.Problem, c.Role, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryClassification, c.WorkbookMember,
+		c.WorkbookCategory, c.WorkbookCategoryDetail, c.WorkbookMember,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -298,8 +298,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Workbook.mutate(ctx, m)
 	case *WorkbookCategoryMutation:
 		return c.WorkbookCategory.mutate(ctx, m)
-	case *WorkbookCategoryClassificationMutation:
-		return c.WorkbookCategoryClassification.mutate(ctx, m)
+	case *WorkbookCategoryDetailMutation:
+		return c.WorkbookCategoryDetail.mutate(ctx, m)
 	case *WorkbookMemberMutation:
 		return c.WorkbookMember.mutate(ctx, m)
 	default:
@@ -1405,15 +1405,15 @@ func (c *ProblemClient) QueryWorkbookCategory(pr *Problem) *WorkbookCategoryQuer
 	return query
 }
 
-// QueryWorkbookCategoryClassification queries the workbook_category_classification edge of a Problem.
-func (c *ProblemClient) QueryWorkbookCategoryClassification(pr *Problem) *WorkbookCategoryClassificationQuery {
-	query := (&WorkbookCategoryClassificationClient{config: c.config}).Query()
+// QueryWorkbookCategoryDetail queries the workbook_category_detail edge of a Problem.
+func (c *ProblemClient) QueryWorkbookCategoryDetail(pr *Problem) *WorkbookCategoryDetailQuery {
+	query := (&WorkbookCategoryDetailClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(problem.Table, problem.FieldID, id),
-			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryClassificationTable, problem.WorkbookCategoryClassificationColumn),
+			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryDetailTable, problem.WorkbookCategoryDetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -2097,15 +2097,15 @@ func (c *WorkbookCategoryClient) QueryWorkbook(wc *WorkbookCategory) *WorkbookQu
 	return query
 }
 
-// QueryWorkbookCategoryClassifications queries the workbook_category_classifications edge of a WorkbookCategory.
-func (c *WorkbookCategoryClient) QueryWorkbookCategoryClassifications(wc *WorkbookCategory) *WorkbookCategoryClassificationQuery {
-	query := (&WorkbookCategoryClassificationClient{config: c.config}).Query()
+// QueryWorkbookCategoryDetails queries the workbook_category_details edge of a WorkbookCategory.
+func (c *WorkbookCategoryClient) QueryWorkbookCategoryDetails(wc *WorkbookCategory) *WorkbookCategoryDetailQuery {
+	query := (&WorkbookCategoryDetailClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := wc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(workbookcategory.Table, workbookcategory.FieldID, id),
-			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryClassificationsTable, workbookcategory.WorkbookCategoryClassificationsColumn),
+			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryDetailsTable, workbookcategory.WorkbookCategoryDetailsColumn),
 		)
 		fromV = sqlgraph.Neighbors(wc.driver.Dialect(), step)
 		return fromV, nil
@@ -2138,107 +2138,107 @@ func (c *WorkbookCategoryClient) mutate(ctx context.Context, m *WorkbookCategory
 	}
 }
 
-// WorkbookCategoryClassificationClient is a client for the WorkbookCategoryClassification schema.
-type WorkbookCategoryClassificationClient struct {
+// WorkbookCategoryDetailClient is a client for the WorkbookCategoryDetail schema.
+type WorkbookCategoryDetailClient struct {
 	config
 }
 
-// NewWorkbookCategoryClassificationClient returns a client for the WorkbookCategoryClassification from the given config.
-func NewWorkbookCategoryClassificationClient(c config) *WorkbookCategoryClassificationClient {
-	return &WorkbookCategoryClassificationClient{config: c}
+// NewWorkbookCategoryDetailClient returns a client for the WorkbookCategoryDetail from the given config.
+func NewWorkbookCategoryDetailClient(c config) *WorkbookCategoryDetailClient {
+	return &WorkbookCategoryDetailClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `workbookcategoryclassification.Hooks(f(g(h())))`.
-func (c *WorkbookCategoryClassificationClient) Use(hooks ...Hook) {
-	c.hooks.WorkbookCategoryClassification = append(c.hooks.WorkbookCategoryClassification, hooks...)
+// A call to `Use(f, g, h)` equals to `workbookcategorydetail.Hooks(f(g(h())))`.
+func (c *WorkbookCategoryDetailClient) Use(hooks ...Hook) {
+	c.hooks.WorkbookCategoryDetail = append(c.hooks.WorkbookCategoryDetail, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `workbookcategoryclassification.Intercept(f(g(h())))`.
-func (c *WorkbookCategoryClassificationClient) Intercept(interceptors ...Interceptor) {
-	c.inters.WorkbookCategoryClassification = append(c.inters.WorkbookCategoryClassification, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `workbookcategorydetail.Intercept(f(g(h())))`.
+func (c *WorkbookCategoryDetailClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WorkbookCategoryDetail = append(c.inters.WorkbookCategoryDetail, interceptors...)
 }
 
-// Create returns a builder for creating a WorkbookCategoryClassification entity.
-func (c *WorkbookCategoryClassificationClient) Create() *WorkbookCategoryClassificationCreate {
-	mutation := newWorkbookCategoryClassificationMutation(c.config, OpCreate)
-	return &WorkbookCategoryClassificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a WorkbookCategoryDetail entity.
+func (c *WorkbookCategoryDetailClient) Create() *WorkbookCategoryDetailCreate {
+	mutation := newWorkbookCategoryDetailMutation(c.config, OpCreate)
+	return &WorkbookCategoryDetailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of WorkbookCategoryClassification entities.
-func (c *WorkbookCategoryClassificationClient) CreateBulk(builders ...*WorkbookCategoryClassificationCreate) *WorkbookCategoryClassificationCreateBulk {
-	return &WorkbookCategoryClassificationCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of WorkbookCategoryDetail entities.
+func (c *WorkbookCategoryDetailClient) CreateBulk(builders ...*WorkbookCategoryDetailCreate) *WorkbookCategoryDetailCreateBulk {
+	return &WorkbookCategoryDetailCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *WorkbookCategoryClassificationClient) MapCreateBulk(slice any, setFunc func(*WorkbookCategoryClassificationCreate, int)) *WorkbookCategoryClassificationCreateBulk {
+func (c *WorkbookCategoryDetailClient) MapCreateBulk(slice any, setFunc func(*WorkbookCategoryDetailCreate, int)) *WorkbookCategoryDetailCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &WorkbookCategoryClassificationCreateBulk{err: fmt.Errorf("calling to WorkbookCategoryClassificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &WorkbookCategoryDetailCreateBulk{err: fmt.Errorf("calling to WorkbookCategoryDetailClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*WorkbookCategoryClassificationCreate, rv.Len())
+	builders := make([]*WorkbookCategoryDetailCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &WorkbookCategoryClassificationCreateBulk{config: c.config, builders: builders}
+	return &WorkbookCategoryDetailCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for WorkbookCategoryClassification.
-func (c *WorkbookCategoryClassificationClient) Update() *WorkbookCategoryClassificationUpdate {
-	mutation := newWorkbookCategoryClassificationMutation(c.config, OpUpdate)
-	return &WorkbookCategoryClassificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for WorkbookCategoryDetail.
+func (c *WorkbookCategoryDetailClient) Update() *WorkbookCategoryDetailUpdate {
+	mutation := newWorkbookCategoryDetailMutation(c.config, OpUpdate)
+	return &WorkbookCategoryDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *WorkbookCategoryClassificationClient) UpdateOne(wcc *WorkbookCategoryClassification) *WorkbookCategoryClassificationUpdateOne {
-	mutation := newWorkbookCategoryClassificationMutation(c.config, OpUpdateOne, withWorkbookCategoryClassification(wcc))
-	return &WorkbookCategoryClassificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *WorkbookCategoryDetailClient) UpdateOne(wcd *WorkbookCategoryDetail) *WorkbookCategoryDetailUpdateOne {
+	mutation := newWorkbookCategoryDetailMutation(c.config, OpUpdateOne, withWorkbookCategoryDetail(wcd))
+	return &WorkbookCategoryDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WorkbookCategoryClassificationClient) UpdateOneID(id uuid.UUID) *WorkbookCategoryClassificationUpdateOne {
-	mutation := newWorkbookCategoryClassificationMutation(c.config, OpUpdateOne, withWorkbookCategoryClassificationID(id))
-	return &WorkbookCategoryClassificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *WorkbookCategoryDetailClient) UpdateOneID(id uuid.UUID) *WorkbookCategoryDetailUpdateOne {
+	mutation := newWorkbookCategoryDetailMutation(c.config, OpUpdateOne, withWorkbookCategoryDetailID(id))
+	return &WorkbookCategoryDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for WorkbookCategoryClassification.
-func (c *WorkbookCategoryClassificationClient) Delete() *WorkbookCategoryClassificationDelete {
-	mutation := newWorkbookCategoryClassificationMutation(c.config, OpDelete)
-	return &WorkbookCategoryClassificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for WorkbookCategoryDetail.
+func (c *WorkbookCategoryDetailClient) Delete() *WorkbookCategoryDetailDelete {
+	mutation := newWorkbookCategoryDetailMutation(c.config, OpDelete)
+	return &WorkbookCategoryDetailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *WorkbookCategoryClassificationClient) DeleteOne(wcc *WorkbookCategoryClassification) *WorkbookCategoryClassificationDeleteOne {
-	return c.DeleteOneID(wcc.ID)
+func (c *WorkbookCategoryDetailClient) DeleteOne(wcd *WorkbookCategoryDetail) *WorkbookCategoryDetailDeleteOne {
+	return c.DeleteOneID(wcd.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WorkbookCategoryClassificationClient) DeleteOneID(id uuid.UUID) *WorkbookCategoryClassificationDeleteOne {
-	builder := c.Delete().Where(workbookcategoryclassification.ID(id))
+func (c *WorkbookCategoryDetailClient) DeleteOneID(id uuid.UUID) *WorkbookCategoryDetailDeleteOne {
+	builder := c.Delete().Where(workbookcategorydetail.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &WorkbookCategoryClassificationDeleteOne{builder}
+	return &WorkbookCategoryDetailDeleteOne{builder}
 }
 
-// Query returns a query builder for WorkbookCategoryClassification.
-func (c *WorkbookCategoryClassificationClient) Query() *WorkbookCategoryClassificationQuery {
-	return &WorkbookCategoryClassificationQuery{
+// Query returns a query builder for WorkbookCategoryDetail.
+func (c *WorkbookCategoryDetailClient) Query() *WorkbookCategoryDetailQuery {
+	return &WorkbookCategoryDetailQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeWorkbookCategoryClassification},
+		ctx:    &QueryContext{Type: TypeWorkbookCategoryDetail},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a WorkbookCategoryClassification entity by its id.
-func (c *WorkbookCategoryClassificationClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookCategoryClassification, error) {
-	return c.Query().Where(workbookcategoryclassification.ID(id)).Only(ctx)
+// Get returns a WorkbookCategoryDetail entity by its id.
+func (c *WorkbookCategoryDetailClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookCategoryDetail, error) {
+	return c.Query().Where(workbookcategorydetail.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WorkbookCategoryClassificationClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookCategoryClassification {
+func (c *WorkbookCategoryDetailClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookCategoryDetail {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2246,44 +2246,44 @@ func (c *WorkbookCategoryClassificationClient) GetX(ctx context.Context, id uuid
 	return obj
 }
 
-// QueryProblems queries the problems edge of a WorkbookCategoryClassification.
-func (c *WorkbookCategoryClassificationClient) QueryProblems(wcc *WorkbookCategoryClassification) *ProblemQuery {
+// QueryProblems queries the problems edge of a WorkbookCategoryDetail.
+func (c *WorkbookCategoryDetailClient) QueryProblems(wcd *WorkbookCategoryDetail) *ProblemQuery {
 	query := (&ProblemClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := wcc.ID
+		id := wcd.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID, id),
+			sqlgraph.From(workbookcategorydetail.Table, workbookcategorydetail.FieldID, id),
 			sqlgraph.To(problem.Table, problem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategoryclassification.ProblemsTable, workbookcategoryclassification.ProblemsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategorydetail.ProblemsTable, workbookcategorydetail.ProblemsColumn),
 		)
-		fromV = sqlgraph.Neighbors(wcc.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(wcd.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *WorkbookCategoryClassificationClient) Hooks() []Hook {
-	return c.hooks.WorkbookCategoryClassification
+func (c *WorkbookCategoryDetailClient) Hooks() []Hook {
+	return c.hooks.WorkbookCategoryDetail
 }
 
 // Interceptors returns the client interceptors.
-func (c *WorkbookCategoryClassificationClient) Interceptors() []Interceptor {
-	return c.inters.WorkbookCategoryClassification
+func (c *WorkbookCategoryDetailClient) Interceptors() []Interceptor {
+	return c.inters.WorkbookCategoryDetail
 }
 
-func (c *WorkbookCategoryClassificationClient) mutate(ctx context.Context, m *WorkbookCategoryClassificationMutation) (Value, error) {
+func (c *WorkbookCategoryDetailClient) mutate(ctx context.Context, m *WorkbookCategoryDetailMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&WorkbookCategoryClassificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryDetailCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&WorkbookCategoryClassificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&WorkbookCategoryClassificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&WorkbookCategoryClassificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&WorkbookCategoryDetailDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown WorkbookCategoryClassification mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown WorkbookCategoryDetail mutation op: %q", m.Op())
 	}
 }
 
@@ -2473,11 +2473,11 @@ type (
 	hooks struct {
 		AnswerDescription, AnswerMultiChoices, AnswerTruth, AnswerType, Article,
 		Permission, Problem, Role, User, Workbook, WorkbookCategory,
-		WorkbookCategoryClassification, WorkbookMember []ent.Hook
+		WorkbookCategoryDetail, WorkbookMember []ent.Hook
 	}
 	inters struct {
 		AnswerDescription, AnswerMultiChoices, AnswerTruth, AnswerType, Article,
 		Permission, Problem, Role, User, Workbook, WorkbookCategory,
-		WorkbookCategoryClassification, WorkbookMember []ent.Interceptor
+		WorkbookCategoryDetail, WorkbookMember []ent.Interceptor
 	}
 )

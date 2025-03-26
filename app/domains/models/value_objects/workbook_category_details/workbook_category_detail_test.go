@@ -1,4 +1,4 @@
-package workbook_category_classifications
+package workbook_category_details
 
 import (
 	"testing"

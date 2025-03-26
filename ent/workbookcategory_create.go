@@ -9,7 +9,7 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -90,19 +90,19 @@ func (wcc *WorkbookCategoryCreate) SetWorkbook(w *Workbook) *WorkbookCategoryCre
 	return wcc.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryClassificationIDs adds the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by IDs.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
-	wcc.mutation.AddWorkbookCategoryClassificationIDs(ids...)
+// AddWorkbookCategoryDetailIDs adds the "workbook_category_details" edge to the WorkbookCategoryDetail entity by IDs.
+func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.AddWorkbookCategoryDetailIDs(ids...)
 	return wcc
 }
 
-// AddWorkbookCategoryClassifications adds the "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryCreate {
+// AddWorkbookCategoryDetails adds the "workbook_category_details" edges to the WorkbookCategoryDetail entity.
+func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryCreate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcc.AddWorkbookCategoryClassificationIDs(ids...)
+	return wcc.AddWorkbookCategoryDetailIDs(ids...)
 }
 
 // Mutation returns the WorkbookCategoryMutation object of the builder.
@@ -252,15 +252,15 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 		_node.WorkbookID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := wcc.mutation.WorkbookCategoryClassificationsIDs(); len(nodes) > 0 {
+	if nodes := wcc.mutation.WorkbookCategoryDetailsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
+			Table:   workbookcategory.WorkbookCategoryDetailsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

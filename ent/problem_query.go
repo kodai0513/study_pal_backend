@@ -15,7 +15,7 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -27,17 +27,17 @@ import (
 // ProblemQuery is the builder for querying Problem entities.
 type ProblemQuery struct {
 	config
-	ctx                                *QueryContext
-	order                              []problem.OrderOption
-	inters                             []Interceptor
-	predicates                         []predicate.Problem
-	withAnswerType                     *AnswerTypeQuery
-	withAnswerDescriptions             *AnswerDescriptionQuery
-	withAnswerMultiChoices             *AnswerMultiChoicesQuery
-	withAnswerTruths                   *AnswerTruthQuery
-	withWorkbook                       *WorkbookQuery
-	withWorkbookCategory               *WorkbookCategoryQuery
-	withWorkbookCategoryClassification *WorkbookCategoryClassificationQuery
+	ctx                        *QueryContext
+	order                      []problem.OrderOption
+	inters                     []Interceptor
+	predicates                 []predicate.Problem
+	withAnswerType             *AnswerTypeQuery
+	withAnswerDescriptions     *AnswerDescriptionQuery
+	withAnswerMultiChoices     *AnswerMultiChoicesQuery
+	withAnswerTruths           *AnswerTruthQuery
+	withWorkbook               *WorkbookQuery
+	withWorkbookCategory       *WorkbookCategoryQuery
+	withWorkbookCategoryDetail *WorkbookCategoryDetailQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -206,9 +206,9 @@ func (pq *ProblemQuery) QueryWorkbookCategory() *WorkbookCategoryQuery {
 	return query
 }
 
-// QueryWorkbookCategoryClassification chains the current query on the "workbook_category_classification" edge.
-func (pq *ProblemQuery) QueryWorkbookCategoryClassification() *WorkbookCategoryClassificationQuery {
-	query := (&WorkbookCategoryClassificationClient{config: pq.config}).Query()
+// QueryWorkbookCategoryDetail chains the current query on the "workbook_category_detail" edge.
+func (pq *ProblemQuery) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
+	query := (&WorkbookCategoryDetailClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -219,8 +219,8 @@ func (pq *ProblemQuery) QueryWorkbookCategoryClassification() *WorkbookCategoryC
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(problem.Table, problem.FieldID, selector),
-			sqlgraph.To(workbookcategoryclassification.Table, workbookcategoryclassification.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryClassificationTable, problem.WorkbookCategoryClassificationColumn),
+			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, problem.WorkbookCategoryDetailTable, problem.WorkbookCategoryDetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -415,18 +415,18 @@ func (pq *ProblemQuery) Clone() *ProblemQuery {
 		return nil
 	}
 	return &ProblemQuery{
-		config:                             pq.config,
-		ctx:                                pq.ctx.Clone(),
-		order:                              append([]problem.OrderOption{}, pq.order...),
-		inters:                             append([]Interceptor{}, pq.inters...),
-		predicates:                         append([]predicate.Problem{}, pq.predicates...),
-		withAnswerType:                     pq.withAnswerType.Clone(),
-		withAnswerDescriptions:             pq.withAnswerDescriptions.Clone(),
-		withAnswerMultiChoices:             pq.withAnswerMultiChoices.Clone(),
-		withAnswerTruths:                   pq.withAnswerTruths.Clone(),
-		withWorkbook:                       pq.withWorkbook.Clone(),
-		withWorkbookCategory:               pq.withWorkbookCategory.Clone(),
-		withWorkbookCategoryClassification: pq.withWorkbookCategoryClassification.Clone(),
+		config:                     pq.config,
+		ctx:                        pq.ctx.Clone(),
+		order:                      append([]problem.OrderOption{}, pq.order...),
+		inters:                     append([]Interceptor{}, pq.inters...),
+		predicates:                 append([]predicate.Problem{}, pq.predicates...),
+		withAnswerType:             pq.withAnswerType.Clone(),
+		withAnswerDescriptions:     pq.withAnswerDescriptions.Clone(),
+		withAnswerMultiChoices:     pq.withAnswerMultiChoices.Clone(),
+		withAnswerTruths:           pq.withAnswerTruths.Clone(),
+		withWorkbook:               pq.withWorkbook.Clone(),
+		withWorkbookCategory:       pq.withWorkbookCategory.Clone(),
+		withWorkbookCategoryDetail: pq.withWorkbookCategoryDetail.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -499,14 +499,14 @@ func (pq *ProblemQuery) WithWorkbookCategory(opts ...func(*WorkbookCategoryQuery
 	return pq
 }
 
-// WithWorkbookCategoryClassification tells the query-builder to eager-load the nodes that are connected to
-// the "workbook_category_classification" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProblemQuery) WithWorkbookCategoryClassification(opts ...func(*WorkbookCategoryClassificationQuery)) *ProblemQuery {
-	query := (&WorkbookCategoryClassificationClient{config: pq.config}).Query()
+// WithWorkbookCategoryDetail tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_category_detail" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProblemQuery) WithWorkbookCategoryDetail(opts ...func(*WorkbookCategoryDetailQuery)) *ProblemQuery {
+	query := (&WorkbookCategoryDetailClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withWorkbookCategoryClassification = query
+	pq.withWorkbookCategoryDetail = query
 	return pq
 }
 
@@ -595,7 +595,7 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 			pq.withAnswerTruths != nil,
 			pq.withWorkbook != nil,
 			pq.withWorkbookCategory != nil,
-			pq.withWorkbookCategoryClassification != nil,
+			pq.withWorkbookCategoryDetail != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -655,9 +655,9 @@ func (pq *ProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prob
 			return nil, err
 		}
 	}
-	if query := pq.withWorkbookCategoryClassification; query != nil {
-		if err := pq.loadWorkbookCategoryClassification(ctx, query, nodes, nil,
-			func(n *Problem, e *WorkbookCategoryClassification) { n.Edges.WorkbookCategoryClassification = e }); err != nil {
+	if query := pq.withWorkbookCategoryDetail; query != nil {
+		if err := pq.loadWorkbookCategoryDetail(ctx, query, nodes, nil,
+			func(n *Problem, e *WorkbookCategoryDetail) { n.Edges.WorkbookCategoryDetail = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -838,14 +838,14 @@ func (pq *ProblemQuery) loadWorkbookCategory(ctx context.Context, query *Workboo
 	}
 	return nil
 }
-func (pq *ProblemQuery) loadWorkbookCategoryClassification(ctx context.Context, query *WorkbookCategoryClassificationQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *WorkbookCategoryClassification)) error {
+func (pq *ProblemQuery) loadWorkbookCategoryDetail(ctx context.Context, query *WorkbookCategoryDetailQuery, nodes []*Problem, init func(*Problem), assign func(*Problem, *WorkbookCategoryDetail)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Problem)
 	for i := range nodes {
-		if nodes[i].WorkbookCategoryClassificationID == nil {
+		if nodes[i].WorkbookCategoryDetailID == nil {
 			continue
 		}
-		fk := *nodes[i].WorkbookCategoryClassificationID
+		fk := *nodes[i].WorkbookCategoryDetailID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -854,7 +854,7 @@ func (pq *ProblemQuery) loadWorkbookCategoryClassification(ctx context.Context, 
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(workbookcategoryclassification.IDIn(ids...))
+	query.Where(workbookcategorydetail.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -862,7 +862,7 @@ func (pq *ProblemQuery) loadWorkbookCategoryClassification(ctx context.Context, 
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "workbook_category_classification_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "workbook_category_detail_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -905,8 +905,8 @@ func (pq *ProblemQuery) querySpec() *sqlgraph.QuerySpec {
 		if pq.withWorkbookCategory != nil {
 			_spec.Node.AddColumnOnce(problem.FieldWorkbookCategoryID)
 		}
-		if pq.withWorkbookCategoryClassification != nil {
-			_spec.Node.AddColumnOnce(problem.FieldWorkbookCategoryClassificationID)
+		if pq.withWorkbookCategoryDetail != nil {
+			_spec.Node.AddColumnOnce(problem.FieldWorkbookCategoryDetailID)
 		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {

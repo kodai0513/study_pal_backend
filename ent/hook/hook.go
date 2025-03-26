@@ -140,16 +140,16 @@ func (f WorkbookCategoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookCategoryMutation", m)
 }
 
-// The WorkbookCategoryClassificationFunc type is an adapter to allow the use of ordinary
-// function as WorkbookCategoryClassification mutator.
-type WorkbookCategoryClassificationFunc func(context.Context, *ent.WorkbookCategoryClassificationMutation) (ent.Value, error)
+// The WorkbookCategoryDetailFunc type is an adapter to allow the use of ordinary
+// function as WorkbookCategoryDetail mutator.
+type WorkbookCategoryDetailFunc func(context.Context, *ent.WorkbookCategoryDetailMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f WorkbookCategoryClassificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.WorkbookCategoryClassificationMutation); ok {
+func (f WorkbookCategoryDetailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WorkbookCategoryDetailMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookCategoryClassificationMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookCategoryDetailMutation", m)
 }
 
 // The WorkbookMemberFunc type is an adapter to allow the use of ordinary

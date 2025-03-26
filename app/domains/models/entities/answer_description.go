@@ -31,3 +31,7 @@ func (a *AnswerDescription) Name() string {
 func (a *AnswerDescription) ProblemId() uuid.UUID {
 	return a.problemId
 }
+
+func (a *AnswerDescription) SetName(name answer_descriptions.Name) {
+	a.name = name
+}

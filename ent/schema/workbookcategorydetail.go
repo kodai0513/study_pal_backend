@@ -12,28 +12,28 @@ import (
 	"github.com/google/uuid"
 )
 
-// WorkbookCategoryClassification holds the schema definition for the WorkbookCategoryClassification entity.
-type WorkbookCategoryClassification struct {
+// WorkbookCategoryDetail holds the schema definition for the WorkbookCategoryDetail entity.
+type WorkbookCategoryDetail struct {
 	ent.Schema
 }
 
-func (WorkbookCategoryClassification) Mixin() []ent.Mixin {
+func (WorkbookCategoryDetail) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.IdMixin{},
 		mixin.TimeMixin{},
 	}
 }
 
-// Fields of the WorkbookCategoryClassification.
-func (WorkbookCategoryClassification) Fields() []ent.Field {
+// Fields of the WorkbookCategoryDetail.
+func (WorkbookCategoryDetail) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").MaxLen(255).NotEmpty(),
 		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Unique(),
 	}
 }
 
-// Edges of the WorkbookCategoryClassification.
-func (WorkbookCategoryClassification) Edges() []ent.Edge {
+// Edges of the WorkbookCategoryDetail.
+func (WorkbookCategoryDetail) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To(problem.Table, Problem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

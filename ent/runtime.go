@@ -15,7 +15,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 )
@@ -417,26 +417,26 @@ func init() {
 			return nil
 		}
 	}()
-	workbookcategoryclassificationMixin := schema.WorkbookCategoryClassification{}.Mixin()
-	workbookcategoryclassificationMixinFields1 := workbookcategoryclassificationMixin[1].Fields()
-	_ = workbookcategoryclassificationMixinFields1
-	workbookcategoryclassificationFields := schema.WorkbookCategoryClassification{}.Fields()
-	_ = workbookcategoryclassificationFields
-	// workbookcategoryclassificationDescCreatedAt is the schema descriptor for created_at field.
-	workbookcategoryclassificationDescCreatedAt := workbookcategoryclassificationMixinFields1[0].Descriptor()
-	// workbookcategoryclassification.DefaultCreatedAt holds the default value on creation for the created_at field.
-	workbookcategoryclassification.DefaultCreatedAt = workbookcategoryclassificationDescCreatedAt.Default.(func() time.Time)
-	// workbookcategoryclassificationDescUpdatedAt is the schema descriptor for updated_at field.
-	workbookcategoryclassificationDescUpdatedAt := workbookcategoryclassificationMixinFields1[1].Descriptor()
-	// workbookcategoryclassification.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	workbookcategoryclassification.DefaultUpdatedAt = workbookcategoryclassificationDescUpdatedAt.Default.(func() time.Time)
-	// workbookcategoryclassification.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	workbookcategoryclassification.UpdateDefaultUpdatedAt = workbookcategoryclassificationDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// workbookcategoryclassificationDescName is the schema descriptor for name field.
-	workbookcategoryclassificationDescName := workbookcategoryclassificationFields[0].Descriptor()
-	// workbookcategoryclassification.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	workbookcategoryclassification.NameValidator = func() func(string) error {
-		validators := workbookcategoryclassificationDescName.Validators
+	workbookcategorydetailMixin := schema.WorkbookCategoryDetail{}.Mixin()
+	workbookcategorydetailMixinFields1 := workbookcategorydetailMixin[1].Fields()
+	_ = workbookcategorydetailMixinFields1
+	workbookcategorydetailFields := schema.WorkbookCategoryDetail{}.Fields()
+	_ = workbookcategorydetailFields
+	// workbookcategorydetailDescCreatedAt is the schema descriptor for created_at field.
+	workbookcategorydetailDescCreatedAt := workbookcategorydetailMixinFields1[0].Descriptor()
+	// workbookcategorydetail.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbookcategorydetail.DefaultCreatedAt = workbookcategorydetailDescCreatedAt.Default.(func() time.Time)
+	// workbookcategorydetailDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookcategorydetailDescUpdatedAt := workbookcategorydetailMixinFields1[1].Descriptor()
+	// workbookcategorydetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbookcategorydetail.DefaultUpdatedAt = workbookcategorydetailDescUpdatedAt.Default.(func() time.Time)
+	// workbookcategorydetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbookcategorydetail.UpdateDefaultUpdatedAt = workbookcategorydetailDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// workbookcategorydetailDescName is the schema descriptor for name field.
+	workbookcategorydetailDescName := workbookcategorydetailFields[0].Descriptor()
+	// workbookcategorydetail.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	workbookcategorydetail.NameValidator = func() func(string) error {
+		validators := workbookcategorydetailDescName.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

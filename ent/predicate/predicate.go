@@ -39,8 +39,8 @@ type Workbook func(*sql.Selector)
 // WorkbookCategory is the predicate function for workbookcategory builders.
 type WorkbookCategory func(*sql.Selector)
 
-// WorkbookCategoryClassification is the predicate function for workbookcategoryclassification builders.
-type WorkbookCategoryClassification func(*sql.Selector)
+// WorkbookCategoryDetail is the predicate function for workbookcategorydetail builders.
+type WorkbookCategoryDetail func(*sql.Selector)
 
 // WorkbookMember is the predicate function for workbookmember builders.
 type WorkbookMember func(*sql.Selector)

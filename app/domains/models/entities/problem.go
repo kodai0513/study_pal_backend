@@ -6,81 +6,61 @@ import (
 	"study-pal-backend/app/master_datas/master_answer_types"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 )
 
 type Problem struct {
-	id                               uuid.UUID
-	answerDescription                *AnswerDescription
-	answerMultiChoices               []*AnswerMultiChoice
-	answerTruth                      *AnswerTruth
-	answerTypeId                     uuid.UUID
-	statement                        problems.Statement
-	workbookCategoryClassificationId uuid.UUID
-	workbookCategoryId               uuid.UUID
-	workbookId                       uuid.UUID
+	id                       uuid.UUID
+	answerDescription        *AnswerDescription
+	answerMultiChoices       map[uuid.UUID]*AnswerMultiChoice
+	answerTruth              *AnswerTruth
+	answerTypeId             uuid.UUID
+	statement                problems.Statement
+	workbookCategoryDetailId uuid.UUID
+	workbookCategoryId       uuid.UUID
+	workbookId               uuid.UUID
+}
+
+func CreateProblem(
+	id uuid.UUID,
+	answerDescription *AnswerDescription,
+	answerMultiChoices []*AnswerMultiChoice,
+	answerTruth *AnswerTruth,
+	answerTypeId uuid.UUID,
+	statement problems.Statement,
+	workbookCategoryDetailId uuid.UUID,
+	workbookCategoryId uuid.UUID,
+	workbookId uuid.UUID,
+) *Problem {
+	return &Problem{
+		id:                       id,
+		answerDescription:        answerDescription,
+		answerMultiChoices:       lo.SliceToMap(answerMultiChoices, func(a *AnswerMultiChoice) (uuid.UUID, *AnswerMultiChoice) { return a.Id(), a }),
+		answerTypeId:             answerTypeId,
+		statement:                statement,
+		workbookCategoryDetailId: workbookCategoryDetailId,
+		workbookCategoryId:       workbookCategoryId,
+		workbookId:               workbookId,
+	}
 }
 
 func NewProblem(id uuid.UUID, answerTypeId uuid.UUID, statement problems.Statement, workbookId uuid.UUID) *Problem {
 	return &Problem{
-		id:                               id,
-		answerTypeId:                     answerTypeId,
-		statement:                        statement,
-		workbookCategoryClassificationId: uuid.Nil,
-		workbookCategoryId:               uuid.Nil,
-		workbookId:                       workbookId,
+		id:                       id,
+		answerMultiChoices:       make(map[uuid.UUID]*AnswerMultiChoice, 0),
+		answerTypeId:             answerTypeId,
+		statement:                statement,
+		workbookCategoryDetailId: uuid.Nil,
+		workbookCategoryId:       uuid.Nil,
+		workbookId:               workbookId,
 	}
-}
-
-func (p *Problem) AddAnswerMultiChoice(answerMultiChoice *AnswerMultiChoice) error {
-	if p.answerTypeId != master_answer_types.MultiChoice {
-		return errors.New("cannot add that answer type")
-	}
-	if len(p.answerMultiChoices) > 30 {
-		return errors.New("the upper limit of answerMultiChoice is 30")
-	}
-	if answerMultiChoice.IsCorrect() {
-		for _, answer := range p.answerMultiChoices {
-			if answer.IsCorrect() {
-				return errors.New("only one correct answer")
-			}
-		}
-	}
-
-	p.answerMultiChoices = append(p.answerMultiChoices, answerMultiChoice)
-	return nil
-}
-
-func (p *Problem) SetAnswerDescription(answerDescription *AnswerDescription) error {
-	if p.answerTypeId != master_answer_types.Description {
-		return errors.New("cannot add that answer type")
-	}
-
-	p.answerDescription = answerDescription
-	return nil
-}
-
-func (p *Problem) SetAnswerTruth(answerTruth *AnswerTruth) error {
-	if p.answerTypeId != master_answer_types.Truth {
-		return errors.New("cannot add that answer type")
-	}
-
-	p.answerTruth = answerTruth
-	return nil
-}
-
-func (p *Problem) SetWorkbookCategoryClassificationId(workbookCategoryClassificationId uuid.UUID) {
-	p.workbookCategoryClassificationId = workbookCategoryClassificationId
-}
-
-func (p *Problem) SetWorkbookCategoryId(workbookCategoryId uuid.UUID) {
-	p.workbookCategoryId = workbookCategoryId
 }
 
 func (p *Problem) AnswerDescription() *AnswerDescription {
 	return p.answerDescription
 }
 
-func (p *Problem) AnswerMultiChoices() []*AnswerMultiChoice {
+func (p *Problem) AnswerMultiChoices() map[uuid.UUID]*AnswerMultiChoice {
 	return p.answerMultiChoices
 }
 
@@ -112,8 +92,8 @@ func (p *Problem) Statement() string {
 	return p.statement.Value()
 }
 
-func (p *Problem) WorkbookCategoryClassificationId() uuid.UUID {
-	return p.workbookCategoryClassificationId
+func (p *Problem) WorkbookCategoryDetailId() uuid.UUID {
+	return p.workbookCategoryDetailId
 }
 
 func (p *Problem) WorkbookCategoryId() uuid.UUID {
@@ -122,4 +102,67 @@ func (p *Problem) WorkbookCategoryId() uuid.UUID {
 
 func (p *Problem) WorkbookId() uuid.UUID {
 	return p.workbookId
+}
+
+func (p *Problem) SetAnswerDescription(answerDescription *AnswerDescription) error {
+	if p.answerTypeId != master_answer_types.Description {
+		return errors.New("cannot add that answer type")
+	}
+
+	p.answerDescription = answerDescription
+	return nil
+}
+
+func (p *Problem) ReplaceAnswerMultiChoices(answerMultiChoices []*AnswerMultiChoice) error {
+	if p.answerTypeId != master_answer_types.MultiChoice {
+		return errors.New("cannot add that answer type")
+	}
+
+	if len(answerMultiChoices) <= 2 {
+		return errors.New("the lower limit is at least 2")
+	}
+
+	if len(answerMultiChoices) > 30 {
+		return errors.New("the upper limit of answerMultiChoice is 30")
+	}
+
+	correctCount := lo.CountBy(
+		answerMultiChoices,
+		func(answerMultiChoice *AnswerMultiChoice) bool {
+			return answerMultiChoice.isCorrect
+		},
+	)
+
+	if correctCount != 1 {
+		return errors.New("only one correct answer can be set")
+	}
+
+	p.answerMultiChoices = lo.SliceToMap(
+		answerMultiChoices,
+		func(answerMultiChoice *AnswerMultiChoice) (uuid.UUID, *AnswerMultiChoice) {
+			return answerMultiChoice.Id(), answerMultiChoice
+		},
+	)
+	return nil
+}
+
+func (p *Problem) SetAnswerTruth(answerTruth *AnswerTruth) error {
+	if p.answerTypeId != master_answer_types.Truth {
+		return errors.New("cannot add that answer type")
+	}
+
+	p.answerTruth = answerTruth
+	return nil
+}
+
+func (p *Problem) SetStatement(statement problems.Statement) {
+	p.statement = statement
+}
+
+func (p *Problem) SetWorkbookCategoryDetailId(workbookCategoryDetailId uuid.UUID) {
+	p.workbookCategoryDetailId = workbookCategoryDetailId
+}
+
+func (p *Problem) SetWorkbookCategoryId(workbookCategoryId uuid.UUID) {
+	p.workbookCategoryId = workbookCategoryId
 }

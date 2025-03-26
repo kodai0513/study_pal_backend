@@ -18,7 +18,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"study-pal-backend/ent/workbookmember"
 	"sync"
 
@@ -85,19 +85,19 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			answerdescription.Table:              answerdescription.ValidColumn,
-			answermultichoices.Table:             answermultichoices.ValidColumn,
-			answertruth.Table:                    answertruth.ValidColumn,
-			answertype.Table:                     answertype.ValidColumn,
-			article.Table:                        article.ValidColumn,
-			permission.Table:                     permission.ValidColumn,
-			problem.Table:                        problem.ValidColumn,
-			role.Table:                           role.ValidColumn,
-			user.Table:                           user.ValidColumn,
-			workbook.Table:                       workbook.ValidColumn,
-			workbookcategory.Table:               workbookcategory.ValidColumn,
-			workbookcategoryclassification.Table: workbookcategoryclassification.ValidColumn,
-			workbookmember.Table:                 workbookmember.ValidColumn,
+			answerdescription.Table:      answerdescription.ValidColumn,
+			answermultichoices.Table:     answermultichoices.ValidColumn,
+			answertruth.Table:            answertruth.ValidColumn,
+			answertype.Table:             answertype.ValidColumn,
+			article.Table:                article.ValidColumn,
+			permission.Table:             permission.ValidColumn,
+			problem.Table:                problem.ValidColumn,
+			role.Table:                   role.ValidColumn,
+			user.Table:                   user.ValidColumn,
+			workbook.Table:               workbook.ValidColumn,
+			workbookcategory.Table:       workbookcategory.ValidColumn,
+			workbookcategorydetail.Table: workbookcategorydetail.ValidColumn,
+			workbookmember.Table:         workbookmember.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

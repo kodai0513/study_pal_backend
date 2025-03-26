@@ -134,7 +134,7 @@ var (
 		{Name: "answer_type_id", Type: field.TypeUUID},
 		{Name: "workbook_id", Type: field.TypeUUID},
 		{Name: "workbook_category_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "workbook_category_classification_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "workbook_category_detail_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// ProblemsTable holds the schema information for the "problems" table.
 	ProblemsTable = &schema.Table{
@@ -161,9 +161,9 @@ var (
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "problems_workbook_category_classifications_problems",
+				Symbol:     "problems_workbook_category_details_problems",
 				Columns:    []*schema.Column{ProblemsColumns[7]},
-				RefColumns: []*schema.Column{WorkbookCategoryClassificationsColumns[0]},
+				RefColumns: []*schema.Column{WorkbookCategoryDetailsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -235,24 +235,24 @@ var (
 			},
 		},
 	}
-	// WorkbookCategoryClassificationsColumns holds the columns for the "workbook_category_classifications" table.
-	WorkbookCategoryClassificationsColumns = []*schema.Column{
+	// WorkbookCategoryDetailsColumns holds the columns for the "workbook_category_details" table.
+	WorkbookCategoryDetailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 255},
 		{Name: "workbook_category_id", Type: field.TypeUUID, Unique: true},
-		{Name: "workbook_category_workbook_category_classifications", Type: field.TypeUUID, Nullable: true},
+		{Name: "workbook_category_workbook_category_details", Type: field.TypeUUID, Nullable: true},
 	}
-	// WorkbookCategoryClassificationsTable holds the schema information for the "workbook_category_classifications" table.
-	WorkbookCategoryClassificationsTable = &schema.Table{
-		Name:       "workbook_category_classifications",
-		Columns:    WorkbookCategoryClassificationsColumns,
-		PrimaryKey: []*schema.Column{WorkbookCategoryClassificationsColumns[0]},
+	// WorkbookCategoryDetailsTable holds the schema information for the "workbook_category_details" table.
+	WorkbookCategoryDetailsTable = &schema.Table{
+		Name:       "workbook_category_details",
+		Columns:    WorkbookCategoryDetailsColumns,
+		PrimaryKey: []*schema.Column{WorkbookCategoryDetailsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "workbook_category_classifications_workbook_categories_workbook_category_classifications",
-				Columns:    []*schema.Column{WorkbookCategoryClassificationsColumns[5]},
+				Symbol:     "workbook_category_details_workbook_categories_workbook_category_details",
+				Columns:    []*schema.Column{WorkbookCategoryDetailsColumns[5]},
 				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -331,7 +331,7 @@ var (
 		UsersTable,
 		WorkbooksTable,
 		WorkbookCategoriesTable,
-		WorkbookCategoryClassificationsTable,
+		WorkbookCategoryDetailsTable,
 		WorkbookMembersTable,
 		PermissionRolesTable,
 	}
@@ -345,9 +345,9 @@ func init() {
 	ProblemsTable.ForeignKeys[0].RefTable = AnswerTypesTable
 	ProblemsTable.ForeignKeys[1].RefTable = WorkbooksTable
 	ProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoriesTable
-	ProblemsTable.ForeignKeys[3].RefTable = WorkbookCategoryClassificationsTable
+	ProblemsTable.ForeignKeys[3].RefTable = WorkbookCategoryDetailsTable
 	WorkbookCategoriesTable.ForeignKeys[0].RefTable = WorkbooksTable
-	WorkbookCategoryClassificationsTable.ForeignKeys[0].RefTable = WorkbookCategoriesTable
+	WorkbookCategoryDetailsTable.ForeignKeys[0].RefTable = WorkbookCategoriesTable
 	WorkbookMembersTable.ForeignKeys[0].RefTable = RolesTable
 	WorkbookMembersTable.ForeignKeys[1].RefTable = UsersTable
 	WorkbookMembersTable.ForeignKeys[2].RefTable = WorkbooksTable

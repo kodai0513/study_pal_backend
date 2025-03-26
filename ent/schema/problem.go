@@ -9,7 +9,7 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -37,7 +37,7 @@ func (Problem) Fields() []ent.Field {
 		field.String("statement").MaxLen(1000).NotEmpty(),
 		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
 		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
-		field.UUID(workbookcategoryclassification.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
+		field.UUID(workbookcategorydetail.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
 	}
 }
 
@@ -50,6 +50,6 @@ func (Problem) Edges() []ent.Edge {
 		edge.To(answertruth.Table, AnswerTruth.Type).Unique().Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From(workbook.Label, Workbook.Type).Ref(problem.Table).Unique().Required().Field(workbook.Label + "_id"),
 		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(problem.Table).Unique().Field(workbookcategory.Label + "_id"),
-		edge.From(workbookcategoryclassification.Label, WorkbookCategoryClassification.Type).Ref(problem.Table).Unique().Field(workbookcategoryclassification.Label + "_id"),
+		edge.From(workbookcategorydetail.Label, WorkbookCategoryDetail.Type).Ref(problem.Table).Unique().Field(workbookcategorydetail.Label + "_id"),
 	}
 }

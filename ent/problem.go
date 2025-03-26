@@ -11,7 +11,7 @@ import (
 	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent"
@@ -36,8 +36,8 @@ type Problem struct {
 	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// WorkbookCategoryID holds the value of the "workbook_category_id" field.
 	WorkbookCategoryID *uuid.UUID `json:"workbook_category_id,omitempty"`
-	// WorkbookCategoryClassificationID holds the value of the "workbook_category_classification_id" field.
-	WorkbookCategoryClassificationID *uuid.UUID `json:"workbook_category_classification_id,omitempty"`
+	// WorkbookCategoryDetailID holds the value of the "workbook_category_detail_id" field.
+	WorkbookCategoryDetailID *uuid.UUID `json:"workbook_category_detail_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProblemQuery when eager-loading is set.
 	Edges        ProblemEdges `json:"edges"`
@@ -58,8 +58,8 @@ type ProblemEdges struct {
 	Workbook *Workbook `json:"workbook,omitempty"`
 	// WorkbookCategory holds the value of the workbook_category edge.
 	WorkbookCategory *WorkbookCategory `json:"workbook_category,omitempty"`
-	// WorkbookCategoryClassification holds the value of the workbook_category_classification edge.
-	WorkbookCategoryClassification *WorkbookCategoryClassification `json:"workbook_category_classification,omitempty"`
+	// WorkbookCategoryDetail holds the value of the workbook_category_detail edge.
+	WorkbookCategoryDetail *WorkbookCategoryDetail `json:"workbook_category_detail,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [7]bool
@@ -129,15 +129,15 @@ func (e ProblemEdges) WorkbookCategoryOrErr() (*WorkbookCategory, error) {
 	return nil, &NotLoadedError{edge: "workbook_category"}
 }
 
-// WorkbookCategoryClassificationOrErr returns the WorkbookCategoryClassification value or an error if the edge
+// WorkbookCategoryDetailOrErr returns the WorkbookCategoryDetail value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ProblemEdges) WorkbookCategoryClassificationOrErr() (*WorkbookCategoryClassification, error) {
-	if e.WorkbookCategoryClassification != nil {
-		return e.WorkbookCategoryClassification, nil
+func (e ProblemEdges) WorkbookCategoryDetailOrErr() (*WorkbookCategoryDetail, error) {
+	if e.WorkbookCategoryDetail != nil {
+		return e.WorkbookCategoryDetail, nil
 	} else if e.loadedTypes[6] {
-		return nil, &NotFoundError{label: workbookcategoryclassification.Label}
+		return nil, &NotFoundError{label: workbookcategorydetail.Label}
 	}
-	return nil, &NotLoadedError{edge: "workbook_category_classification"}
+	return nil, &NotLoadedError{edge: "workbook_category_detail"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -145,7 +145,7 @@ func (*Problem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case problem.FieldWorkbookCategoryID, problem.FieldWorkbookCategoryClassificationID:
+		case problem.FieldWorkbookCategoryID, problem.FieldWorkbookCategoryDetailID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case problem.FieldStatement:
 			values[i] = new(sql.NullString)
@@ -211,12 +211,12 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 				pr.WorkbookCategoryID = new(uuid.UUID)
 				*pr.WorkbookCategoryID = *value.S.(*uuid.UUID)
 			}
-		case problem.FieldWorkbookCategoryClassificationID:
+		case problem.FieldWorkbookCategoryDetailID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field workbook_category_classification_id", values[i])
+				return fmt.Errorf("unexpected type %T for field workbook_category_detail_id", values[i])
 			} else if value.Valid {
-				pr.WorkbookCategoryClassificationID = new(uuid.UUID)
-				*pr.WorkbookCategoryClassificationID = *value.S.(*uuid.UUID)
+				pr.WorkbookCategoryDetailID = new(uuid.UUID)
+				*pr.WorkbookCategoryDetailID = *value.S.(*uuid.UUID)
 			}
 		default:
 			pr.selectValues.Set(columns[i], values[i])
@@ -261,9 +261,9 @@ func (pr *Problem) QueryWorkbookCategory() *WorkbookCategoryQuery {
 	return NewProblemClient(pr.config).QueryWorkbookCategory(pr)
 }
 
-// QueryWorkbookCategoryClassification queries the "workbook_category_classification" edge of the Problem entity.
-func (pr *Problem) QueryWorkbookCategoryClassification() *WorkbookCategoryClassificationQuery {
-	return NewProblemClient(pr.config).QueryWorkbookCategoryClassification(pr)
+// QueryWorkbookCategoryDetail queries the "workbook_category_detail" edge of the Problem entity.
+func (pr *Problem) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
+	return NewProblemClient(pr.config).QueryWorkbookCategoryDetail(pr)
 }
 
 // Update returns a builder for updating this Problem.
@@ -309,8 +309,8 @@ func (pr *Problem) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := pr.WorkbookCategoryClassificationID; v != nil {
-		builder.WriteString("workbook_category_classification_id=")
+	if v := pr.WorkbookCategoryDetailID; v != nil {
+		builder.WriteString("workbook_category_detail_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')
