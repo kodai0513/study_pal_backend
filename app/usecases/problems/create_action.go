@@ -5,15 +5,15 @@ import "study-pal-backend/app/usecases/shared/usecase_error"
 type problem struct {
 	Name string
 }
-type workbookCategoryClassification struct {
+type workbookCategoryDetail struct {
 	Name     string
 	Problems []*problem
 }
 
 type workbookCategory struct {
-	Name                            string
-	Problems                        []*problem
-	WorkbookCategoryClassifications []*workbookCategoryClassification
+	Name                    string
+	Problems                []*problem
+	WorkbookCategoryDetails []*workbookCategoryDetail
 }
 
 type CreateActionCommand struct {

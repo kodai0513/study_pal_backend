@@ -18,29 +18,47 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldCreatedID holds the string denoting the created_id field in the database.
-	FieldCreatedID = "created_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// FieldIsPublic holds the string denoting the is_public field in the database.
 	FieldIsPublic = "is_public"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
-	// EdgeProblems holds the string denoting the problems edge name in mutations.
-	EdgeProblems = "problems"
+	// EdgeDescriptionProblems holds the string denoting the description_problems edge name in mutations.
+	EdgeDescriptionProblems = "description_problems"
+	// EdgeSelectionProblems holds the string denoting the selection_problems edge name in mutations.
+	EdgeSelectionProblems = "selection_problems"
+	// EdgeTrueOrFalseProblems holds the string denoting the true_or_false_problems edge name in mutations.
+	EdgeTrueOrFalseProblems = "true_or_false_problems"
 	// EdgeWorkbookCategories holds the string denoting the workbook_categories edge name in mutations.
 	EdgeWorkbookCategories = "workbook_categories"
 	// EdgeWorkbookMembers holds the string denoting the workbook_members edge name in mutations.
 	EdgeWorkbookMembers = "workbook_members"
 	// Table holds the table name of the workbook in the database.
 	Table = "workbooks"
-	// ProblemsTable is the table that holds the problems relation/edge.
-	ProblemsTable = "problems"
-	// ProblemsInverseTable is the table name for the Problem entity.
-	// It exists in this package in order to avoid circular dependency with the "problem" package.
-	ProblemsInverseTable = "problems"
-	// ProblemsColumn is the table column denoting the problems relation/edge.
-	ProblemsColumn = "workbook_id"
+	// DescriptionProblemsTable is the table that holds the description_problems relation/edge.
+	DescriptionProblemsTable = "description_problems"
+	// DescriptionProblemsInverseTable is the table name for the DescriptionProblem entity.
+	// It exists in this package in order to avoid circular dependency with the "descriptionproblem" package.
+	DescriptionProblemsInverseTable = "description_problems"
+	// DescriptionProblemsColumn is the table column denoting the description_problems relation/edge.
+	DescriptionProblemsColumn = "workbook_id"
+	// SelectionProblemsTable is the table that holds the selection_problems relation/edge.
+	SelectionProblemsTable = "selection_problems"
+	// SelectionProblemsInverseTable is the table name for the SelectionProblem entity.
+	// It exists in this package in order to avoid circular dependency with the "selectionproblem" package.
+	SelectionProblemsInverseTable = "selection_problems"
+	// SelectionProblemsColumn is the table column denoting the selection_problems relation/edge.
+	SelectionProblemsColumn = "workbook_id"
+	// TrueOrFalseProblemsTable is the table that holds the true_or_false_problems relation/edge.
+	TrueOrFalseProblemsTable = "true_or_false_problems"
+	// TrueOrFalseProblemsInverseTable is the table name for the TrueOrFalseProblem entity.
+	// It exists in this package in order to avoid circular dependency with the "trueorfalseproblem" package.
+	TrueOrFalseProblemsInverseTable = "true_or_false_problems"
+	// TrueOrFalseProblemsColumn is the table column denoting the true_or_false_problems relation/edge.
+	TrueOrFalseProblemsColumn = "workbook_id"
 	// WorkbookCategoriesTable is the table that holds the workbook_categories relation/edge.
 	WorkbookCategoriesTable = "workbook_categories"
 	// WorkbookCategoriesInverseTable is the table name for the WorkbookCategory entity.
@@ -62,7 +80,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldCreatedID,
+	FieldUserID,
 	FieldDescription,
 	FieldIsPublic,
 	FieldTitle,
@@ -111,9 +129,9 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByCreatedID orders the results by the created_id field.
-func ByCreatedID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedID, opts...).ToFunc()
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.
@@ -131,17 +149,45 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
-// ByProblemsCount orders the results by problems count.
-func ByProblemsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDescriptionProblemsCount orders the results by description_problems count.
+func ByDescriptionProblemsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newProblemsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDescriptionProblemsStep(), opts...)
 	}
 }
 
-// ByProblems orders the results by problems terms.
-func ByProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDescriptionProblems orders the results by description_problems terms.
+func ByDescriptionProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDescriptionProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySelectionProblemsCount orders the results by selection_problems count.
+func BySelectionProblemsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSelectionProblemsStep(), opts...)
+	}
+}
+
+// BySelectionProblems orders the results by selection_problems terms.
+func BySelectionProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSelectionProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTrueOrFalseProblemsCount orders the results by true_or_false_problems count.
+func ByTrueOrFalseProblemsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTrueOrFalseProblemsStep(), opts...)
+	}
+}
+
+// ByTrueOrFalseProblems orders the results by true_or_false_problems terms.
+func ByTrueOrFalseProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTrueOrFalseProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -172,11 +218,25 @@ func ByWorkbookMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newWorkbookMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newProblemsStep() *sqlgraph.Step {
+func newDescriptionProblemsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProblemsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, ProblemsTable, ProblemsColumn),
+		sqlgraph.To(DescriptionProblemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DescriptionProblemsTable, DescriptionProblemsColumn),
+	)
+}
+func newSelectionProblemsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SelectionProblemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SelectionProblemsTable, SelectionProblemsColumn),
+	)
+}
+func newTrueOrFalseProblemsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TrueOrFalseProblemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TrueOrFalseProblemsTable, TrueOrFalseProblemsColumn),
 	)
 }
 func newWorkbookCategoriesStep() *sqlgraph.Step {

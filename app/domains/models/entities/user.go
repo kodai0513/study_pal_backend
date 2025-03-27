@@ -43,3 +43,19 @@ func (u *User) NickName() string {
 func (u *User) Password() string {
 	return u.password.Value()
 }
+
+func (u *User) SetEmail(email users.Email) {
+	u.email = email
+}
+
+func (u *User) SetName(name users.Name) {
+	u.name = name
+}
+
+func (u *User) SetNickName(nickName users.NickName) {
+	u.nickName = nickName
+}
+
+func (u *User) SetPassword(password users.Password) {
+	u.password = password
+}

@@ -6,8 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/predicate"
-	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
@@ -52,16 +54,16 @@ func (wu *WorkbookUpdate) SetUpdatedAt(t time.Time) *WorkbookUpdate {
 	return wu
 }
 
-// SetCreatedID sets the "created_id" field.
-func (wu *WorkbookUpdate) SetCreatedID(u uuid.UUID) *WorkbookUpdate {
-	wu.mutation.SetCreatedID(u)
+// SetUserID sets the "user_id" field.
+func (wu *WorkbookUpdate) SetUserID(u uuid.UUID) *WorkbookUpdate {
+	wu.mutation.SetUserID(u)
 	return wu
 }
 
-// SetNillableCreatedID sets the "created_id" field if the given value is not nil.
-func (wu *WorkbookUpdate) SetNillableCreatedID(u *uuid.UUID) *WorkbookUpdate {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (wu *WorkbookUpdate) SetNillableUserID(u *uuid.UUID) *WorkbookUpdate {
 	if u != nil {
-		wu.SetCreatedID(*u)
+		wu.SetUserID(*u)
 	}
 	return wu
 }
@@ -108,19 +110,49 @@ func (wu *WorkbookUpdate) SetNillableTitle(s *string) *WorkbookUpdate {
 	return wu
 }
 
-// AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wu *WorkbookUpdate) AddProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
-	wu.mutation.AddProblemIDs(ids...)
+// AddDescriptionProblemIDs adds the "description_problems" edge to the DescriptionProblem entity by IDs.
+func (wu *WorkbookUpdate) AddDescriptionProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
+	wu.mutation.AddDescriptionProblemIDs(ids...)
 	return wu
 }
 
-// AddProblems adds the "problems" edges to the Problem entity.
-func (wu *WorkbookUpdate) AddProblems(p ...*Problem) *WorkbookUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddDescriptionProblems adds the "description_problems" edges to the DescriptionProblem entity.
+func (wu *WorkbookUpdate) AddDescriptionProblems(d ...*DescriptionProblem) *WorkbookUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return wu.AddProblemIDs(ids...)
+	return wu.AddDescriptionProblemIDs(ids...)
+}
+
+// AddSelectionProblemIDs adds the "selection_problems" edge to the SelectionProblem entity by IDs.
+func (wu *WorkbookUpdate) AddSelectionProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
+	wu.mutation.AddSelectionProblemIDs(ids...)
+	return wu
+}
+
+// AddSelectionProblems adds the "selection_problems" edges to the SelectionProblem entity.
+func (wu *WorkbookUpdate) AddSelectionProblems(s ...*SelectionProblem) *WorkbookUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wu.AddSelectionProblemIDs(ids...)
+}
+
+// AddTrueOrFalseProblemIDs adds the "true_or_false_problems" edge to the TrueOrFalseProblem entity by IDs.
+func (wu *WorkbookUpdate) AddTrueOrFalseProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
+	wu.mutation.AddTrueOrFalseProblemIDs(ids...)
+	return wu
+}
+
+// AddTrueOrFalseProblems adds the "true_or_false_problems" edges to the TrueOrFalseProblem entity.
+func (wu *WorkbookUpdate) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *WorkbookUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return wu.AddTrueOrFalseProblemIDs(ids...)
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
@@ -158,25 +190,67 @@ func (wu *WorkbookUpdate) Mutation() *WorkbookMutation {
 	return wu.mutation
 }
 
-// ClearProblems clears all "problems" edges to the Problem entity.
-func (wu *WorkbookUpdate) ClearProblems() *WorkbookUpdate {
-	wu.mutation.ClearProblems()
+// ClearDescriptionProblems clears all "description_problems" edges to the DescriptionProblem entity.
+func (wu *WorkbookUpdate) ClearDescriptionProblems() *WorkbookUpdate {
+	wu.mutation.ClearDescriptionProblems()
 	return wu
 }
 
-// RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (wu *WorkbookUpdate) RemoveProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
-	wu.mutation.RemoveProblemIDs(ids...)
+// RemoveDescriptionProblemIDs removes the "description_problems" edge to DescriptionProblem entities by IDs.
+func (wu *WorkbookUpdate) RemoveDescriptionProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
+	wu.mutation.RemoveDescriptionProblemIDs(ids...)
 	return wu
 }
 
-// RemoveProblems removes "problems" edges to Problem entities.
-func (wu *WorkbookUpdate) RemoveProblems(p ...*Problem) *WorkbookUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// RemoveDescriptionProblems removes "description_problems" edges to DescriptionProblem entities.
+func (wu *WorkbookUpdate) RemoveDescriptionProblems(d ...*DescriptionProblem) *WorkbookUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return wu.RemoveProblemIDs(ids...)
+	return wu.RemoveDescriptionProblemIDs(ids...)
+}
+
+// ClearSelectionProblems clears all "selection_problems" edges to the SelectionProblem entity.
+func (wu *WorkbookUpdate) ClearSelectionProblems() *WorkbookUpdate {
+	wu.mutation.ClearSelectionProblems()
+	return wu
+}
+
+// RemoveSelectionProblemIDs removes the "selection_problems" edge to SelectionProblem entities by IDs.
+func (wu *WorkbookUpdate) RemoveSelectionProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
+	wu.mutation.RemoveSelectionProblemIDs(ids...)
+	return wu
+}
+
+// RemoveSelectionProblems removes "selection_problems" edges to SelectionProblem entities.
+func (wu *WorkbookUpdate) RemoveSelectionProblems(s ...*SelectionProblem) *WorkbookUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wu.RemoveSelectionProblemIDs(ids...)
+}
+
+// ClearTrueOrFalseProblems clears all "true_or_false_problems" edges to the TrueOrFalseProblem entity.
+func (wu *WorkbookUpdate) ClearTrueOrFalseProblems() *WorkbookUpdate {
+	wu.mutation.ClearTrueOrFalseProblems()
+	return wu
+}
+
+// RemoveTrueOrFalseProblemIDs removes the "true_or_false_problems" edge to TrueOrFalseProblem entities by IDs.
+func (wu *WorkbookUpdate) RemoveTrueOrFalseProblemIDs(ids ...uuid.UUID) *WorkbookUpdate {
+	wu.mutation.RemoveTrueOrFalseProblemIDs(ids...)
+	return wu
+}
+
+// RemoveTrueOrFalseProblems removes "true_or_false_problems" edges to TrueOrFalseProblem entities.
+func (wu *WorkbookUpdate) RemoveTrueOrFalseProblems(t ...*TrueOrFalseProblem) *WorkbookUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return wu.RemoveTrueOrFalseProblemIDs(ids...)
 }
 
 // ClearWorkbookCategories clears all "workbook_categories" edges to the WorkbookCategory entity.
@@ -290,8 +364,8 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := wu.mutation.UpdatedAt(); ok {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := wu.mutation.CreatedID(); ok {
-		_spec.SetField(workbook.FieldCreatedID, field.TypeUUID, value)
+	if value, ok := wu.mutation.UserID(); ok {
+		_spec.SetField(workbook.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := wu.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
@@ -302,28 +376,28 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := wu.mutation.Title(); ok {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
 	}
-	if wu.mutation.ProblemsCleared() {
+	if wu.mutation.DescriptionProblemsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.RemovedProblemsIDs(); len(nodes) > 0 && !wu.mutation.ProblemsCleared() {
+	if nodes := wu.mutation.RemovedDescriptionProblemsIDs(); len(nodes) > 0 && !wu.mutation.DescriptionProblemsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -331,15 +405,105 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.ProblemsIDs(); len(nodes) > 0 {
+	if nodes := wu.mutation.DescriptionProblemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.SelectionProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedSelectionProblemsIDs(); len(nodes) > 0 && !wu.mutation.SelectionProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.SelectionProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.TrueOrFalseProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedTrueOrFalseProblemsIDs(); len(nodes) > 0 && !wu.mutation.TrueOrFalseProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.TrueOrFalseProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -477,16 +641,16 @@ func (wuo *WorkbookUpdateOne) SetUpdatedAt(t time.Time) *WorkbookUpdateOne {
 	return wuo
 }
 
-// SetCreatedID sets the "created_id" field.
-func (wuo *WorkbookUpdateOne) SetCreatedID(u uuid.UUID) *WorkbookUpdateOne {
-	wuo.mutation.SetCreatedID(u)
+// SetUserID sets the "user_id" field.
+func (wuo *WorkbookUpdateOne) SetUserID(u uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.SetUserID(u)
 	return wuo
 }
 
-// SetNillableCreatedID sets the "created_id" field if the given value is not nil.
-func (wuo *WorkbookUpdateOne) SetNillableCreatedID(u *uuid.UUID) *WorkbookUpdateOne {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (wuo *WorkbookUpdateOne) SetNillableUserID(u *uuid.UUID) *WorkbookUpdateOne {
 	if u != nil {
-		wuo.SetCreatedID(*u)
+		wuo.SetUserID(*u)
 	}
 	return wuo
 }
@@ -533,19 +697,49 @@ func (wuo *WorkbookUpdateOne) SetNillableTitle(s *string) *WorkbookUpdateOne {
 	return wuo
 }
 
-// AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wuo *WorkbookUpdateOne) AddProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
-	wuo.mutation.AddProblemIDs(ids...)
+// AddDescriptionProblemIDs adds the "description_problems" edge to the DescriptionProblem entity by IDs.
+func (wuo *WorkbookUpdateOne) AddDescriptionProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.AddDescriptionProblemIDs(ids...)
 	return wuo
 }
 
-// AddProblems adds the "problems" edges to the Problem entity.
-func (wuo *WorkbookUpdateOne) AddProblems(p ...*Problem) *WorkbookUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddDescriptionProblems adds the "description_problems" edges to the DescriptionProblem entity.
+func (wuo *WorkbookUpdateOne) AddDescriptionProblems(d ...*DescriptionProblem) *WorkbookUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return wuo.AddProblemIDs(ids...)
+	return wuo.AddDescriptionProblemIDs(ids...)
+}
+
+// AddSelectionProblemIDs adds the "selection_problems" edge to the SelectionProblem entity by IDs.
+func (wuo *WorkbookUpdateOne) AddSelectionProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.AddSelectionProblemIDs(ids...)
+	return wuo
+}
+
+// AddSelectionProblems adds the "selection_problems" edges to the SelectionProblem entity.
+func (wuo *WorkbookUpdateOne) AddSelectionProblems(s ...*SelectionProblem) *WorkbookUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wuo.AddSelectionProblemIDs(ids...)
+}
+
+// AddTrueOrFalseProblemIDs adds the "true_or_false_problems" edge to the TrueOrFalseProblem entity by IDs.
+func (wuo *WorkbookUpdateOne) AddTrueOrFalseProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.AddTrueOrFalseProblemIDs(ids...)
+	return wuo
+}
+
+// AddTrueOrFalseProblems adds the "true_or_false_problems" edges to the TrueOrFalseProblem entity.
+func (wuo *WorkbookUpdateOne) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *WorkbookUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return wuo.AddTrueOrFalseProblemIDs(ids...)
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
@@ -583,25 +777,67 @@ func (wuo *WorkbookUpdateOne) Mutation() *WorkbookMutation {
 	return wuo.mutation
 }
 
-// ClearProblems clears all "problems" edges to the Problem entity.
-func (wuo *WorkbookUpdateOne) ClearProblems() *WorkbookUpdateOne {
-	wuo.mutation.ClearProblems()
+// ClearDescriptionProblems clears all "description_problems" edges to the DescriptionProblem entity.
+func (wuo *WorkbookUpdateOne) ClearDescriptionProblems() *WorkbookUpdateOne {
+	wuo.mutation.ClearDescriptionProblems()
 	return wuo
 }
 
-// RemoveProblemIDs removes the "problems" edge to Problem entities by IDs.
-func (wuo *WorkbookUpdateOne) RemoveProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
-	wuo.mutation.RemoveProblemIDs(ids...)
+// RemoveDescriptionProblemIDs removes the "description_problems" edge to DescriptionProblem entities by IDs.
+func (wuo *WorkbookUpdateOne) RemoveDescriptionProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.RemoveDescriptionProblemIDs(ids...)
 	return wuo
 }
 
-// RemoveProblems removes "problems" edges to Problem entities.
-func (wuo *WorkbookUpdateOne) RemoveProblems(p ...*Problem) *WorkbookUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// RemoveDescriptionProblems removes "description_problems" edges to DescriptionProblem entities.
+func (wuo *WorkbookUpdateOne) RemoveDescriptionProblems(d ...*DescriptionProblem) *WorkbookUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return wuo.RemoveProblemIDs(ids...)
+	return wuo.RemoveDescriptionProblemIDs(ids...)
+}
+
+// ClearSelectionProblems clears all "selection_problems" edges to the SelectionProblem entity.
+func (wuo *WorkbookUpdateOne) ClearSelectionProblems() *WorkbookUpdateOne {
+	wuo.mutation.ClearSelectionProblems()
+	return wuo
+}
+
+// RemoveSelectionProblemIDs removes the "selection_problems" edge to SelectionProblem entities by IDs.
+func (wuo *WorkbookUpdateOne) RemoveSelectionProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.RemoveSelectionProblemIDs(ids...)
+	return wuo
+}
+
+// RemoveSelectionProblems removes "selection_problems" edges to SelectionProblem entities.
+func (wuo *WorkbookUpdateOne) RemoveSelectionProblems(s ...*SelectionProblem) *WorkbookUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wuo.RemoveSelectionProblemIDs(ids...)
+}
+
+// ClearTrueOrFalseProblems clears all "true_or_false_problems" edges to the TrueOrFalseProblem entity.
+func (wuo *WorkbookUpdateOne) ClearTrueOrFalseProblems() *WorkbookUpdateOne {
+	wuo.mutation.ClearTrueOrFalseProblems()
+	return wuo
+}
+
+// RemoveTrueOrFalseProblemIDs removes the "true_or_false_problems" edge to TrueOrFalseProblem entities by IDs.
+func (wuo *WorkbookUpdateOne) RemoveTrueOrFalseProblemIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
+	wuo.mutation.RemoveTrueOrFalseProblemIDs(ids...)
+	return wuo
+}
+
+// RemoveTrueOrFalseProblems removes "true_or_false_problems" edges to TrueOrFalseProblem entities.
+func (wuo *WorkbookUpdateOne) RemoveTrueOrFalseProblems(t ...*TrueOrFalseProblem) *WorkbookUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return wuo.RemoveTrueOrFalseProblemIDs(ids...)
 }
 
 // ClearWorkbookCategories clears all "workbook_categories" edges to the WorkbookCategory entity.
@@ -745,8 +981,8 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 	if value, ok := wuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := wuo.mutation.CreatedID(); ok {
-		_spec.SetField(workbook.FieldCreatedID, field.TypeUUID, value)
+	if value, ok := wuo.mutation.UserID(); ok {
+		_spec.SetField(workbook.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := wuo.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
@@ -757,28 +993,28 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 	if value, ok := wuo.mutation.Title(); ok {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
 	}
-	if wuo.mutation.ProblemsCleared() {
+	if wuo.mutation.DescriptionProblemsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.RemovedProblemsIDs(); len(nodes) > 0 && !wuo.mutation.ProblemsCleared() {
+	if nodes := wuo.mutation.RemovedDescriptionProblemsIDs(); len(nodes) > 0 && !wuo.mutation.DescriptionProblemsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -786,15 +1022,105 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.ProblemsIDs(); len(nodes) > 0 {
+	if nodes := wuo.mutation.DescriptionProblemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.SelectionProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedSelectionProblemsIDs(); len(nodes) > 0 && !wuo.mutation.SelectionProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.SelectionProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.TrueOrFalseProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedTrueOrFalseProblemsIDs(); len(nodes) > 0 && !wuo.mutation.TrueOrFalseProblemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.TrueOrFalseProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

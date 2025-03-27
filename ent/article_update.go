@@ -91,17 +91,23 @@ func (au *ArticleUpdate) SetNillableDescription(s *string) *ArticleUpdate {
 	return au
 }
 
-// SetPostID sets the "post_id" field.
-func (au *ArticleUpdate) SetPostID(u uuid.UUID) *ArticleUpdate {
-	au.mutation.SetPostID(u)
+// SetUserID sets the "user_id" field.
+func (au *ArticleUpdate) SetUserID(u uuid.UUID) *ArticleUpdate {
+	au.mutation.SetUserID(u)
 	return au
 }
 
-// SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (au *ArticleUpdate) SetNillablePostID(u *uuid.UUID) *ArticleUpdate {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (au *ArticleUpdate) SetNillableUserID(u *uuid.UUID) *ArticleUpdate {
 	if u != nil {
-		au.SetPostID(*u)
+		au.SetUserID(*u)
 	}
+	return au
+}
+
+// SetPostID sets the "post" edge to the User entity by ID.
+func (au *ArticleUpdate) SetPostID(id uuid.UUID) *ArticleUpdate {
+	au.mutation.SetPostID(id)
 	return au
 }
 
@@ -310,17 +316,23 @@ func (auo *ArticleUpdateOne) SetNillableDescription(s *string) *ArticleUpdateOne
 	return auo
 }
 
-// SetPostID sets the "post_id" field.
-func (auo *ArticleUpdateOne) SetPostID(u uuid.UUID) *ArticleUpdateOne {
-	auo.mutation.SetPostID(u)
+// SetUserID sets the "user_id" field.
+func (auo *ArticleUpdateOne) SetUserID(u uuid.UUID) *ArticleUpdateOne {
+	auo.mutation.SetUserID(u)
 	return auo
 }
 
-// SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (auo *ArticleUpdateOne) SetNillablePostID(u *uuid.UUID) *ArticleUpdateOne {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (auo *ArticleUpdateOne) SetNillableUserID(u *uuid.UUID) *ArticleUpdateOne {
 	if u != nil {
-		auo.SetPostID(*u)
+		auo.SetUserID(*u)
 	}
+	return auo
+}
+
+// SetPostID sets the "post" edge to the User entity by ID.
+func (auo *ArticleUpdateOne) SetPostID(id uuid.UUID) *ArticleUpdateOne {
+	auo.mutation.SetPostID(id)
 	return auo
 }
 

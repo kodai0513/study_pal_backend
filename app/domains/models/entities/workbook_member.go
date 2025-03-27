@@ -49,3 +49,15 @@ func (w *WorkbookMember) UserId() uuid.UUID {
 func (w *WorkbookMember) WorkbookId() uuid.UUID {
 	return w.workbookId
 }
+
+func (w *WorkbookMember) ChangeAdmin() {
+	w.roleId = master_roles.Admin
+}
+
+func (w *WorkbookMember) ChangeEditor() {
+	w.roleId = master_roles.Editor
+}
+
+func (w *WorkbookMember) ChangeReader() {
+	w.roleId = master_roles.Reader
+}

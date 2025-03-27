@@ -52,7 +52,7 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_quer
 			return &timeline_query_service.TimelineDto{
 				Id:           article.ID,
 				Description:  article.Description,
-				UserId:       article.PostID,
+				UserId:       article.UserID,
 				UserNickName: article.Edges.Post.Name,
 				UserName:     article.Edges.Post.NickName,
 			}

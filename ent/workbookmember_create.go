@@ -58,9 +58,9 @@ func (wmc *WorkbookMemberCreate) SetRoleID(u uuid.UUID) *WorkbookMemberCreate {
 	return wmc
 }
 
-// SetMemberID sets the "member_id" field.
-func (wmc *WorkbookMemberCreate) SetMemberID(u uuid.UUID) *WorkbookMemberCreate {
-	wmc.mutation.SetMemberID(u)
+// SetUserID sets the "user_id" field.
+func (wmc *WorkbookMemberCreate) SetUserID(u uuid.UUID) *WorkbookMemberCreate {
+	wmc.mutation.SetUserID(u)
 	return wmc
 }
 
@@ -81,9 +81,9 @@ func (wmc *WorkbookMemberCreate) SetRole(r *Role) *WorkbookMemberCreate {
 	return wmc.SetRoleID(r.ID)
 }
 
-// SetMember sets the "member" edge to the User entity.
-func (wmc *WorkbookMemberCreate) SetMember(u *User) *WorkbookMemberCreate {
-	return wmc.SetMemberID(u.ID)
+// SetUser sets the "user" edge to the User entity.
+func (wmc *WorkbookMemberCreate) SetUser(u *User) *WorkbookMemberCreate {
+	return wmc.SetUserID(u.ID)
 }
 
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
@@ -147,8 +147,8 @@ func (wmc *WorkbookMemberCreate) check() error {
 	if _, ok := wmc.mutation.RoleID(); !ok {
 		return &ValidationError{Name: "role_id", err: errors.New(`ent: missing required field "WorkbookMember.role_id"`)}
 	}
-	if _, ok := wmc.mutation.MemberID(); !ok {
-		return &ValidationError{Name: "member_id", err: errors.New(`ent: missing required field "WorkbookMember.member_id"`)}
+	if _, ok := wmc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "WorkbookMember.user_id"`)}
 	}
 	if _, ok := wmc.mutation.WorkbookID(); !ok {
 		return &ValidationError{Name: "workbook_id", err: errors.New(`ent: missing required field "WorkbookMember.workbook_id"`)}
@@ -156,8 +156,8 @@ func (wmc *WorkbookMemberCreate) check() error {
 	if len(wmc.mutation.RoleIDs()) == 0 {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required edge "WorkbookMember.role"`)}
 	}
-	if len(wmc.mutation.MemberIDs()) == 0 {
-		return &ValidationError{Name: "member", err: errors.New(`ent: missing required edge "WorkbookMember.member"`)}
+	if len(wmc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "WorkbookMember.user"`)}
 	}
 	if len(wmc.mutation.WorkbookIDs()) == 0 {
 		return &ValidationError{Name: "workbook", err: errors.New(`ent: missing required edge "WorkbookMember.workbook"`)}
@@ -222,12 +222,12 @@ func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.Create
 		_node.RoleID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := wmc.mutation.MemberIDs(); len(nodes) > 0 {
+	if nodes := wmc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   workbookmember.MemberTable,
-			Columns: []string{workbookmember.MemberColumn},
+			Table:   workbookmember.UserTable,
+			Columns: []string{workbookmember.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -236,7 +236,7 @@ func (wmc *WorkbookMemberCreate) createSpec() (*WorkbookMember, *sqlgraph.Create
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.MemberID = nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := wmc.mutation.WorkbookIDs(); len(nodes) > 0 {

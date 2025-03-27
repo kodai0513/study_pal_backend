@@ -71,9 +71,9 @@ func RoleID(v uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldEQ(FieldRoleID, v))
 }
 
-// MemberID applies equality check predicate on the "member_id" field. It's identical to MemberIDEQ.
-func MemberID(v uuid.UUID) predicate.WorkbookMember {
-	return predicate.WorkbookMember(sql.FieldEQ(FieldMemberID, v))
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v uuid.UUID) predicate.WorkbookMember {
+	return predicate.WorkbookMember(sql.FieldEQ(FieldUserID, v))
 }
 
 // WorkbookID applies equality check predicate on the "workbook_id" field. It's identical to WorkbookIDEQ.
@@ -181,24 +181,24 @@ func RoleIDNotIn(vs ...uuid.UUID) predicate.WorkbookMember {
 	return predicate.WorkbookMember(sql.FieldNotIn(FieldRoleID, vs...))
 }
 
-// MemberIDEQ applies the EQ predicate on the "member_id" field.
-func MemberIDEQ(v uuid.UUID) predicate.WorkbookMember {
-	return predicate.WorkbookMember(sql.FieldEQ(FieldMemberID, v))
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v uuid.UUID) predicate.WorkbookMember {
+	return predicate.WorkbookMember(sql.FieldEQ(FieldUserID, v))
 }
 
-// MemberIDNEQ applies the NEQ predicate on the "member_id" field.
-func MemberIDNEQ(v uuid.UUID) predicate.WorkbookMember {
-	return predicate.WorkbookMember(sql.FieldNEQ(FieldMemberID, v))
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v uuid.UUID) predicate.WorkbookMember {
+	return predicate.WorkbookMember(sql.FieldNEQ(FieldUserID, v))
 }
 
-// MemberIDIn applies the In predicate on the "member_id" field.
-func MemberIDIn(vs ...uuid.UUID) predicate.WorkbookMember {
-	return predicate.WorkbookMember(sql.FieldIn(FieldMemberID, vs...))
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...uuid.UUID) predicate.WorkbookMember {
+	return predicate.WorkbookMember(sql.FieldIn(FieldUserID, vs...))
 }
 
-// MemberIDNotIn applies the NotIn predicate on the "member_id" field.
-func MemberIDNotIn(vs ...uuid.UUID) predicate.WorkbookMember {
-	return predicate.WorkbookMember(sql.FieldNotIn(FieldMemberID, vs...))
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...uuid.UUID) predicate.WorkbookMember {
+	return predicate.WorkbookMember(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // WorkbookIDEQ applies the EQ predicate on the "workbook_id" field.
@@ -244,21 +244,21 @@ func HasRoleWith(preds ...predicate.Role) predicate.WorkbookMember {
 	})
 }
 
-// HasMember applies the HasEdge predicate on the "member" edge.
-func HasMember() predicate.WorkbookMember {
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.WorkbookMember {
 	return predicate.WorkbookMember(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, MemberTable, MemberColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasMemberWith applies the HasEdge predicate on the "member" edge with a given conditions (other predicates).
-func HasMemberWith(preds ...predicate.User) predicate.WorkbookMember {
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.WorkbookMember {
 	return predicate.WorkbookMember(func(s *sql.Selector) {
-		step := newMemberStep()
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

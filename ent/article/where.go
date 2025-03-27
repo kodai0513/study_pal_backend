@@ -76,9 +76,9 @@ func Description(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldDescription, v))
 }
 
-// PostID applies equality check predicate on the "post_id" field. It's identical to PostIDEQ.
-func PostID(v uuid.UUID) predicate.Article {
-	return predicate.Article(sql.FieldEQ(FieldPostID, v))
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v uuid.UUID) predicate.Article {
+	return predicate.Article(sql.FieldEQ(FieldUserID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -276,24 +276,24 @@ func DescriptionContainsFold(v string) predicate.Article {
 	return predicate.Article(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// PostIDEQ applies the EQ predicate on the "post_id" field.
-func PostIDEQ(v uuid.UUID) predicate.Article {
-	return predicate.Article(sql.FieldEQ(FieldPostID, v))
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v uuid.UUID) predicate.Article {
+	return predicate.Article(sql.FieldEQ(FieldUserID, v))
 }
 
-// PostIDNEQ applies the NEQ predicate on the "post_id" field.
-func PostIDNEQ(v uuid.UUID) predicate.Article {
-	return predicate.Article(sql.FieldNEQ(FieldPostID, v))
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v uuid.UUID) predicate.Article {
+	return predicate.Article(sql.FieldNEQ(FieldUserID, v))
 }
 
-// PostIDIn applies the In predicate on the "post_id" field.
-func PostIDIn(vs ...uuid.UUID) predicate.Article {
-	return predicate.Article(sql.FieldIn(FieldPostID, vs...))
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...uuid.UUID) predicate.Article {
+	return predicate.Article(sql.FieldIn(FieldUserID, vs...))
 }
 
-// PostIDNotIn applies the NotIn predicate on the "post_id" field.
-func PostIDNotIn(vs ...uuid.UUID) predicate.Article {
-	return predicate.Article(sql.FieldNotIn(FieldPostID, vs...))
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...uuid.UUID) predicate.Article {
+	return predicate.Article(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // HasPost applies the HasEdge predicate on the "post" edge.

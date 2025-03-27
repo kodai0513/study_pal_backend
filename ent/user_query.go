@@ -459,7 +459,7 @@ func (uq *UserQuery) loadArticles(ctx context.Context, query *ArticleQuery, node
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(article.FieldPostID)
+		query.ctx.AppendFieldOnce(article.FieldUserID)
 	}
 	query.Where(predicate.Article(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.ArticlesColumn), fks...))
@@ -469,10 +469,10 @@ func (uq *UserQuery) loadArticles(ctx context.Context, query *ArticleQuery, node
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.PostID
+		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "post_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -489,7 +489,7 @@ func (uq *UserQuery) loadWorkbookMembers(ctx context.Context, query *WorkbookMem
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(workbookmember.FieldMemberID)
+		query.ctx.AppendFieldOnce(workbookmember.FieldUserID)
 	}
 	query.Where(predicate.WorkbookMember(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.WorkbookMembersColumn), fks...))
@@ -499,10 +499,10 @@ func (uq *UserQuery) loadWorkbookMembers(ctx context.Context, query *WorkbookMem
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.MemberID
+		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "member_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
