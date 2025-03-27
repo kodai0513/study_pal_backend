@@ -27,7 +27,7 @@ type WorkbookMemberQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.WorkbookMember
 	withRole     *RoleQuery
-	withMember   *UserQuery
+	withUser     *UserQuery
 	withWorkbook *WorkbookQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -87,8 +87,8 @@ func (wmq *WorkbookMemberQuery) QueryRole() *RoleQuery {
 	return query
 }
 
-// QueryMember chains the current query on the "member" edge.
-func (wmq *WorkbookMemberQuery) QueryMember() *UserQuery {
+// QueryUser chains the current query on the "user" edge.
+func (wmq *WorkbookMemberQuery) QueryUser() *UserQuery {
 	query := (&UserClient{config: wmq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wmq.prepareQuery(ctx); err != nil {
@@ -101,7 +101,7 @@ func (wmq *WorkbookMemberQuery) QueryMember() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(workbookmember.Table, workbookmember.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, workbookmember.MemberTable, workbookmember.MemberColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, workbookmember.UserTable, workbookmember.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wmq.driver.Dialect(), step)
 		return fromU, nil
@@ -324,7 +324,7 @@ func (wmq *WorkbookMemberQuery) Clone() *WorkbookMemberQuery {
 		inters:       append([]Interceptor{}, wmq.inters...),
 		predicates:   append([]predicate.WorkbookMember{}, wmq.predicates...),
 		withRole:     wmq.withRole.Clone(),
-		withMember:   wmq.withMember.Clone(),
+		withUser:     wmq.withUser.Clone(),
 		withWorkbook: wmq.withWorkbook.Clone(),
 		// clone intermediate query.
 		sql:  wmq.sql.Clone(),
@@ -343,14 +343,14 @@ func (wmq *WorkbookMemberQuery) WithRole(opts ...func(*RoleQuery)) *WorkbookMemb
 	return wmq
 }
 
-// WithMember tells the query-builder to eager-load the nodes that are connected to
-// the "member" edge. The optional arguments are used to configure the query builder of the edge.
-func (wmq *WorkbookMemberQuery) WithMember(opts ...func(*UserQuery)) *WorkbookMemberQuery {
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (wmq *WorkbookMemberQuery) WithUser(opts ...func(*UserQuery)) *WorkbookMemberQuery {
 	query := (&UserClient{config: wmq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	wmq.withMember = query
+	wmq.withUser = query
 	return wmq
 }
 
@@ -445,7 +445,7 @@ func (wmq *WorkbookMemberQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		_spec       = wmq.querySpec()
 		loadedTypes = [3]bool{
 			wmq.withRole != nil,
-			wmq.withMember != nil,
+			wmq.withUser != nil,
 			wmq.withWorkbook != nil,
 		}
 	)
@@ -473,9 +473,9 @@ func (wmq *WorkbookMemberQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			return nil, err
 		}
 	}
-	if query := wmq.withMember; query != nil {
-		if err := wmq.loadMember(ctx, query, nodes, nil,
-			func(n *WorkbookMember, e *User) { n.Edges.Member = e }); err != nil {
+	if query := wmq.withUser; query != nil {
+		if err := wmq.loadUser(ctx, query, nodes, nil,
+			func(n *WorkbookMember, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -517,11 +517,11 @@ func (wmq *WorkbookMemberQuery) loadRole(ctx context.Context, query *RoleQuery, 
 	}
 	return nil
 }
-func (wmq *WorkbookMemberQuery) loadMember(ctx context.Context, query *UserQuery, nodes []*WorkbookMember, init func(*WorkbookMember), assign func(*WorkbookMember, *User)) error {
+func (wmq *WorkbookMemberQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*WorkbookMember, init func(*WorkbookMember), assign func(*WorkbookMember, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*WorkbookMember)
 	for i := range nodes {
-		fk := nodes[i].MemberID
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -538,7 +538,7 @@ func (wmq *WorkbookMemberQuery) loadMember(ctx context.Context, query *UserQuery
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "member_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -604,8 +604,8 @@ func (wmq *WorkbookMemberQuery) querySpec() *sqlgraph.QuerySpec {
 		if wmq.withRole != nil {
 			_spec.Node.AddColumnOnce(workbookmember.FieldRoleID)
 		}
-		if wmq.withMember != nil {
-			_spec.Node.AddColumnOnce(workbookmember.FieldMemberID)
+		if wmq.withUser != nil {
+			_spec.Node.AddColumnOnce(workbookmember.FieldUserID)
 		}
 		if wmq.withWorkbook != nil {
 			_spec.Node.AddColumnOnce(workbookmember.FieldWorkbookID)

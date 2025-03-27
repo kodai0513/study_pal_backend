@@ -9,86 +9,6 @@ import (
 )
 
 var (
-	// AnswerDescriptionsColumns holds the columns for the "answer_descriptions" table.
-	AnswerDescriptionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Size: 255},
-		{Name: "problem_id", Type: field.TypeUUID, Unique: true},
-	}
-	// AnswerDescriptionsTable holds the schema information for the "answer_descriptions" table.
-	AnswerDescriptionsTable = &schema.Table{
-		Name:       "answer_descriptions",
-		Columns:    AnswerDescriptionsColumns,
-		PrimaryKey: []*schema.Column{AnswerDescriptionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "answer_descriptions_problems_answer_descriptions",
-				Columns:    []*schema.Column{AnswerDescriptionsColumns[4]},
-				RefColumns: []*schema.Column{ProblemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// AnswerMultiChoicesColumns holds the columns for the "answer_multi_choices" table.
-	AnswerMultiChoicesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Size: 255},
-		{Name: "is_correct", Type: field.TypeBool},
-		{Name: "problem_id", Type: field.TypeUUID},
-	}
-	// AnswerMultiChoicesTable holds the schema information for the "answer_multi_choices" table.
-	AnswerMultiChoicesTable = &schema.Table{
-		Name:       "answer_multi_choices",
-		Columns:    AnswerMultiChoicesColumns,
-		PrimaryKey: []*schema.Column{AnswerMultiChoicesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "answer_multi_choices_problems_answer_multi_choices",
-				Columns:    []*schema.Column{AnswerMultiChoicesColumns[5]},
-				RefColumns: []*schema.Column{ProblemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// AnswerTruthsColumns holds the columns for the "answer_truths" table.
-	AnswerTruthsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "truth", Type: field.TypeBool},
-		{Name: "problem_id", Type: field.TypeUUID, Unique: true},
-	}
-	// AnswerTruthsTable holds the schema information for the "answer_truths" table.
-	AnswerTruthsTable = &schema.Table{
-		Name:       "answer_truths",
-		Columns:    AnswerTruthsColumns,
-		PrimaryKey: []*schema.Column{AnswerTruthsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "answer_truths_problems_answer_truths",
-				Columns:    []*schema.Column{AnswerTruthsColumns[4]},
-				RefColumns: []*schema.Column{ProblemsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// AnswerTypesColumns holds the columns for the "answer_types" table.
-	AnswerTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Unique: true, Size: 255},
-	}
-	// AnswerTypesTable holds the schema information for the "answer_types" table.
-	AnswerTypesTable = &schema.Table{
-		Name:       "answer_types",
-		Columns:    AnswerTypesColumns,
-		PrimaryKey: []*schema.Column{AnswerTypesColumns[0]},
-	}
 	// ArticlesColumns holds the columns for the "articles" table.
 	ArticlesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -96,7 +16,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "page_id", Type: field.TypeInt, Unique: true, Nullable: true},
 		{Name: "description", Type: field.TypeString, Size: 400},
-		{Name: "post_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// ArticlesTable holds the schema information for the "articles" table.
 	ArticlesTable = &schema.Table{
@@ -108,6 +28,43 @@ var (
 				Symbol:     "articles_users_articles",
 				Columns:    []*schema.Column{ArticlesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// DescriptionProblemsColumns holds the columns for the "description_problems" table.
+	DescriptionProblemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "correct_statement", Type: field.TypeString, Size: 255},
+		{Name: "statement", Type: field.TypeString, Size: 1000},
+		{Name: "workbook_id", Type: field.TypeUUID},
+		{Name: "workbook_category_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "workbook_category_detail_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// DescriptionProblemsTable holds the schema information for the "description_problems" table.
+	DescriptionProblemsTable = &schema.Table{
+		Name:       "description_problems",
+		Columns:    DescriptionProblemsColumns,
+		PrimaryKey: []*schema.Column{DescriptionProblemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "description_problems_workbooks_description_problems",
+				Columns:    []*schema.Column{DescriptionProblemsColumns[5]},
+				RefColumns: []*schema.Column{WorkbooksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "description_problems_workbook_categories_description_problems",
+				Columns:    []*schema.Column{DescriptionProblemsColumns[6]},
+				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "description_problems_workbook_category_details_description_problems",
+				Columns:    []*schema.Column{DescriptionProblemsColumns[7]},
+				RefColumns: []*schema.Column{WorkbookCategoryDetailsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -125,49 +82,6 @@ var (
 		Columns:    PermissionsColumns,
 		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
 	}
-	// ProblemsColumns holds the columns for the "problems" table.
-	ProblemsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "statement", Type: field.TypeString, Size: 1000},
-		{Name: "answer_type_id", Type: field.TypeUUID},
-		{Name: "workbook_id", Type: field.TypeUUID},
-		{Name: "workbook_category_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "workbook_category_detail_id", Type: field.TypeUUID, Nullable: true},
-	}
-	// ProblemsTable holds the schema information for the "problems" table.
-	ProblemsTable = &schema.Table{
-		Name:       "problems",
-		Columns:    ProblemsColumns,
-		PrimaryKey: []*schema.Column{ProblemsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "problems_answer_types_problems",
-				Columns:    []*schema.Column{ProblemsColumns[4]},
-				RefColumns: []*schema.Column{AnswerTypesColumns[0]},
-				OnDelete:   schema.Restrict,
-			},
-			{
-				Symbol:     "problems_workbooks_problems",
-				Columns:    []*schema.Column{ProblemsColumns[5]},
-				RefColumns: []*schema.Column{WorkbooksColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "problems_workbook_categories_problems",
-				Columns:    []*schema.Column{ProblemsColumns[6]},
-				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "problems_workbook_category_details_problems",
-				Columns:    []*schema.Column{ProblemsColumns[7]},
-				RefColumns: []*schema.Column{WorkbookCategoryDetailsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// RolesColumns holds the columns for the "roles" table.
 	RolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -180,6 +94,102 @@ var (
 		Name:       "roles",
 		Columns:    RolesColumns,
 		PrimaryKey: []*schema.Column{RolesColumns[0]},
+	}
+	// SelectionProblemsColumns holds the columns for the "selection_problems" table.
+	SelectionProblemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "statement", Type: field.TypeString, Size: 255},
+		{Name: "workbook_id", Type: field.TypeUUID},
+		{Name: "workbook_category_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "workbook_category_detail_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// SelectionProblemsTable holds the schema information for the "selection_problems" table.
+	SelectionProblemsTable = &schema.Table{
+		Name:       "selection_problems",
+		Columns:    SelectionProblemsColumns,
+		PrimaryKey: []*schema.Column{SelectionProblemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "selection_problems_workbooks_selection_problems",
+				Columns:    []*schema.Column{SelectionProblemsColumns[4]},
+				RefColumns: []*schema.Column{WorkbooksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "selection_problems_workbook_categories_selection_problems",
+				Columns:    []*schema.Column{SelectionProblemsColumns[5]},
+				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "selection_problems_workbook_category_details_selection_problems",
+				Columns:    []*schema.Column{SelectionProblemsColumns[6]},
+				RefColumns: []*schema.Column{WorkbookCategoryDetailsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// SelectionProblemAnswersColumns holds the columns for the "selection_problem_answers" table.
+	SelectionProblemAnswersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "is_correct", Type: field.TypeBool},
+		{Name: "statement", Type: field.TypeString, Size: 255},
+		{Name: "selection_problem_id", Type: field.TypeUUID},
+	}
+	// SelectionProblemAnswersTable holds the schema information for the "selection_problem_answers" table.
+	SelectionProblemAnswersTable = &schema.Table{
+		Name:       "selection_problem_answers",
+		Columns:    SelectionProblemAnswersColumns,
+		PrimaryKey: []*schema.Column{SelectionProblemAnswersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "selection_problem_answers_selection_problems_selection_problem_answers",
+				Columns:    []*schema.Column{SelectionProblemAnswersColumns[5]},
+				RefColumns: []*schema.Column{SelectionProblemsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// TrueOrFalseProblemsColumns holds the columns for the "true_or_false_problems" table.
+	TrueOrFalseProblemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "is_correct", Type: field.TypeBool},
+		{Name: "statement", Type: field.TypeString, Size: 255},
+		{Name: "workbook_id", Type: field.TypeUUID},
+		{Name: "workbook_category_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "workbook_category_detail_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// TrueOrFalseProblemsTable holds the schema information for the "true_or_false_problems" table.
+	TrueOrFalseProblemsTable = &schema.Table{
+		Name:       "true_or_false_problems",
+		Columns:    TrueOrFalseProblemsColumns,
+		PrimaryKey: []*schema.Column{TrueOrFalseProblemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "true_or_false_problems_workbooks_true_or_false_problems",
+				Columns:    []*schema.Column{TrueOrFalseProblemsColumns[5]},
+				RefColumns: []*schema.Column{WorkbooksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "true_or_false_problems_workbook_categories_true_or_false_problems",
+				Columns:    []*schema.Column{TrueOrFalseProblemsColumns[6]},
+				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "true_or_false_problems_workbook_category_details_true_or_false_problems",
+				Columns:    []*schema.Column{TrueOrFalseProblemsColumns[7]},
+				RefColumns: []*schema.Column{WorkbookCategoryDetailsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -202,7 +212,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "created_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "description", Type: field.TypeString, Size: 400},
 		{Name: "is_public", Type: field.TypeBool, Default: false},
 		{Name: "title", Type: field.TypeString, Size: 255},
@@ -264,7 +274,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "role_id", Type: field.TypeUUID},
-		{Name: "member_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "workbook_id", Type: field.TypeUUID},
 	}
 	// WorkbookMembersTable holds the schema information for the "workbook_members" table.
@@ -320,14 +330,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AnswerDescriptionsTable,
-		AnswerMultiChoicesTable,
-		AnswerTruthsTable,
-		AnswerTypesTable,
 		ArticlesTable,
+		DescriptionProblemsTable,
 		PermissionsTable,
-		ProblemsTable,
 		RolesTable,
+		SelectionProblemsTable,
+		SelectionProblemAnswersTable,
+		TrueOrFalseProblemsTable,
 		UsersTable,
 		WorkbooksTable,
 		WorkbookCategoriesTable,
@@ -338,14 +347,17 @@ var (
 )
 
 func init() {
-	AnswerDescriptionsTable.ForeignKeys[0].RefTable = ProblemsTable
-	AnswerMultiChoicesTable.ForeignKeys[0].RefTable = ProblemsTable
-	AnswerTruthsTable.ForeignKeys[0].RefTable = ProblemsTable
 	ArticlesTable.ForeignKeys[0].RefTable = UsersTable
-	ProblemsTable.ForeignKeys[0].RefTable = AnswerTypesTable
-	ProblemsTable.ForeignKeys[1].RefTable = WorkbooksTable
-	ProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoriesTable
-	ProblemsTable.ForeignKeys[3].RefTable = WorkbookCategoryDetailsTable
+	DescriptionProblemsTable.ForeignKeys[0].RefTable = WorkbooksTable
+	DescriptionProblemsTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
+	DescriptionProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoryDetailsTable
+	SelectionProblemsTable.ForeignKeys[0].RefTable = WorkbooksTable
+	SelectionProblemsTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
+	SelectionProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoryDetailsTable
+	SelectionProblemAnswersTable.ForeignKeys[0].RefTable = SelectionProblemsTable
+	TrueOrFalseProblemsTable.ForeignKeys[0].RefTable = WorkbooksTable
+	TrueOrFalseProblemsTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
+	TrueOrFalseProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoryDetailsTable
 	WorkbookCategoriesTable.ForeignKeys[0].RefTable = WorkbooksTable
 	WorkbookCategoryDetailsTable.ForeignKeys[0].RefTable = WorkbookCategoriesTable
 	WorkbookMembersTable.ForeignKeys[0].RefTable = RolesTable

@@ -3,6 +3,7 @@ package schema
 import (
 	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/role"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
 
@@ -28,7 +29,7 @@ func (WorkbookMember) Mixin() []ent.Mixin {
 func (WorkbookMember) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID(role.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID("member_id", uuid.UUID{}).Unique(),
+		field.UUID(user.Label+"_id", uuid.UUID{}).Unique(),
 		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
 	}
 }
@@ -37,7 +38,7 @@ func (WorkbookMember) Fields() []ent.Field {
 func (WorkbookMember) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From(role.Label, Role.Type).Ref(workbookmember.Table).Unique().Required().Field(role.Label + "_id"),
-		edge.From("member", User.Type).Ref(workbookmember.Table).Unique().Required().Field("member_id"),
+		edge.From(user.Label, User.Type).Ref(workbookmember.Table).Unique().Required().Field(user.Label + "_id"),
 		edge.From(workbook.Label, Workbook.Type).Ref(workbookmember.Table).Unique().Required().Field(workbook.Label + "_id"),
 	}
 }

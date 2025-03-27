@@ -406,7 +406,7 @@ func (aq *ArticleQuery) loadPost(ctx context.Context, query *UserQuery, nodes []
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Article)
 	for i := range nodes {
-		fk := nodes[i].PostID
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -423,7 +423,7 @@ func (aq *ArticleQuery) loadPost(ctx context.Context, query *UserQuery, nodes []
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "post_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -458,7 +458,7 @@ func (aq *ArticleQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 		if aq.withPost != nil {
-			_spec.Node.AddColumnOnce(article.FieldPostID)
+			_spec.Node.AddColumnOnce(article.FieldUserID)
 		}
 	}
 	if ps := aq.predicates; len(ps) > 0 {

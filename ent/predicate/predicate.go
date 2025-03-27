@@ -6,29 +6,26 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// AnswerDescription is the predicate function for answerdescription builders.
-type AnswerDescription func(*sql.Selector)
-
-// AnswerMultiChoices is the predicate function for answermultichoices builders.
-type AnswerMultiChoices func(*sql.Selector)
-
-// AnswerTruth is the predicate function for answertruth builders.
-type AnswerTruth func(*sql.Selector)
-
-// AnswerType is the predicate function for answertype builders.
-type AnswerType func(*sql.Selector)
-
 // Article is the predicate function for article builders.
 type Article func(*sql.Selector)
+
+// DescriptionProblem is the predicate function for descriptionproblem builders.
+type DescriptionProblem func(*sql.Selector)
 
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
 
-// Problem is the predicate function for problem builders.
-type Problem func(*sql.Selector)
-
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
+
+// SelectionProblem is the predicate function for selectionproblem builders.
+type SelectionProblem func(*sql.Selector)
+
+// SelectionProblemAnswer is the predicate function for selectionproblemanswer builders.
+type SelectionProblemAnswer func(*sql.Selector)
+
+// TrueOrFalseProblem is the predicate function for trueorfalseproblem builders.
+type TrueOrFalseProblem func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -1,8 +1,10 @@
 package schema
 
 import (
+	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/mixin"
-	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookcategorydetail"
@@ -37,7 +39,9 @@ func (WorkbookCategory) Fields() []ent.Field {
 // Edges of the WorkbookCategory.
 func (WorkbookCategory) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To(problem.Table, Problem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(descriptionproblem.Table, DescriptionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From(workbook.Label, Workbook.Type).Ref(workbookcategory.Table).Unique().Required().Field(workbook.Label + "_id"),
 		edge.To(workbookcategorydetail.Table, WorkbookCategoryDetail.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

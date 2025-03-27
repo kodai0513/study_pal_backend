@@ -35,20 +35,42 @@ type WorkbookCategoryDetail struct {
 
 // WorkbookCategoryDetailEdges holds the relations/edges for other nodes in the graph.
 type WorkbookCategoryDetailEdges struct {
-	// Problems holds the value of the problems edge.
-	Problems []*Problem `json:"problems,omitempty"`
+	// DescriptionProblems holds the value of the description_problems edge.
+	DescriptionProblems []*DescriptionProblem `json:"description_problems,omitempty"`
+	// SelectionProblems holds the value of the selection_problems edge.
+	SelectionProblems []*SelectionProblem `json:"selection_problems,omitempty"`
+	// TrueOrFalseProblems holds the value of the true_or_false_problems edge.
+	TrueOrFalseProblems []*TrueOrFalseProblem `json:"true_or_false_problems,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
-// ProblemsOrErr returns the Problems value or an error if the edge
+// DescriptionProblemsOrErr returns the DescriptionProblems value or an error if the edge
 // was not loaded in eager-loading.
-func (e WorkbookCategoryDetailEdges) ProblemsOrErr() ([]*Problem, error) {
+func (e WorkbookCategoryDetailEdges) DescriptionProblemsOrErr() ([]*DescriptionProblem, error) {
 	if e.loadedTypes[0] {
-		return e.Problems, nil
+		return e.DescriptionProblems, nil
 	}
-	return nil, &NotLoadedError{edge: "problems"}
+	return nil, &NotLoadedError{edge: "description_problems"}
+}
+
+// SelectionProblemsOrErr returns the SelectionProblems value or an error if the edge
+// was not loaded in eager-loading.
+func (e WorkbookCategoryDetailEdges) SelectionProblemsOrErr() ([]*SelectionProblem, error) {
+	if e.loadedTypes[1] {
+		return e.SelectionProblems, nil
+	}
+	return nil, &NotLoadedError{edge: "selection_problems"}
+}
+
+// TrueOrFalseProblemsOrErr returns the TrueOrFalseProblems value or an error if the edge
+// was not loaded in eager-loading.
+func (e WorkbookCategoryDetailEdges) TrueOrFalseProblemsOrErr() ([]*TrueOrFalseProblem, error) {
+	if e.loadedTypes[2] {
+		return e.TrueOrFalseProblems, nil
+	}
+	return nil, &NotLoadedError{edge: "true_or_false_problems"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -129,9 +151,19 @@ func (wcd *WorkbookCategoryDetail) Value(name string) (ent.Value, error) {
 	return wcd.selectValues.Get(name)
 }
 
-// QueryProblems queries the "problems" edge of the WorkbookCategoryDetail entity.
-func (wcd *WorkbookCategoryDetail) QueryProblems() *ProblemQuery {
-	return NewWorkbookCategoryDetailClient(wcd.config).QueryProblems(wcd)
+// QueryDescriptionProblems queries the "description_problems" edge of the WorkbookCategoryDetail entity.
+func (wcd *WorkbookCategoryDetail) QueryDescriptionProblems() *DescriptionProblemQuery {
+	return NewWorkbookCategoryDetailClient(wcd.config).QueryDescriptionProblems(wcd)
+}
+
+// QuerySelectionProblems queries the "selection_problems" edge of the WorkbookCategoryDetail entity.
+func (wcd *WorkbookCategoryDetail) QuerySelectionProblems() *SelectionProblemQuery {
+	return NewWorkbookCategoryDetailClient(wcd.config).QuerySelectionProblems(wcd)
+}
+
+// QueryTrueOrFalseProblems queries the "true_or_false_problems" edge of the WorkbookCategoryDetail entity.
+func (wcd *WorkbookCategoryDetail) QueryTrueOrFalseProblems() *TrueOrFalseProblemQuery {
+	return NewWorkbookCategoryDetailClient(wcd.config).QueryTrueOrFalseProblems(wcd)
 }
 
 // Update returns a builder for updating this WorkbookCategoryDetail.

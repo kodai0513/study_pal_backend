@@ -43,11 +43,11 @@ func (w *WorkbookCategoryDetail) WorkbookCategoryId() uuid.UUID {
 	return w.workbookCategoryId
 }
 
-func (w *WorkbookCategoryDetail) SetName(name workbook_categories.Name) {
+func (w *WorkbookCategoryDetail) setName(name workbook_categories.Name) {
 	w.name = name
 }
 
-func (w *WorkbookCategoryDetail) AddProblem(problem *Problem) error {
+func (w *WorkbookCategoryDetail) addProblem(problem *Problem) error {
 	if problem.WorkbookCategoryId() != w.workbookCategoryId || problem.WorkbookCategoryDetailId() != w.id {
 		return errors.New("that issue cannot be included in the category details")
 	}

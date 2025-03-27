@@ -50,6 +50,14 @@ func (w *WorkbookMember) WorkbookId() uuid.UUID {
 	return w.workbookId
 }
 
-func (w *WorkbookMember) SetRoleId(roleId uuid.UUID) {
-	w.roleId = roleId
+func (w *WorkbookMember) ChangeAdmin() {
+	w.roleId = master_roles.Admin
+}
+
+func (w *WorkbookMember) ChangeEditor() {
+	w.roleId = master_roles.Editor
+}
+
+func (w *WorkbookMember) ChangeReader() {
+	w.roleId = master_roles.Reader
 }

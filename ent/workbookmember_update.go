@@ -66,16 +66,16 @@ func (wmu *WorkbookMemberUpdate) SetNillableRoleID(u *uuid.UUID) *WorkbookMember
 	return wmu
 }
 
-// SetMemberID sets the "member_id" field.
-func (wmu *WorkbookMemberUpdate) SetMemberID(u uuid.UUID) *WorkbookMemberUpdate {
-	wmu.mutation.SetMemberID(u)
+// SetUserID sets the "user_id" field.
+func (wmu *WorkbookMemberUpdate) SetUserID(u uuid.UUID) *WorkbookMemberUpdate {
+	wmu.mutation.SetUserID(u)
 	return wmu
 }
 
-// SetNillableMemberID sets the "member_id" field if the given value is not nil.
-func (wmu *WorkbookMemberUpdate) SetNillableMemberID(u *uuid.UUID) *WorkbookMemberUpdate {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (wmu *WorkbookMemberUpdate) SetNillableUserID(u *uuid.UUID) *WorkbookMemberUpdate {
 	if u != nil {
-		wmu.SetMemberID(*u)
+		wmu.SetUserID(*u)
 	}
 	return wmu
 }
@@ -99,9 +99,9 @@ func (wmu *WorkbookMemberUpdate) SetRole(r *Role) *WorkbookMemberUpdate {
 	return wmu.SetRoleID(r.ID)
 }
 
-// SetMember sets the "member" edge to the User entity.
-func (wmu *WorkbookMemberUpdate) SetMember(u *User) *WorkbookMemberUpdate {
-	return wmu.SetMemberID(u.ID)
+// SetUser sets the "user" edge to the User entity.
+func (wmu *WorkbookMemberUpdate) SetUser(u *User) *WorkbookMemberUpdate {
+	return wmu.SetUserID(u.ID)
 }
 
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
@@ -120,9 +120,9 @@ func (wmu *WorkbookMemberUpdate) ClearRole() *WorkbookMemberUpdate {
 	return wmu
 }
 
-// ClearMember clears the "member" edge to the User entity.
-func (wmu *WorkbookMemberUpdate) ClearMember() *WorkbookMemberUpdate {
-	wmu.mutation.ClearMember()
+// ClearUser clears the "user" edge to the User entity.
+func (wmu *WorkbookMemberUpdate) ClearUser() *WorkbookMemberUpdate {
+	wmu.mutation.ClearUser()
 	return wmu
 }
 
@@ -173,8 +173,8 @@ func (wmu *WorkbookMemberUpdate) check() error {
 	if wmu.mutation.RoleCleared() && len(wmu.mutation.RoleIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "WorkbookMember.role"`)
 	}
-	if wmu.mutation.MemberCleared() && len(wmu.mutation.MemberIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "WorkbookMember.member"`)
+	if wmu.mutation.UserCleared() && len(wmu.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "WorkbookMember.user"`)
 	}
 	if wmu.mutation.WorkbookCleared() && len(wmu.mutation.WorkbookIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "WorkbookMember.workbook"`)
@@ -229,12 +229,12 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wmu.mutation.MemberCleared() {
+	if wmu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   workbookmember.MemberTable,
-			Columns: []string{workbookmember.MemberColumn},
+			Table:   workbookmember.UserTable,
+			Columns: []string{workbookmember.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -242,12 +242,12 @@ func (wmu *WorkbookMemberUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wmu.mutation.MemberIDs(); len(nodes) > 0 {
+	if nodes := wmu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   workbookmember.MemberTable,
-			Columns: []string{workbookmember.MemberColumn},
+			Table:   workbookmember.UserTable,
+			Columns: []string{workbookmember.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -341,16 +341,16 @@ func (wmuo *WorkbookMemberUpdateOne) SetNillableRoleID(u *uuid.UUID) *WorkbookMe
 	return wmuo
 }
 
-// SetMemberID sets the "member_id" field.
-func (wmuo *WorkbookMemberUpdateOne) SetMemberID(u uuid.UUID) *WorkbookMemberUpdateOne {
-	wmuo.mutation.SetMemberID(u)
+// SetUserID sets the "user_id" field.
+func (wmuo *WorkbookMemberUpdateOne) SetUserID(u uuid.UUID) *WorkbookMemberUpdateOne {
+	wmuo.mutation.SetUserID(u)
 	return wmuo
 }
 
-// SetNillableMemberID sets the "member_id" field if the given value is not nil.
-func (wmuo *WorkbookMemberUpdateOne) SetNillableMemberID(u *uuid.UUID) *WorkbookMemberUpdateOne {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (wmuo *WorkbookMemberUpdateOne) SetNillableUserID(u *uuid.UUID) *WorkbookMemberUpdateOne {
 	if u != nil {
-		wmuo.SetMemberID(*u)
+		wmuo.SetUserID(*u)
 	}
 	return wmuo
 }
@@ -374,9 +374,9 @@ func (wmuo *WorkbookMemberUpdateOne) SetRole(r *Role) *WorkbookMemberUpdateOne {
 	return wmuo.SetRoleID(r.ID)
 }
 
-// SetMember sets the "member" edge to the User entity.
-func (wmuo *WorkbookMemberUpdateOne) SetMember(u *User) *WorkbookMemberUpdateOne {
-	return wmuo.SetMemberID(u.ID)
+// SetUser sets the "user" edge to the User entity.
+func (wmuo *WorkbookMemberUpdateOne) SetUser(u *User) *WorkbookMemberUpdateOne {
+	return wmuo.SetUserID(u.ID)
 }
 
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
@@ -395,9 +395,9 @@ func (wmuo *WorkbookMemberUpdateOne) ClearRole() *WorkbookMemberUpdateOne {
 	return wmuo
 }
 
-// ClearMember clears the "member" edge to the User entity.
-func (wmuo *WorkbookMemberUpdateOne) ClearMember() *WorkbookMemberUpdateOne {
-	wmuo.mutation.ClearMember()
+// ClearUser clears the "user" edge to the User entity.
+func (wmuo *WorkbookMemberUpdateOne) ClearUser() *WorkbookMemberUpdateOne {
+	wmuo.mutation.ClearUser()
 	return wmuo
 }
 
@@ -461,8 +461,8 @@ func (wmuo *WorkbookMemberUpdateOne) check() error {
 	if wmuo.mutation.RoleCleared() && len(wmuo.mutation.RoleIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "WorkbookMember.role"`)
 	}
-	if wmuo.mutation.MemberCleared() && len(wmuo.mutation.MemberIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "WorkbookMember.member"`)
+	if wmuo.mutation.UserCleared() && len(wmuo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "WorkbookMember.user"`)
 	}
 	if wmuo.mutation.WorkbookCleared() && len(wmuo.mutation.WorkbookIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "WorkbookMember.workbook"`)
@@ -534,12 +534,12 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wmuo.mutation.MemberCleared() {
+	if wmuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   workbookmember.MemberTable,
-			Columns: []string{workbookmember.MemberColumn},
+			Table:   workbookmember.UserTable,
+			Columns: []string{workbookmember.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -547,12 +547,12 @@ func (wmuo *WorkbookMemberUpdateOne) sqlSave(ctx context.Context) (_node *Workbo
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wmuo.mutation.MemberIDs(); len(nodes) > 0 {
+	if nodes := wmuo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   workbookmember.MemberTable,
-			Columns: []string{workbookmember.MemberColumn},
+			Table:   workbookmember.UserTable,
+			Columns: []string{workbookmember.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),

@@ -38,14 +38,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "article" package.
 	ArticlesInverseTable = "articles"
 	// ArticlesColumn is the table column denoting the articles relation/edge.
-	ArticlesColumn = "post_id"
+	ArticlesColumn = "user_id"
 	// WorkbookMembersTable is the table that holds the workbook_members relation/edge.
 	WorkbookMembersTable = "workbook_members"
 	// WorkbookMembersInverseTable is the table name for the WorkbookMember entity.
 	// It exists in this package in order to avoid circular dependency with the "workbookmember" package.
 	WorkbookMembersInverseTable = "workbook_members"
 	// WorkbookMembersColumn is the table column denoting the workbook_members relation/edge.
-	WorkbookMembersColumn = "member_id"
+	WorkbookMembersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.

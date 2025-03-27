@@ -1,8 +1,11 @@
 package schema
 
 import (
+	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/mixin"
-	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/trueorfalseproblem"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
 
@@ -28,7 +31,7 @@ func (Workbook) Mixin() []ent.Mixin {
 // Fields of the Workbook.
 func (Workbook) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("created_id", uuid.UUID{}),
+		field.UUID(user.Label+"_id", uuid.UUID{}),
 		field.String("description").MaxLen(400).Nillable(),
 		field.Bool("is_public").Default(false),
 		field.String("title").MaxLen(255).NotEmpty(),
@@ -38,7 +41,9 @@ func (Workbook) Fields() []ent.Field {
 // Edges of the Workbook.
 func (Workbook) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To(problem.Table, Problem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(descriptionproblem.Table, DescriptionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbookcategory.Table, WorkbookCategory.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

@@ -60,8 +60,10 @@ func (p *Problem) AnswerDescription() *AnswerDescription {
 	return p.answerDescription
 }
 
-func (p *Problem) AnswerMultiChoices() map[uuid.UUID]*AnswerMultiChoice {
-	return p.answerMultiChoices
+func (p *Problem) AnswerMultiChoices() []*AnswerMultiChoice {
+	return lo.MapToSlice(p.answerMultiChoices, func(k uuid.UUID, a *AnswerMultiChoice) *AnswerMultiChoice {
+		return a
+	})
 }
 
 func (p *Problem) AnswerTruth() *AnswerTruth {
@@ -104,7 +106,7 @@ func (p *Problem) WorkbookId() uuid.UUID {
 	return p.workbookId
 }
 
-func (p *Problem) SetAnswerDescription(answerDescription *AnswerDescription) error {
+func (p *Problem) setAnswerDescription(answerDescription *AnswerDescription) error {
 	if p.answerTypeId != master_answer_types.Description {
 		return errors.New("cannot add that answer type")
 	}
@@ -113,7 +115,7 @@ func (p *Problem) SetAnswerDescription(answerDescription *AnswerDescription) err
 	return nil
 }
 
-func (p *Problem) ReplaceAnswerMultiChoices(answerMultiChoices []*AnswerMultiChoice) error {
+func (p *Problem) replaceAnswerMultiChoices(answerMultiChoices []*AnswerMultiChoice) error {
 	if p.answerTypeId != master_answer_types.MultiChoice {
 		return errors.New("cannot add that answer type")
 	}
@@ -146,7 +148,7 @@ func (p *Problem) ReplaceAnswerMultiChoices(answerMultiChoices []*AnswerMultiCho
 	return nil
 }
 
-func (p *Problem) SetAnswerTruth(answerTruth *AnswerTruth) error {
+func (p *Problem) setAnswerTruth(answerTruth *AnswerTruth) error {
 	if p.answerTypeId != master_answer_types.Truth {
 		return errors.New("cannot add that answer type")
 	}
@@ -155,14 +157,14 @@ func (p *Problem) SetAnswerTruth(answerTruth *AnswerTruth) error {
 	return nil
 }
 
-func (p *Problem) SetStatement(statement problems.Statement) {
+func (p *Problem) setStatement(statement problems.Statement) {
 	p.statement = statement
 }
 
-func (p *Problem) SetWorkbookCategoryDetailId(workbookCategoryDetailId uuid.UUID) {
+func (p *Problem) setWorkbookCategoryDetailId(workbookCategoryDetailId uuid.UUID) {
 	p.workbookCategoryDetailId = workbookCategoryDetailId
 }
 
-func (p *Problem) SetWorkbookCategoryId(workbookCategoryId uuid.UUID) {
+func (p *Problem) setWorkbookCategoryId(workbookCategoryId uuid.UUID) {
 	p.workbookCategoryId = workbookCategoryId
 }

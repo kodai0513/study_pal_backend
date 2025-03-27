@@ -30,6 +30,6 @@ func (a *AnswerTruth) Truth() bool {
 	return a.truth
 }
 
-func (a *AnswerTruth) SetTruth(truth bool) {
+func (a *AnswerTruth) setTruth(truth bool) {
 	a.truth = truth
 }

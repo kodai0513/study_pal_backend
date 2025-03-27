@@ -12,22 +12,20 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// AnswerDescription is the client for interacting with the AnswerDescription builders.
-	AnswerDescription *AnswerDescriptionClient
-	// AnswerMultiChoices is the client for interacting with the AnswerMultiChoices builders.
-	AnswerMultiChoices *AnswerMultiChoicesClient
-	// AnswerTruth is the client for interacting with the AnswerTruth builders.
-	AnswerTruth *AnswerTruthClient
-	// AnswerType is the client for interacting with the AnswerType builders.
-	AnswerType *AnswerTypeClient
 	// Article is the client for interacting with the Article builders.
 	Article *ArticleClient
+	// DescriptionProblem is the client for interacting with the DescriptionProblem builders.
+	DescriptionProblem *DescriptionProblemClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
-	// Problem is the client for interacting with the Problem builders.
-	Problem *ProblemClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
+	// SelectionProblem is the client for interacting with the SelectionProblem builders.
+	SelectionProblem *SelectionProblemClient
+	// SelectionProblemAnswer is the client for interacting with the SelectionProblemAnswer builders.
+	SelectionProblemAnswer *SelectionProblemAnswerClient
+	// TrueOrFalseProblem is the client for interacting with the TrueOrFalseProblem builders.
+	TrueOrFalseProblem *TrueOrFalseProblemClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// Workbook is the client for interacting with the Workbook builders.
@@ -169,14 +167,13 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.AnswerDescription = NewAnswerDescriptionClient(tx.config)
-	tx.AnswerMultiChoices = NewAnswerMultiChoicesClient(tx.config)
-	tx.AnswerTruth = NewAnswerTruthClient(tx.config)
-	tx.AnswerType = NewAnswerTypeClient(tx.config)
 	tx.Article = NewArticleClient(tx.config)
+	tx.DescriptionProblem = NewDescriptionProblemClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
-	tx.Problem = NewProblemClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
+	tx.SelectionProblem = NewSelectionProblemClient(tx.config)
+	tx.SelectionProblemAnswer = NewSelectionProblemAnswerClient(tx.config)
+	tx.TrueOrFalseProblem = NewTrueOrFalseProblemClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.Workbook = NewWorkbookClient(tx.config)
 	tx.WorkbookCategory = NewWorkbookCategoryClient(tx.config)
@@ -191,7 +188,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AnswerDescription.QueryXXX(), the query will be executed
+// applies a query, for example: Article.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
