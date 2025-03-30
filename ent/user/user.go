@@ -28,6 +28,8 @@ const (
 	FieldPassword = "password"
 	// EdgeArticles holds the string denoting the articles edge name in mutations.
 	EdgeArticles = "articles"
+	// EdgeWorkbooks holds the string denoting the workbooks edge name in mutations.
+	EdgeWorkbooks = "workbooks"
 	// EdgeWorkbookMembers holds the string denoting the workbook_members edge name in mutations.
 	EdgeWorkbookMembers = "workbook_members"
 	// Table holds the table name of the user in the database.
@@ -39,6 +41,13 @@ const (
 	ArticlesInverseTable = "articles"
 	// ArticlesColumn is the table column denoting the articles relation/edge.
 	ArticlesColumn = "user_id"
+	// WorkbooksTable is the table that holds the workbooks relation/edge.
+	WorkbooksTable = "workbooks"
+	// WorkbooksInverseTable is the table name for the Workbook entity.
+	// It exists in this package in order to avoid circular dependency with the "workbook" package.
+	WorkbooksInverseTable = "workbooks"
+	// WorkbooksColumn is the table column denoting the workbooks relation/edge.
+	WorkbooksColumn = "user_id"
 	// WorkbookMembersTable is the table that holds the workbook_members relation/edge.
 	WorkbookMembersTable = "workbook_members"
 	// WorkbookMembersInverseTable is the table name for the WorkbookMember entity.
@@ -138,6 +147,20 @@ func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByWorkbooksCount orders the results by workbooks count.
+func ByWorkbooksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWorkbooksStep(), opts...)
+	}
+}
+
+// ByWorkbooks orders the results by workbooks terms.
+func ByWorkbooks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkbooksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByWorkbookMembersCount orders the results by workbook_members count.
 func ByWorkbookMembersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -156,6 +179,13 @@ func newArticlesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ArticlesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+	)
+}
+func newWorkbooksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkbooksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkbooksTable, WorkbooksColumn),
 	)
 }
 func newWorkbookMembersStep() *sqlgraph.Step {

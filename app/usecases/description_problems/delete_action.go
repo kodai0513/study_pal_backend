@@ -1,4 +1,4 @@
-package problems
+package description_problems
 
 import "study-pal-backend/app/usecases/shared/usecase_error"
 

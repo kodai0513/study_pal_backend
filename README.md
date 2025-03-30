@@ -9,7 +9,7 @@ https://github.com/samber/lo
 # ent.の使用上の注意点
 
 ### クエリの発行するメソッドは○○Xという命名のメソッドを使用する(致命的なエラーをerrorの戻り値ではなくpanicによって発生させれるため)
-```
+```go
 w.client.Workbook.Create().
 		SetID(workbook.Id()).
 		SetCreatedID(workbook.UserId()).
@@ -19,7 +19,7 @@ w.client.Workbook.Create().
 		Save(w.ctx)
 ```
 
-```
+```go
 w.client.Workbook.Create().
 		SetID(workbook.Id()).
 		SetCreatedID(workbook.UserId()).
@@ -32,22 +32,22 @@ w.client.Workbook.Create().
 # マイグレーション手順
 
 ### コマンドを実行しスキーマを定義
-```
+```sh
 go run -mod=mod entgo.io/ent/cmd/ent new User
 ```
 
 #### entのアセットの生成
-```
+```sh
 go generate ./ent
 ```
 
 #### atlasgoが入っていない場合はインストールしておく
-```
+```sh
 curl -sSf https://atlasgo.sh | sh
 ```
 
 #### マイグレーションファイルの生成
-```
+```sh
 atlas migrate diff migration_name \
     --dir "file://db/migrations" \
     --to "ent://ent/schema" \
@@ -55,7 +55,7 @@ atlas migrate diff migration_name \
 ```
 
 #### マイグレーションの適用
-```
+```sh
 atlas migrate apply \
     --dir "file://db/migrations" \
     --url "postgres://postgres:postgres@study_pal_db:5432/study_pal?search_path=public&sslmode=disable"
@@ -67,7 +67,7 @@ atlas migrate apply \
 https://github.com/swaggo/swag
 
 #### controllerのメソッドに以下のようにして記述
-```
+```go
 // timelines godoc
 //
 //	@Summary		タイムライン取得API
@@ -86,14 +86,51 @@ func (t *TimelineController) Index(c *gin.Context)
 ```
 
 #### ファイルを自動整形
-'''
+```sh
 swag fmt
-'''
+```
 
 #### swaggerファイルを自動生成
-```
+```sh
 swag init
 ```
 
 ### APIドキュメント(swagger)
 http://localhost:8080/swagger/index.html
+
+
+### ローカル環境の操作
+
+```sh
+# 開発サーバーに入れる
+docker exec -it study_pal_backend sh
+
+# 開発サーバーのログを表示する
+docker logs study_pal_backend --tail 20 -f
+```
+
+### データベースへのアクセス
+```sh
+psql -h study_pal_db -p 5432 -U postgres -d study_pal
+Password for user postgres: postgres
+```
+
+### controller、usecase層のテンプレートファイル作成
+```sh
+cd generate
+
+# コントローラー作成
+go run gen.go controller [コントローラー名]
+# example
+go run gen.go controller Test
+
+# ユースケースアクション作成
+go run gen.go action [アクション名]
+#example
+go run gen.go action Test
+
+# ユースケースクエリ作成
+go run gen.go query [クエリ名]
+#example
+go run gen.go query Test
+```

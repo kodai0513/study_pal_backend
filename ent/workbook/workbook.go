@@ -32,6 +32,8 @@ const (
 	EdgeSelectionProblems = "selection_problems"
 	// EdgeTrueOrFalseProblems holds the string denoting the true_or_false_problems edge name in mutations.
 	EdgeTrueOrFalseProblems = "true_or_false_problems"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// EdgeWorkbookCategories holds the string denoting the workbook_categories edge name in mutations.
 	EdgeWorkbookCategories = "workbook_categories"
 	// EdgeWorkbookMembers holds the string denoting the workbook_members edge name in mutations.
@@ -59,6 +61,13 @@ const (
 	TrueOrFalseProblemsInverseTable = "true_or_false_problems"
 	// TrueOrFalseProblemsColumn is the table column denoting the true_or_false_problems relation/edge.
 	TrueOrFalseProblemsColumn = "workbook_id"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "workbooks"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
 	// WorkbookCategoriesTable is the table that holds the workbook_categories relation/edge.
 	WorkbookCategoriesTable = "workbook_categories"
 	// WorkbookCategoriesInverseTable is the table name for the WorkbookCategory entity.
@@ -191,6 +200,13 @@ func ByTrueOrFalseProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 	}
 }
 
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByWorkbookCategoriesCount orders the results by workbook_categories count.
 func ByWorkbookCategoriesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -237,6 +253,13 @@ func newTrueOrFalseProblemsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TrueOrFalseProblemsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TrueOrFalseProblemsTable, TrueOrFalseProblemsColumn),
+	)
+}
+func newUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }
 func newWorkbookCategoriesStep() *sqlgraph.Step {

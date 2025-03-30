@@ -212,16 +212,24 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "description", Type: field.TypeString, Size: 400},
 		{Name: "is_public", Type: field.TypeBool, Default: false},
 		{Name: "title", Type: field.TypeString, Size: 255},
+		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// WorkbooksTable holds the schema information for the "workbooks" table.
 	WorkbooksTable = &schema.Table{
 		Name:       "workbooks",
 		Columns:    WorkbooksColumns,
 		PrimaryKey: []*schema.Column{WorkbooksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "workbooks_users_workbooks",
+				Columns:    []*schema.Column{WorkbooksColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// WorkbookCategoriesColumns holds the columns for the "workbook_categories" table.
 	WorkbookCategoriesColumns = []*schema.Column{
@@ -358,6 +366,7 @@ func init() {
 	TrueOrFalseProblemsTable.ForeignKeys[0].RefTable = WorkbooksTable
 	TrueOrFalseProblemsTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
 	TrueOrFalseProblemsTable.ForeignKeys[2].RefTable = WorkbookCategoryDetailsTable
+	WorkbooksTable.ForeignKeys[0].RefTable = UsersTable
 	WorkbookCategoriesTable.ForeignKeys[0].RefTable = WorkbooksTable
 	WorkbookCategoryDetailsTable.ForeignKeys[0].RefTable = WorkbookCategoriesTable
 	WorkbookMembersTable.ForeignKeys[0].RefTable = RolesTable

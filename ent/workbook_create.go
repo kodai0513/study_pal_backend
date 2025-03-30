@@ -9,6 +9,7 @@ import (
 	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/selectionproblem"
 	"study-pal-backend/ent/trueorfalseproblem"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
@@ -137,6 +138,11 @@ func (wc *WorkbookCreate) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *Work
 	return wc.AddTrueOrFalseProblemIDs(ids...)
 }
 
+// SetUser sets the "user" edge to the User entity.
+func (wc *WorkbookCreate) SetUser(u *User) *WorkbookCreate {
+	return wc.SetUserID(u.ID)
+}
+
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
 func (wc *WorkbookCreate) AddWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookCreate {
 	wc.mutation.AddWorkbookCategoryIDs(ids...)
@@ -246,6 +252,9 @@ func (wc *WorkbookCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Workbook.title": %w`, err)}
 		}
 	}
+	if len(wc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Workbook.user"`)}
+	}
 	return nil
 }
 
@@ -288,10 +297,6 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 	if value, ok := wc.mutation.UpdatedAt(); ok {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if value, ok := wc.mutation.UserID(); ok {
-		_spec.SetField(workbook.FieldUserID, field.TypeUUID, value)
-		_node.UserID = value
 	}
 	if value, ok := wc.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
@@ -351,6 +356,23 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   workbook.UserTable,
+			Columns: []string{workbook.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := wc.mutation.WorkbookCategoriesIDs(); len(nodes) > 0 {

@@ -11,6 +11,7 @@ RUN apk --update add tzdata && \
 
 RUN apk update
 RUN apk add curl
+apk add --no-cache postgresql-client
 RUN curl -sSf https://atlasgo.sh | sh
 
 # ログに出力する時間をJSTにするため、タイムゾーンを設定

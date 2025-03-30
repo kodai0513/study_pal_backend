@@ -7,42 +7,60 @@ import (
 )
 
 type ProblemController struct {
-	AppData *app_types.AppData
+	appData *app_types.AppData
 }
 
-type Problem struct {
-	Name string `json:"name"`
-}
+type CreateProblemRequest struct {}
 
-type WorkbookCategoryDetail struct {
-	Name     string     `json:"name"`
-	Problems []*Problem `json:"problems"`
-}
-
-type WorkbookCategory struct {
-	Name                    string                    `json:"name"`
-	Problems                []*Problem                `json:"problems"`
-	WorkbookCategoryDetails []*WorkbookCategoryDetail `json:"workbook_category_details"`
-}
-
-type ProblemCreateRequest struct {
-	Problems           []*Problem          `json:"problems"`
-	WorkbookCategories []*WorkbookCategory `json:"workbook_categories"`
-}
+type CreateProblemResponse struct {}
 
 // problem godoc
 //
-//	@Summary	API
-//	@Description
-//	@Tags		problem
-//	@Accept		json
-//	@Produce	json
-//	@Param		request	body	ProblemCreateRequest	true	"問題作成API"
-//	@Success	201		{object} 	nil
-//	@Failure	400		{object}	app_types.ErrorResponse
-//	@Failure	401		{object}	app_types.ErrorResponse
-//	@Failure	500		{object}	app_types.ErrorResponse
-//	@Router		/{workbook_id}/problems [post]
+//	@Summary		API
+//	@Description    
+//	@Tags			problem
+//	@Accept			json
+//	@Produce		json
+//	@Success		201		{object}	CreateProblemResponse
+//	@Failure		400		{object}	app_types.ErrorResponse
+//	@Failure		401		{object}	app_types.ErrorResponse
+//	@Failure		500		{object}	app_types.ErrorResponse
+//	@Router			/ [post]
 func (a *ProblemController) Create(c *gin.Context) {
+}
 
+
+type UpdateProblemRequest struct {}
+
+type UpdateProblemResponse struct {}
+
+// problem godoc
+//
+//	@Summary		API
+//	@Description    
+//	@Tags			problem
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	UpdateProblemResponse
+//	@Failure		400		{object}	app_types.ErrorResponse
+//	@Failure		401		{object}	app_types.ErrorResponse
+//	@Failure		500		{object}	app_types.ErrorResponse
+//	@Router			/ [put]
+func (a *ProblemController) Update(c *gin.Context) {
+}
+
+
+// problem godoc
+//
+//	@Summary		API
+//	@Description    
+//	@Tags			problem
+//	@Accept			json
+//	@Produce		json
+//	@Success		204		{object}	nil
+//	@Failure		400		{object}	app_types.ErrorResponse
+//	@Failure		401		{object}	app_types.ErrorResponse
+//	@Failure		500		{object}	app_types.ErrorResponse
+//	@Router			/ [delete]
+func (a *ProblemController) Delete(c *gin.Context) {
 }

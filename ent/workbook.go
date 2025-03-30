@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"time"
 
@@ -44,13 +45,15 @@ type WorkbookEdges struct {
 	SelectionProblems []*SelectionProblem `json:"selection_problems,omitempty"`
 	// TrueOrFalseProblems holds the value of the true_or_false_problems edge.
 	TrueOrFalseProblems []*TrueOrFalseProblem `json:"true_or_false_problems,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// WorkbookCategories holds the value of the workbook_categories edge.
 	WorkbookCategories []*WorkbookCategory `json:"workbook_categories,omitempty"`
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // DescriptionProblemsOrErr returns the DescriptionProblems value or an error if the edge
@@ -80,10 +83,21 @@ func (e WorkbookEdges) TrueOrFalseProblemsOrErr() ([]*TrueOrFalseProblem, error)
 	return nil, &NotLoadedError{edge: "true_or_false_problems"}
 }
 
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WorkbookEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
+		return e.User, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
 // WorkbookCategoriesOrErr returns the WorkbookCategories value or an error if the edge
 // was not loaded in eager-loading.
 func (e WorkbookEdges) WorkbookCategoriesOrErr() ([]*WorkbookCategory, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.WorkbookCategories, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_categories"}
@@ -92,7 +106,7 @@ func (e WorkbookEdges) WorkbookCategoriesOrErr() ([]*WorkbookCategory, error) {
 // WorkbookMembersOrErr returns the WorkbookMembers value or an error if the edge
 // was not loaded in eager-loading.
 func (e WorkbookEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.WorkbookMembers, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_members"}
@@ -195,6 +209,11 @@ func (w *Workbook) QuerySelectionProblems() *SelectionProblemQuery {
 // QueryTrueOrFalseProblems queries the "true_or_false_problems" edge of the Workbook entity.
 func (w *Workbook) QueryTrueOrFalseProblems() *TrueOrFalseProblemQuery {
 	return NewWorkbookClient(w.config).QueryTrueOrFalseProblems(w)
+}
+
+// QueryUser queries the "user" edge of the Workbook entity.
+func (w *Workbook) QueryUser() *UserQuery {
+	return NewWorkbookClient(w.config).QueryUser(w)
 }
 
 // QueryWorkbookCategories queries the "workbook_categories" edge of the Workbook entity.

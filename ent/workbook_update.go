@@ -10,6 +10,7 @@ import (
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/selectionproblem"
 	"study-pal-backend/ent/trueorfalseproblem"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
@@ -155,6 +156,11 @@ func (wu *WorkbookUpdate) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *Work
 	return wu.AddTrueOrFalseProblemIDs(ids...)
 }
 
+// SetUser sets the "user" edge to the User entity.
+func (wu *WorkbookUpdate) SetUser(u *User) *WorkbookUpdate {
+	return wu.SetUserID(u.ID)
+}
+
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
 func (wu *WorkbookUpdate) AddWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookUpdate {
 	wu.mutation.AddWorkbookCategoryIDs(ids...)
@@ -253,6 +259,12 @@ func (wu *WorkbookUpdate) RemoveTrueOrFalseProblems(t ...*TrueOrFalseProblem) *W
 	return wu.RemoveTrueOrFalseProblemIDs(ids...)
 }
 
+// ClearUser clears the "user" edge to the User entity.
+func (wu *WorkbookUpdate) ClearUser() *WorkbookUpdate {
+	wu.mutation.ClearUser()
+	return wu
+}
+
 // ClearWorkbookCategories clears all "workbook_categories" edges to the WorkbookCategory entity.
 func (wu *WorkbookUpdate) ClearWorkbookCategories() *WorkbookUpdate {
 	wu.mutation.ClearWorkbookCategories()
@@ -343,6 +355,9 @@ func (wu *WorkbookUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Workbook.title": %w`, err)}
 		}
 	}
+	if wu.mutation.UserCleared() && len(wu.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Workbook.user"`)
+	}
 	return nil
 }
 
@@ -363,9 +378,6 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := wu.mutation.UpdatedAt(); ok {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if value, ok := wu.mutation.UserID(); ok {
-		_spec.SetField(workbook.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := wu.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
@@ -504,6 +516,35 @@ func (wu *WorkbookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   workbook.UserTable,
+			Columns: []string{workbook.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   workbook.UserTable,
+			Columns: []string{workbook.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -742,6 +783,11 @@ func (wuo *WorkbookUpdateOne) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *
 	return wuo.AddTrueOrFalseProblemIDs(ids...)
 }
 
+// SetUser sets the "user" edge to the User entity.
+func (wuo *WorkbookUpdateOne) SetUser(u *User) *WorkbookUpdateOne {
+	return wuo.SetUserID(u.ID)
+}
+
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
 func (wuo *WorkbookUpdateOne) AddWorkbookCategoryIDs(ids ...uuid.UUID) *WorkbookUpdateOne {
 	wuo.mutation.AddWorkbookCategoryIDs(ids...)
@@ -838,6 +884,12 @@ func (wuo *WorkbookUpdateOne) RemoveTrueOrFalseProblems(t ...*TrueOrFalseProblem
 		ids[i] = t[i].ID
 	}
 	return wuo.RemoveTrueOrFalseProblemIDs(ids...)
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (wuo *WorkbookUpdateOne) ClearUser() *WorkbookUpdateOne {
+	wuo.mutation.ClearUser()
+	return wuo
 }
 
 // ClearWorkbookCategories clears all "workbook_categories" edges to the WorkbookCategory entity.
@@ -943,6 +995,9 @@ func (wuo *WorkbookUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Workbook.title": %w`, err)}
 		}
 	}
+	if wuo.mutation.UserCleared() && len(wuo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Workbook.user"`)
+	}
 	return nil
 }
 
@@ -980,9 +1035,6 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 	}
 	if value, ok := wuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if value, ok := wuo.mutation.UserID(); ok {
-		_spec.SetField(workbook.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := wuo.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
@@ -1121,6 +1173,35 @@ func (wuo *WorkbookUpdateOne) sqlSave(ctx context.Context) (_node *Workbook, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   workbook.UserTable,
+			Columns: []string{workbook.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   workbook.UserTable,
+			Columns: []string{workbook.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

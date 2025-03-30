@@ -5051,6 +5051,9 @@ type UserMutation struct {
 	articles                map[uuid.UUID]struct{}
 	removedarticles         map[uuid.UUID]struct{}
 	clearedarticles         bool
+	workbooks               map[uuid.UUID]struct{}
+	removedworkbooks        map[uuid.UUID]struct{}
+	clearedworkbooks        bool
 	workbook_members        map[uuid.UUID]struct{}
 	removedworkbook_members map[uuid.UUID]struct{}
 	clearedworkbook_members bool
@@ -5433,6 +5436,60 @@ func (m *UserMutation) ResetArticles() {
 	m.removedarticles = nil
 }
 
+// AddWorkbookIDs adds the "workbooks" edge to the Workbook entity by ids.
+func (m *UserMutation) AddWorkbookIDs(ids ...uuid.UUID) {
+	if m.workbooks == nil {
+		m.workbooks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.workbooks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbooks clears the "workbooks" edge to the Workbook entity.
+func (m *UserMutation) ClearWorkbooks() {
+	m.clearedworkbooks = true
+}
+
+// WorkbooksCleared reports if the "workbooks" edge to the Workbook entity was cleared.
+func (m *UserMutation) WorkbooksCleared() bool {
+	return m.clearedworkbooks
+}
+
+// RemoveWorkbookIDs removes the "workbooks" edge to the Workbook entity by IDs.
+func (m *UserMutation) RemoveWorkbookIDs(ids ...uuid.UUID) {
+	if m.removedworkbooks == nil {
+		m.removedworkbooks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.workbooks, ids[i])
+		m.removedworkbooks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbooks returns the removed IDs of the "workbooks" edge to the Workbook entity.
+func (m *UserMutation) RemovedWorkbooksIDs() (ids []uuid.UUID) {
+	for id := range m.removedworkbooks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbooksIDs returns the "workbooks" edge IDs in the mutation.
+func (m *UserMutation) WorkbooksIDs() (ids []uuid.UUID) {
+	for id := range m.workbooks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbooks resets all changes to the "workbooks" edge.
+func (m *UserMutation) ResetWorkbooks() {
+	m.workbooks = nil
+	m.clearedworkbooks = false
+	m.removedworkbooks = nil
+}
+
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by ids.
 func (m *UserMutation) AddWorkbookMemberIDs(ids ...uuid.UUID) {
 	if m.workbook_members == nil {
@@ -5705,9 +5762,12 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.articles != nil {
 		edges = append(edges, user.EdgeArticles)
+	}
+	if m.workbooks != nil {
+		edges = append(edges, user.EdgeWorkbooks)
 	}
 	if m.workbook_members != nil {
 		edges = append(edges, user.EdgeWorkbookMembers)
@@ -5725,6 +5785,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWorkbooks:
+		ids := make([]ent.Value, 0, len(m.workbooks))
+		for id := range m.workbooks {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeWorkbookMembers:
 		ids := make([]ent.Value, 0, len(m.workbook_members))
 		for id := range m.workbook_members {
@@ -5737,9 +5803,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedarticles != nil {
 		edges = append(edges, user.EdgeArticles)
+	}
+	if m.removedworkbooks != nil {
+		edges = append(edges, user.EdgeWorkbooks)
 	}
 	if m.removedworkbook_members != nil {
 		edges = append(edges, user.EdgeWorkbookMembers)
@@ -5757,6 +5826,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWorkbooks:
+		ids := make([]ent.Value, 0, len(m.removedworkbooks))
+		for id := range m.removedworkbooks {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeWorkbookMembers:
 		ids := make([]ent.Value, 0, len(m.removedworkbook_members))
 		for id := range m.removedworkbook_members {
@@ -5769,9 +5844,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedarticles {
 		edges = append(edges, user.EdgeArticles)
+	}
+	if m.clearedworkbooks {
+		edges = append(edges, user.EdgeWorkbooks)
 	}
 	if m.clearedworkbook_members {
 		edges = append(edges, user.EdgeWorkbookMembers)
@@ -5785,6 +5863,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeArticles:
 		return m.clearedarticles
+	case user.EdgeWorkbooks:
+		return m.clearedworkbooks
 	case user.EdgeWorkbookMembers:
 		return m.clearedworkbook_members
 	}
@@ -5806,6 +5886,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeArticles:
 		m.ResetArticles()
 		return nil
+	case user.EdgeWorkbooks:
+		m.ResetWorkbooks()
+		return nil
 	case user.EdgeWorkbookMembers:
 		m.ResetWorkbookMembers()
 		return nil
@@ -5821,7 +5904,6 @@ type WorkbookMutation struct {
 	id                            *uuid.UUID
 	created_at                    *time.Time
 	updated_at                    *time.Time
-	user_id                       *uuid.UUID
 	description                   *string
 	is_public                     *bool
 	title                         *string
@@ -5835,6 +5917,8 @@ type WorkbookMutation struct {
 	true_or_false_problems        map[uuid.UUID]struct{}
 	removedtrue_or_false_problems map[uuid.UUID]struct{}
 	clearedtrue_or_false_problems bool
+	user                          *uuid.UUID
+	cleareduser                   bool
 	workbook_categories           map[uuid.UUID]struct{}
 	removedworkbook_categories    map[uuid.UUID]struct{}
 	clearedworkbook_categories    bool
@@ -6024,12 +6108,12 @@ func (m *WorkbookMutation) ResetUpdatedAt() {
 
 // SetUserID sets the "user_id" field.
 func (m *WorkbookMutation) SetUserID(u uuid.UUID) {
-	m.user_id = &u
+	m.user = &u
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
 func (m *WorkbookMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user_id
+	v := m.user
 	if v == nil {
 		return
 	}
@@ -6055,7 +6139,7 @@ func (m *WorkbookMutation) OldUserID(ctx context.Context) (v uuid.UUID, err erro
 
 // ResetUserID resets all changes to the "user_id" field.
 func (m *WorkbookMutation) ResetUserID() {
-	m.user_id = nil
+	m.user = nil
 }
 
 // SetDescription sets the "description" field.
@@ -6328,6 +6412,33 @@ func (m *WorkbookMutation) ResetTrueOrFalseProblems() {
 	m.removedtrue_or_false_problems = nil
 }
 
+// ClearUser clears the "user" edge to the User entity.
+func (m *WorkbookMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[workbook.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *WorkbookMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *WorkbookMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *WorkbookMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by ids.
 func (m *WorkbookMutation) AddWorkbookCategoryIDs(ids ...uuid.UUID) {
 	if m.workbook_categories == nil {
@@ -6477,7 +6588,7 @@ func (m *WorkbookMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, workbook.FieldUpdatedAt)
 	}
-	if m.user_id != nil {
+	if m.user != nil {
 		fields = append(fields, workbook.FieldUserID)
 	}
 	if m.description != nil {
@@ -6654,7 +6765,7 @@ func (m *WorkbookMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *WorkbookMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.description_problems != nil {
 		edges = append(edges, workbook.EdgeDescriptionProblems)
 	}
@@ -6663,6 +6774,9 @@ func (m *WorkbookMutation) AddedEdges() []string {
 	}
 	if m.true_or_false_problems != nil {
 		edges = append(edges, workbook.EdgeTrueOrFalseProblems)
+	}
+	if m.user != nil {
+		edges = append(edges, workbook.EdgeUser)
 	}
 	if m.workbook_categories != nil {
 		edges = append(edges, workbook.EdgeWorkbookCategories)
@@ -6695,6 +6809,10 @@ func (m *WorkbookMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case workbook.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
 	case workbook.EdgeWorkbookCategories:
 		ids := make([]ent.Value, 0, len(m.workbook_categories))
 		for id := range m.workbook_categories {
@@ -6713,7 +6831,7 @@ func (m *WorkbookMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *WorkbookMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removeddescription_problems != nil {
 		edges = append(edges, workbook.EdgeDescriptionProblems)
 	}
@@ -6772,7 +6890,7 @@ func (m *WorkbookMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *WorkbookMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.cleareddescription_problems {
 		edges = append(edges, workbook.EdgeDescriptionProblems)
 	}
@@ -6781,6 +6899,9 @@ func (m *WorkbookMutation) ClearedEdges() []string {
 	}
 	if m.clearedtrue_or_false_problems {
 		edges = append(edges, workbook.EdgeTrueOrFalseProblems)
+	}
+	if m.cleareduser {
+		edges = append(edges, workbook.EdgeUser)
 	}
 	if m.clearedworkbook_categories {
 		edges = append(edges, workbook.EdgeWorkbookCategories)
@@ -6801,6 +6922,8 @@ func (m *WorkbookMutation) EdgeCleared(name string) bool {
 		return m.clearedselection_problems
 	case workbook.EdgeTrueOrFalseProblems:
 		return m.clearedtrue_or_false_problems
+	case workbook.EdgeUser:
+		return m.cleareduser
 	case workbook.EdgeWorkbookCategories:
 		return m.clearedworkbook_categories
 	case workbook.EdgeWorkbookMembers:
@@ -6813,6 +6936,9 @@ func (m *WorkbookMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *WorkbookMutation) ClearEdge(name string) error {
 	switch name {
+	case workbook.EdgeUser:
+		m.ClearUser()
+		return nil
 	}
 	return fmt.Errorf("unknown Workbook unique edge %s", name)
 }
@@ -6829,6 +6955,9 @@ func (m *WorkbookMutation) ResetEdge(name string) error {
 		return nil
 	case workbook.EdgeTrueOrFalseProblems:
 		m.ResetTrueOrFalseProblems()
+		return nil
+	case workbook.EdgeUser:
+		m.ResetUser()
 		return nil
 	case workbook.EdgeWorkbookCategories:
 		m.ResetWorkbookCategories()

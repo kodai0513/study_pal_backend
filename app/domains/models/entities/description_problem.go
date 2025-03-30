@@ -10,9 +10,9 @@ type DescriptionProblem struct {
 	id                       uuid.UUID
 	correntStatement         description_problems.CorrectStatement
 	statement                description_problems.Statement
-	workbookId               uuid.UUID
-	workbookCategoryId       uuid.UUID
 	workbookCategoryDetailId uuid.UUID
+	workbookCategoryId       uuid.UUID
+	workbookId               uuid.UUID
 }
 
 func NewDescriptionProblem(
@@ -27,9 +27,9 @@ func NewDescriptionProblem(
 		id:                       id,
 		correntStatement:         correctStatement,
 		statement:                statement,
-		workbookId:               workbookId,
-		workbookCategoryId:       workbookCategoryId,
 		workbookCategoryDetailId: workbookCategoryDetailId,
+		workbookCategoryId:       workbookCategoryId,
+		workbookId:               workbookId,
 	}
 }
 
@@ -45,14 +45,14 @@ func (d *DescriptionProblem) Statement() string {
 	return d.statement.Value()
 }
 
-func (d *DescriptionProblem) WorkbookId() uuid.UUID {
-	return d.workbookId
+func (d *DescriptionProblem) WorkbookCategoryDetailId() uuid.UUID {
+	return d.workbookCategoryDetailId
 }
 
 func (d *DescriptionProblem) WorkbookCategoryId() uuid.UUID {
 	return d.workbookCategoryId
 }
 
-func (d *DescriptionProblem) WorkbookCategoryDetailId() uuid.UUID {
-	return d.workbookCategoryDetailId
+func (d *DescriptionProblem) WorkbookId() uuid.UUID {
+	return d.workbookId
 }

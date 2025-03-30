@@ -1,4 +1,4 @@
-package problems
+package true_or_false_problem
 
 import validation "github.com/go-ozzo/ozzo-validation"
 

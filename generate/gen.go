@@ -110,7 +110,7 @@ func generateAction(generateInfo *generateInfo) {
 		"packageName": camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
 		"dtoName":     generateInfo.name + "Dto",
 	}
-	dtoOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(generateInfo.name) + "_action.go"
+	dtoOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(generateInfo.name) + "_dto.go"
 
 	outputFile, err := os.Create(dtoOutputPath)
 	if err != nil {

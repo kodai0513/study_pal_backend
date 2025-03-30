@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/mixin"
+	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -38,6 +39,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To(article.Table, Article.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(workbook.Table, Workbook.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

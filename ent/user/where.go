@@ -449,6 +449,29 @@ func HasArticlesWith(preds ...predicate.Article) predicate.User {
 	})
 }
 
+// HasWorkbooks applies the HasEdge predicate on the "workbooks" edge.
+func HasWorkbooks() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkbooksTable, WorkbooksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWorkbooksWith applies the HasEdge predicate on the "workbooks" edge with a given conditions (other predicates).
+func HasWorkbooksWith(preds ...predicate.Workbook) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newWorkbooksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasWorkbookMembers applies the HasEdge predicate on the "workbook_members" edge.
 func HasWorkbookMembers() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -1,28 +1,25 @@
 package entities
 
 import (
-	"errors"
-	"study-pal-backend/app/domains/models/value_objects/workbook_categories"
+	"study-pal-backend/app/domains/models/value_objects/workbook_category_details"
 
 	"github.com/google/uuid"
 )
 
 type WorkbookCategoryDetail struct {
 	id                 uuid.UUID
-	name               workbook_categories.Name
-	problems           map[uuid.UUID]*Problem
+	name               workbook_category_details.Name
 	workbookCategoryId uuid.UUID
 }
 
 func NewWorkbookCategoryDetail(
 	id uuid.UUID,
-	name workbook_categories.Name,
+	name workbook_category_details.Name,
 	workbookCategoryId uuid.UUID,
 ) *WorkbookCategoryDetail {
 	return &WorkbookCategoryDetail{
 		id:                 id,
 		name:               name,
-		problems:           make(map[uuid.UUID]*Problem, 0),
 		workbookCategoryId: workbookCategoryId,
 	}
 }
@@ -35,24 +32,10 @@ func (w *WorkbookCategoryDetail) Name() string {
 	return w.name.Value()
 }
 
-func (w *WorkbookCategoryDetail) Problems() map[uuid.UUID]*Problem {
-	return w.problems
-}
-
 func (w *WorkbookCategoryDetail) WorkbookCategoryId() uuid.UUID {
 	return w.workbookCategoryId
 }
 
-func (w *WorkbookCategoryDetail) setName(name workbook_categories.Name) {
+func (w *WorkbookCategoryDetail) SetName(name workbook_category_details.Name) {
 	w.name = name
-}
-
-func (w *WorkbookCategoryDetail) addProblem(problem *Problem) error {
-	if problem.WorkbookCategoryId() != w.workbookCategoryId || problem.WorkbookCategoryDetailId() != w.id {
-		return errors.New("that issue cannot be included in the category details")
-	}
-
-	w.problems[problem.Id()] = problem
-
-	return nil
 }

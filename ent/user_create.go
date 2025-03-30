@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 
@@ -94,6 +95,21 @@ func (uc *UserCreate) AddArticles(a ...*Article) *UserCreate {
 		ids[i] = a[i].ID
 	}
 	return uc.AddArticleIDs(ids...)
+}
+
+// AddWorkbookIDs adds the "workbooks" edge to the Workbook entity by IDs.
+func (uc *UserCreate) AddWorkbookIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddWorkbookIDs(ids...)
+	return uc
+}
+
+// AddWorkbooks adds the "workbooks" edges to the Workbook entity.
+func (uc *UserCreate) AddWorkbooks(w ...*Workbook) *UserCreate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWorkbookIDs(ids...)
 }
 
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
@@ -264,6 +280,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WorkbooksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

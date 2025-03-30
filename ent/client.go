@@ -1594,6 +1594,22 @@ func (c *UserClient) QueryArticles(u *User) *ArticleQuery {
 	return query
 }
 
+// QueryWorkbooks queries the workbooks edge of a User.
+func (c *UserClient) QueryWorkbooks(u *User) *WorkbookQuery {
+	query := (&WorkbookClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(workbook.Table, workbook.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WorkbooksTable, user.WorkbooksColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryWorkbookMembers queries the workbook_members edge of a User.
 func (c *UserClient) QueryWorkbookMembers(u *User) *WorkbookMemberQuery {
 	query := (&WorkbookMemberClient{config: c.config}).Query()
@@ -1784,6 +1800,22 @@ func (c *WorkbookClient) QueryTrueOrFalseProblems(w *Workbook) *TrueOrFalseProbl
 			sqlgraph.From(workbook.Table, workbook.FieldID, id),
 			sqlgraph.To(trueorfalseproblem.Table, trueorfalseproblem.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, workbook.TrueOrFalseProblemsTable, workbook.TrueOrFalseProblemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Workbook.
+func (c *WorkbookClient) QueryUser(w *Workbook) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, workbook.UserTable, workbook.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
 		return fromV, nil

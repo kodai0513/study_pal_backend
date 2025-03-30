@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type ProblemRepository interface {
-	CreateBulk([]*entities.Problem)
+type DescriptionProblemRepository interface {
+	CreateBulk([]*entities.DescriptionProblem)
 	ExistByWorkbookId(workbookId uuid.UUID) bool
 }
