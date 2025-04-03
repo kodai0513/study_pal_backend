@@ -32,9 +32,7 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ArticleDto, useca
 	article := entities.NewArticle(uuid.New(), description, command.UserId)
 	resultArticle := c.ArticleRepository.Create(article)
 	return &ArticleDto{
-			Id:          resultArticle.Id(),
 			Description: resultArticle.Description(),
-			UserId:      resultArticle.UserId(),
 		},
 		nil
 }

@@ -24,16 +24,16 @@ func TestSelectionProblem_正常に作成と回答追加ができるか(t *testi
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		workbookCategoryDetailId,
-		workbookCategoryId,
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		workbookId,
 	)
 
 	// 基本的な属性の確認
 	assert.Equal(t, problemId, problem.Id())
 	assert.Equal(t, "これはテスト問題です", problem.Statement())
-	assert.Equal(t, workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
-	assert.Equal(t, workbookCategoryId, problem.WorkbookCategoryId())
+	assert.Equal(t, &workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
+	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
 	assert.Equal(t, workbookId, problem.WorkbookId())
 	assert.Empty(t, problem.SelectionProblemAnswers())
 
@@ -58,11 +58,13 @@ func TestSelectionProblem_AddSelectionProblemAnswer_正常系(t *testing.T) {
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -90,11 +92,13 @@ func TestSelectionProblem_AddSelectionProblemAnswer_エラー系(t *testing.T) {
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -132,11 +136,13 @@ func TestSelectionProblem_IsOneAnswer_正常系とエラー系(t *testing.T) {
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -169,11 +175,13 @@ func TestSelectionProblem_SetAnswerStatement_正常系とエラー系(t *testing
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -217,11 +225,13 @@ func TestSelectionProblem_SetAnswerIsCorrect_正常系とエラー系(t *testing
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -265,11 +275,13 @@ func TestSelectionProblem_HasMinimumAnswers_正常系とエラー系(t *testing.
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -302,11 +314,13 @@ func TestSelectionProblem_SetStatement(t *testing.T) {
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
+	workbookCategoryDetailId := uuid.New()
+	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		uuid.New(),
-		uuid.New(),
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		uuid.New(),
 	)
 
@@ -339,16 +353,16 @@ func TestNewSelectionProblem(t *testing.T) {
 		problemId,
 		answers,
 		statement,
-		workbookCategoryDetailId,
-		workbookCategoryId,
+		&workbookCategoryDetailId,
+		&workbookCategoryId,
 		workbookId,
 	)
 
 	// 基本的な属性の確認
 	assert.Equal(t, problemId, problem.Id())
 	assert.Equal(t, "これはテスト問題です", problem.Statement())
-	assert.Equal(t, workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
-	assert.Equal(t, workbookCategoryId, problem.WorkbookCategoryId())
+	assert.Equal(t, &workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
+	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
 	assert.Equal(t, workbookId, problem.WorkbookId())
 	assert.Len(t, problem.SelectionProblemAnswers(), 2)
 }

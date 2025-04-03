@@ -56,7 +56,11 @@ func main() {
 	appData := app_types.NewAppData(client, jwtSecretKey)
 	articleController := controllers.ArticleController{AppData: appData}
 	authController := controllers.AuthController{AppData: appData}
+	descriptionProblemController := controllers.DescriptionProblemController{AppData: appData}
+	problemController := controllers.ProblemController{AppData: appData}
+	selectionProblemController := controllers.SelectionProblemController{AppData: appData}
 	timelineController := controllers.TimelineController{AppData: appData}
+	trueOrFalseProblemController := controllers.TrueOrFalseProblemController{AppData: appData}
 	workbookController := controllers.WorkbookController{AppData: appData}
 
 	r := gin.New()
@@ -72,9 +76,25 @@ func main() {
 			articles.PUT("/:article_id", authRequired, articleController.Update)
 			articles.DELETE("/:article_id", authRequired, articleController.Delete)
 		}
+		descriptionProblems := v1.Group("/description-problems")
+		{
+			descriptionProblems.PUT("/:description_problem_id", authRequired, descriptionProblemController.Update)
+			descriptionProblems.DELETE("/:description_problem_id", authRequired, descriptionProblemController.Delete)
+		}
 		v1.POST("/login", authController.Login)
 		v1.POST("/refresh-token", authController.RefreshToken)
+		selectionProblems := v1.Group("/selection-problems")
+		{
+			selectionProblems.PUT("/:selection_problem_id", authRequired, selectionProblemController.Update)
+			selectionProblems.DELETE("/:selection_problem_id", authRequired, selectionProblemController.Delete)
+		}
+		trueOrFalseProblems := v1.Group("/true-or-false-problems")
+		{
+			trueOrFalseProblems.PUT("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Update)
+			trueOrFalseProblems.DELETE("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Delete)
+		}
 		v1.GET("/timelines", timelineController.Index)
+		v1.POST("/problems", problemController.Create)
 		workbooks := v1.Group("/workbooks")
 		{
 			workbooks.POST("/", authRequired, workbookController.Create)

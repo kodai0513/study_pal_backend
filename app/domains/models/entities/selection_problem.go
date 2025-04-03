@@ -13,16 +13,16 @@ type SelectionProblem struct {
 	id                       uuid.UUID
 	selectionProblemAnswers  map[uuid.UUID]*SelectionProblemAnswer
 	statement                selection_problems.Statement
-	workbookCategoryDetailId uuid.UUID
-	workbookCategoryId       uuid.UUID
+	workbookCategoryDetailId *uuid.UUID
+	workbookCategoryId       *uuid.UUID
 	workbookId               uuid.UUID
 }
 
 func CreateSelectionProblem(
 	id uuid.UUID,
 	statement selection_problems.Statement,
-	workbookCategoryDetailId uuid.UUID,
-	workbookCategoryId uuid.UUID,
+	workbookCategoryDetailId *uuid.UUID,
+	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *SelectionProblem {
 	return &SelectionProblem{
@@ -39,8 +39,8 @@ func NewSelectionProblem(
 	id uuid.UUID,
 	selectionProblemAnswers []*SelectionProblemAnswer,
 	statement selection_problems.Statement,
-	workbookCategoryDetailId uuid.UUID,
-	workbookCategoryId uuid.UUID,
+	workbookCategoryDetailId *uuid.UUID,
+	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *SelectionProblem {
 	return &SelectionProblem{
@@ -69,11 +69,11 @@ func (s *SelectionProblem) Statement() string {
 	return s.statement.Value()
 }
 
-func (s *SelectionProblem) WorkbookCategoryDetailId() uuid.UUID {
+func (s *SelectionProblem) WorkbookCategoryDetailId() *uuid.UUID {
 	return s.workbookCategoryDetailId
 }
 
-func (s *SelectionProblem) WorkbookCategoryId() uuid.UUID {
+func (s *SelectionProblem) WorkbookCategoryId() *uuid.UUID {
 	return s.workbookCategoryId
 }
 
@@ -114,6 +114,17 @@ func (s *SelectionProblem) AddSelectionProblemAnswer(selectionProblemAnswer *Sel
 	}
 
 	s.selectionProblemAnswers[selectionProblemAnswer.id] = selectionProblemAnswer
+	return nil
+}
+
+func (s *SelectionProblem) RemoveSelectionProblemAnswer(selectionProblemAnswerId uuid.UUID) error {
+	_, exist := s.selectionProblemAnswers[selectionProblemAnswerId]
+	if !exist {
+		return errors.New("selectionProblemAnswer not found")
+	}
+
+	delete(s.selectionProblemAnswers, selectionProblemAnswerId)
+
 	return nil
 }
 

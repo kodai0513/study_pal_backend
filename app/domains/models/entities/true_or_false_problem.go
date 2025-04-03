@@ -1,7 +1,7 @@
 package entities
 
 import (
-	true_or_false_problem "study-pal-backend/app/domains/models/value_objects/true_or_false_problems"
+	"study-pal-backend/app/domains/models/value_objects/true_or_false_problems"
 
 	"github.com/google/uuid"
 )
@@ -9,22 +9,24 @@ import (
 type TrueOrFalseProblem struct {
 	id                       uuid.UUID
 	isCorrect                bool
-	statement                true_or_false_problem.Statement
-	workbookCategoryDetailId uuid.UUID
-	workbookCategoryId       uuid.UUID
+	statement                true_or_false_problems.Statement
+	workbookCategoryDetailId *uuid.UUID
+	workbookCategoryId       *uuid.UUID
 	workbookId               uuid.UUID
 }
 
 func NewTrueOrFalseProblem(
 	id uuid.UUID,
 	isCorrect bool,
-	workbookCategoryDetailId uuid.UUID,
-	workbookCategoryId uuid.UUID,
+	statement true_or_false_problems.Statement,
+	workbookCategoryDetailId *uuid.UUID,
+	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *TrueOrFalseProblem {
 	return &TrueOrFalseProblem{
 		id:                       id,
 		isCorrect:                isCorrect,
+		statement:                statement,
 		workbookCategoryDetailId: workbookCategoryDetailId,
 		workbookCategoryId:       workbookCategoryId,
 		workbookId:               workbookId,
@@ -43,11 +45,11 @@ func (t *TrueOrFalseProblem) Statement() string {
 	return t.statement.Value()
 }
 
-func (t *TrueOrFalseProblem) WorkbookCategoryDetailId() uuid.UUID {
+func (t *TrueOrFalseProblem) WorkbookCategoryDetailId() *uuid.UUID {
 	return t.workbookCategoryDetailId
 }
 
-func (t *TrueOrFalseProblem) WorkbookCategoryId() uuid.UUID {
+func (t *TrueOrFalseProblem) WorkbookCategoryId() *uuid.UUID {
 	return t.workbookCategoryId
 }
 
@@ -59,6 +61,6 @@ func (t *TrueOrFalseProblem) SetIsCorrect(isCorrect bool) {
 	t.isCorrect = isCorrect
 }
 
-func (t *TrueOrFalseProblem) SetStatement(statement true_or_false_problem.Statement) {
+func (t *TrueOrFalseProblem) SetStatement(statement true_or_false_problems.Statement) {
 	t.statement = statement
 }

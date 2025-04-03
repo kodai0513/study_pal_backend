@@ -11,7 +11,8 @@ RUN apk --update add tzdata && \
 
 RUN apk update
 RUN apk add curl
-apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN curl -sSf https://atlasgo.sh | sh
 
 # ログに出力する時間をJSTにするため、タイムゾーンを設定

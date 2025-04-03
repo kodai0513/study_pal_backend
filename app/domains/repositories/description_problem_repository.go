@@ -7,6 +7,10 @@ import (
 )
 
 type DescriptionProblemRepository interface {
-	CreateBulk([]*entities.DescriptionProblem)
-	ExistByWorkbookId(workbookId uuid.UUID) bool
+	CreateBulk([]*entities.DescriptionProblem) []*entities.DescriptionProblem
+	Delete(uuid.UUID)
+	ExistById(uuid.UUID) bool
+	ExistByWorkbookId(uuid.UUID) bool
+	FindById(uuid.UUID) *entities.DescriptionProblem
+	Update(*entities.DescriptionProblem) *entities.DescriptionProblem
 }

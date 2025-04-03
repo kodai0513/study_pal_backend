@@ -21,11 +21,9 @@ type CreateWorkbookRequest struct {
 }
 
 type CreateWorkbookResponse struct {
-	Id          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	IsPublic    bool      `json:"is_public"`
-	Title       string    `json:"title"`
-	UserId      uuid.UUID `json:"user_id"`
+	Description string `json:"description"`
+	IsPublic    bool   `json:"is_public"`
+	Title       string `json:"title"`
 }
 
 // workbook godoc
@@ -70,11 +68,9 @@ func (a *WorkbookController) Create(c *gin.Context) {
 	c.SecureJSON(
 		http.StatusCreated,
 		&CreateWorkbookResponse{
-			Id:          workbookDto.Id,
 			Description: workbookDto.Description,
 			IsPublic:    workbookDto.IsPublic,
 			Title:       workbookDto.Title,
-			UserId:      workbookDto.UserId,
 		},
 	)
 }
@@ -85,11 +81,9 @@ type UpdateWorkbookRequest struct {
 }
 
 type UpdateWorkbookResponse struct {
-	Id          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	IsPublic    bool      `json:"is_public"`
-	Title       string    `json:"title"`
-	UserId      uuid.UUID `json:"user_id"`
+	Description string `json:"description"`
+	IsPublic    bool   `json:"is_public"`
+	Title       string `json:"title"`
 }
 
 // workbook godoc
@@ -108,7 +102,17 @@ type UpdateWorkbookResponse struct {
 //	@Router			/workbooks/{workbook_id} [put]
 func (a *WorkbookController) Update(c *gin.Context) {
 	var request UpdateWorkbookRequest
-	c.BindJSON(&request)
+	err := c.BindJSON(&request)
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	workbookIdParam := c.Param("workbook_id")
 	workbookId, err := uuid.Parse(workbookIdParam)
 	if err != nil {
@@ -148,11 +152,9 @@ func (a *WorkbookController) Update(c *gin.Context) {
 	c.SecureJSON(
 		http.StatusOK,
 		&UpdateWorkbookResponse{
-			Id:          workbookDto.Id,
 			Description: workbookDto.Description,
 			IsPublic:    workbookDto.IsPublic,
 			Title:       workbookDto.Title,
-			UserId:      workbookDto.UserId,
 		},
 	)
 }

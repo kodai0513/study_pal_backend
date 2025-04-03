@@ -57,7 +57,7 @@ func generateAction(generateInfo *generateInfo) {
 	if err != nil {
 		panic(err)
 	}
-	for index, actionType := range []string{"Create", "Update", "Delete"} {
+	for index, actionType := range []string{"Index", "Create", "Update", "Delete"} {
 		actionData := map[string]string{
 			"actionCommandName": actionType + "ActionCommand",
 			"actionName":        actionType + "Action",
@@ -66,8 +66,8 @@ func generateAction(generateInfo *generateInfo) {
 		}
 
 		var fileName string
-		if actionType == "Create" || actionType == "Update" {
-			fileName = "templates/create_or_update_action.tmpl"
+		if actionType == "Index" || actionType == "Create" || actionType == "Update" {
+			fileName = "templates/index_or_create_or_update_action.tmpl"
 		} else {
 			fileName = "templates/delete_action.tmpl"
 		}
@@ -110,7 +110,7 @@ func generateAction(generateInfo *generateInfo) {
 		"packageName": camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
 		"dtoName":     generateInfo.name + "Dto",
 	}
-	dtoOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(generateInfo.name) + "_dto.go"
+	dtoOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + camelToSnake(generateInfo.name) + "_dto.go"
 
 	outputFile, err := os.Create(dtoOutputPath)
 	if err != nil {
@@ -138,7 +138,8 @@ func generateAction(generateInfo *generateInfo) {
 func generateController(generateInfo *generateInfo) {
 	data := map[string]string{
 		"controllerName":     generateInfo.name + "Controller",
-		"godocName":          strings.ToLower(generateInfo.name),
+		"godocName":          camelToKebab(generateInfo.name),
+		"indexResponseName":  "Index" + generateInfo.name + "Response",
 		"createRequestName":  "Create" + generateInfo.name + "Request",
 		"createResponseName": "Create" + generateInfo.name + "Response",
 		"updateRequestName":  "Update" + generateInfo.name + "Request",
@@ -233,6 +234,31 @@ func camelToSnake(s string) string {
 	}
 
 	delimiter := "_"
+	sLen := len(s)
+	var snake string
+	for i, current := range s {
+		if i > 0 && i+1 < sLen {
+			if current >= 'A' && current <= 'Z' {
+				next := s[i+1]
+				prev := s[i-1]
+				if (next >= 'a' && next <= 'z') || (prev >= 'a' && prev <= 'z') {
+					snake += delimiter
+				}
+			}
+		}
+		snake += string(current)
+	}
+
+	snake = strings.ToLower(snake)
+	return snake
+}
+
+func camelToKebab(s string) string {
+	if s == "" {
+		return s
+	}
+
+	delimiter := "-"
 	sLen := len(s)
 	var snake string
 	for i, current := range s {

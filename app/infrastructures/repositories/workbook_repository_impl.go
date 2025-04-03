@@ -63,6 +63,10 @@ func (w *WorkbookRepositoryImpl) Delete(workbookId uuid.UUID) {
 	w.client.Workbook.DeleteOneID(workbookId).ExecX(w.ctx)
 }
 
+func (w *WorkbookRepositoryImpl) ExistById(workbookId uuid.UUID) bool {
+	return w.client.Workbook.Query().Where(workbook.IDEQ(workbookId)).ExistX(w.ctx)
+}
+
 func (w *WorkbookRepositoryImpl) FindById(workbookId uuid.UUID) *entities.Workbook {
 	result := w.client.Workbook.
 		Query().

@@ -7,7 +7,24 @@ import (
 )
 
 type {{ .controllerName }} struct {
-	appData *app_types.AppData
+	AppData *app_types.AppData
+}
+
+type {{ .indexResponseName }} struct {}
+
+// {{ .godocName }} godoc
+//
+//	@Summary		API
+//	@Description    
+//	@Tags			{{ .godocName }}
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	{{ .indexResponseName }}
+//	@Failure		400		{object}	app_types.ErrorResponse
+//	@Failure		401		{object}	app_types.ErrorResponse
+//	@Failure		500		{object}	app_types.ErrorResponse
+//	@Router			/ [get]
+func (a *{{ .controllerName }}) Index(c *gin.Context) {
 }
 
 type {{ .createRequestName }} struct {}
@@ -21,6 +38,7 @@ type {{ .createResponseName }} struct {}
 //	@Tags			{{ .godocName }}
 //	@Accept			json
 //	@Produce		json
+//	@Param			request		body	{{ .createRequestName }}	true	""
 //	@Success		201		{object}	{{ .createResponseName }}
 //	@Failure		400		{object}	app_types.ErrorResponse
 //	@Failure		401		{object}	app_types.ErrorResponse
@@ -41,6 +59,7 @@ type {{ .updateResponseName }} struct {}
 //	@Tags			{{ .godocName }}
 //	@Accept			json
 //	@Produce		json
+//	@Param			request		body	{{ .updateRequestName }}	true	""
 //	@Success		200		{object}	{{ .updateResponseName }}
 //	@Failure		400		{object}	app_types.ErrorResponse
 //	@Failure		401		{object}	app_types.ErrorResponse

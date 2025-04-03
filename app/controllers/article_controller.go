@@ -15,14 +15,16 @@ type ArticleController struct {
 	AppData *app_types.AppData
 }
 
-type CreateArticleRequest struct {
+type CreateArticle struct {
 	Description string `json:"description"`
 }
 
+type CreateArticleRequest struct {
+	CreateArticle
+}
+
 type CreateArticleResponse struct {
-	Id          uuid.UUID `json:"id"`
-	Description string    `json:"description"`
-	UserId      uuid.UUID `json:"user_id"`
+	CreateArticle
 }
 
 // article godoc
@@ -40,7 +42,17 @@ type CreateArticleResponse struct {
 //	@Router			/articles [post]
 func (a *ArticleController) Create(c *gin.Context) {
 	var request CreateArticleRequest
-	c.BindJSON(&request)
+	err := c.BindJSON(&request)
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	userId, _ := c.Get("user_id")
 	action := article.CreateAction{
 		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
@@ -66,9 +78,9 @@ func (a *ArticleController) Create(c *gin.Context) {
 	c.SecureJSON(
 		http.StatusCreated,
 		&CreateArticleResponse{
-			Id:          articleDto.Id,
-			Description: articleDto.Description,
-			UserId:      articleDto.UserId,
+			CreateArticle: CreateArticle{
+				Description: articleDto.Description,
+			},
 		},
 	)
 }
@@ -78,7 +90,6 @@ type UpdateArticleRequest struct {
 }
 
 type UpdateArticleResponse struct {
-	Id          uuid.UUID `json:"id"`
 	Description string    `json:"description"`
 	UserId      uuid.UUID `json:"user_id"`
 }
@@ -99,7 +110,17 @@ type UpdateArticleResponse struct {
 //	@Router			/articles/{article_id} [put]
 func (a *ArticleController) Update(c *gin.Context) {
 	var request UpdateArticleRequest
-	c.BindJSON(&request)
+	err := c.BindJSON(&request)
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	articleIdParam := c.Param("article_id")
 	articleId, err := uuid.Parse(articleIdParam)
 	if err != nil {
@@ -138,9 +159,7 @@ func (a *ArticleController) Update(c *gin.Context) {
 	c.SecureJSON(
 		http.StatusOK,
 		&UpdateArticleResponse{
-			Id:          articleDto.Id,
 			Description: articleDto.Description,
-			UserId:      articleDto.UserId,
 		},
 	)
 }
