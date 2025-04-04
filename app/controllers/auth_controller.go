@@ -36,7 +36,17 @@ type RefreshTokenResponse struct {
 //	@Router			/refresh-token [post]
 func (a *AuthController) RefreshToken(c *gin.Context) {
 	var request RefreshTokenRequest
-	c.BindJSON(&request)
+	err := c.BindJSON(&request)
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	action := auth.RefreshTokenAction{
 		AppData: *a.AppData,
 	}
@@ -89,7 +99,17 @@ type LoginResponse struct {
 //	@Router			/login [post]
 func (a *AuthController) Login(c *gin.Context) {
 	var request LoginRequest
-	c.BindJSON(&request)
+	err := c.BindJSON(&request)
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	repository := repositories.NewUserRepositoryImpl(a.AppData.Client(), c)
 	action := auth.LoginAction{
 		AppData:        *a.AppData,

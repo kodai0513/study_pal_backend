@@ -7,8 +7,9 @@ import (
 )
 
 type WorkbookRepository interface {
-	Create(workbook *entities.Workbook) *entities.Workbook
-	Delete(workbookId uuid.UUID)
-	FindById(workbookId uuid.UUID) *entities.Workbook
-	Update(workbook *entities.Workbook) *entities.Workbook
+	Create(*entities.Workbook) *entities.Workbook
+	Delete(uuid.UUID)
+	ExistById(uuid.UUID) bool
+	FindById(uuid.UUID) *entities.Workbook
+	Update(*entities.Workbook) *entities.Workbook
 }

@@ -3,19 +3,18 @@
 package ent
 
 import (
-	"study-pal-backend/ent/answerdescription"
-	"study-pal-backend/ent/answermultichoices"
-	"study-pal-backend/ent/answertruth"
-	"study-pal-backend/ent/answertype"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/permission"
-	"study-pal-backend/ent/problem"
 	"study-pal-backend/ent/role"
 	"study-pal-backend/ent/schema"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/selectionproblemanswer"
+	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 )
@@ -24,120 +23,6 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	answerdescriptionMixin := schema.AnswerDescription{}.Mixin()
-	answerdescriptionMixinFields1 := answerdescriptionMixin[1].Fields()
-	_ = answerdescriptionMixinFields1
-	answerdescriptionFields := schema.AnswerDescription{}.Fields()
-	_ = answerdescriptionFields
-	// answerdescriptionDescCreatedAt is the schema descriptor for created_at field.
-	answerdescriptionDescCreatedAt := answerdescriptionMixinFields1[0].Descriptor()
-	// answerdescription.DefaultCreatedAt holds the default value on creation for the created_at field.
-	answerdescription.DefaultCreatedAt = answerdescriptionDescCreatedAt.Default.(func() time.Time)
-	// answerdescriptionDescUpdatedAt is the schema descriptor for updated_at field.
-	answerdescriptionDescUpdatedAt := answerdescriptionMixinFields1[1].Descriptor()
-	// answerdescription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	answerdescription.DefaultUpdatedAt = answerdescriptionDescUpdatedAt.Default.(func() time.Time)
-	// answerdescription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	answerdescription.UpdateDefaultUpdatedAt = answerdescriptionDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// answerdescriptionDescName is the schema descriptor for name field.
-	answerdescriptionDescName := answerdescriptionFields[0].Descriptor()
-	// answerdescription.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	answerdescription.NameValidator = func() func(string) error {
-		validators := answerdescriptionDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	answermultichoicesMixin := schema.AnswerMultiChoices{}.Mixin()
-	answermultichoicesMixinFields1 := answermultichoicesMixin[1].Fields()
-	_ = answermultichoicesMixinFields1
-	answermultichoicesFields := schema.AnswerMultiChoices{}.Fields()
-	_ = answermultichoicesFields
-	// answermultichoicesDescCreatedAt is the schema descriptor for created_at field.
-	answermultichoicesDescCreatedAt := answermultichoicesMixinFields1[0].Descriptor()
-	// answermultichoices.DefaultCreatedAt holds the default value on creation for the created_at field.
-	answermultichoices.DefaultCreatedAt = answermultichoicesDescCreatedAt.Default.(func() time.Time)
-	// answermultichoicesDescUpdatedAt is the schema descriptor for updated_at field.
-	answermultichoicesDescUpdatedAt := answermultichoicesMixinFields1[1].Descriptor()
-	// answermultichoices.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	answermultichoices.DefaultUpdatedAt = answermultichoicesDescUpdatedAt.Default.(func() time.Time)
-	// answermultichoices.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	answermultichoices.UpdateDefaultUpdatedAt = answermultichoicesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// answermultichoicesDescName is the schema descriptor for name field.
-	answermultichoicesDescName := answermultichoicesFields[0].Descriptor()
-	// answermultichoices.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	answermultichoices.NameValidator = func() func(string) error {
-		validators := answermultichoicesDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	answertruthMixin := schema.AnswerTruth{}.Mixin()
-	answertruthMixinFields1 := answertruthMixin[1].Fields()
-	_ = answertruthMixinFields1
-	answertruthFields := schema.AnswerTruth{}.Fields()
-	_ = answertruthFields
-	// answertruthDescCreatedAt is the schema descriptor for created_at field.
-	answertruthDescCreatedAt := answertruthMixinFields1[0].Descriptor()
-	// answertruth.DefaultCreatedAt holds the default value on creation for the created_at field.
-	answertruth.DefaultCreatedAt = answertruthDescCreatedAt.Default.(func() time.Time)
-	// answertruthDescUpdatedAt is the schema descriptor for updated_at field.
-	answertruthDescUpdatedAt := answertruthMixinFields1[1].Descriptor()
-	// answertruth.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	answertruth.DefaultUpdatedAt = answertruthDescUpdatedAt.Default.(func() time.Time)
-	// answertruth.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	answertruth.UpdateDefaultUpdatedAt = answertruthDescUpdatedAt.UpdateDefault.(func() time.Time)
-	answertypeMixin := schema.AnswerType{}.Mixin()
-	answertypeMixinFields1 := answertypeMixin[1].Fields()
-	_ = answertypeMixinFields1
-	answertypeFields := schema.AnswerType{}.Fields()
-	_ = answertypeFields
-	// answertypeDescCreatedAt is the schema descriptor for created_at field.
-	answertypeDescCreatedAt := answertypeMixinFields1[0].Descriptor()
-	// answertype.DefaultCreatedAt holds the default value on creation for the created_at field.
-	answertype.DefaultCreatedAt = answertypeDescCreatedAt.Default.(func() time.Time)
-	// answertypeDescUpdatedAt is the schema descriptor for updated_at field.
-	answertypeDescUpdatedAt := answertypeMixinFields1[1].Descriptor()
-	// answertype.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	answertype.DefaultUpdatedAt = answertypeDescUpdatedAt.Default.(func() time.Time)
-	// answertype.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	answertype.UpdateDefaultUpdatedAt = answertypeDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// answertypeDescName is the schema descriptor for name field.
-	answertypeDescName := answertypeFields[0].Descriptor()
-	// answertype.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	answertype.NameValidator = func() func(string) error {
-		validators := answertypeDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
 	articleMixin := schema.Article{}.Mixin()
 	articleMixinFields1 := articleMixin[1].Fields()
 	_ = articleMixinFields1
@@ -165,6 +50,57 @@ func init() {
 		return func(description string) error {
 			for _, fn := range fns {
 				if err := fn(description); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	descriptionproblemMixin := schema.DescriptionProblem{}.Mixin()
+	descriptionproblemMixinFields1 := descriptionproblemMixin[1].Fields()
+	_ = descriptionproblemMixinFields1
+	descriptionproblemFields := schema.DescriptionProblem{}.Fields()
+	_ = descriptionproblemFields
+	// descriptionproblemDescCreatedAt is the schema descriptor for created_at field.
+	descriptionproblemDescCreatedAt := descriptionproblemMixinFields1[0].Descriptor()
+	// descriptionproblem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	descriptionproblem.DefaultCreatedAt = descriptionproblemDescCreatedAt.Default.(func() time.Time)
+	// descriptionproblemDescUpdatedAt is the schema descriptor for updated_at field.
+	descriptionproblemDescUpdatedAt := descriptionproblemMixinFields1[1].Descriptor()
+	// descriptionproblem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	descriptionproblem.DefaultUpdatedAt = descriptionproblemDescUpdatedAt.Default.(func() time.Time)
+	// descriptionproblem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	descriptionproblem.UpdateDefaultUpdatedAt = descriptionproblemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// descriptionproblemDescCorrectStatement is the schema descriptor for correct_statement field.
+	descriptionproblemDescCorrectStatement := descriptionproblemFields[0].Descriptor()
+	// descriptionproblem.CorrectStatementValidator is a validator for the "correct_statement" field. It is called by the builders before save.
+	descriptionproblem.CorrectStatementValidator = func() func(string) error {
+		validators := descriptionproblemDescCorrectStatement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(correct_statement string) error {
+			for _, fn := range fns {
+				if err := fn(correct_statement); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// descriptionproblemDescStatement is the schema descriptor for statement field.
+	descriptionproblemDescStatement := descriptionproblemFields[1].Descriptor()
+	// descriptionproblem.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	descriptionproblem.StatementValidator = func() func(string) error {
+		validators := descriptionproblemDescStatement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(statement string) error {
+			for _, fn := range fns {
+				if err := fn(statement); err != nil {
 					return err
 				}
 			}
@@ -204,39 +140,6 @@ func init() {
 			return nil
 		}
 	}()
-	problemMixin := schema.Problem{}.Mixin()
-	problemMixinFields1 := problemMixin[1].Fields()
-	_ = problemMixinFields1
-	problemFields := schema.Problem{}.Fields()
-	_ = problemFields
-	// problemDescCreatedAt is the schema descriptor for created_at field.
-	problemDescCreatedAt := problemMixinFields1[0].Descriptor()
-	// problem.DefaultCreatedAt holds the default value on creation for the created_at field.
-	problem.DefaultCreatedAt = problemDescCreatedAt.Default.(func() time.Time)
-	// problemDescUpdatedAt is the schema descriptor for updated_at field.
-	problemDescUpdatedAt := problemMixinFields1[1].Descriptor()
-	// problem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	problem.DefaultUpdatedAt = problemDescUpdatedAt.Default.(func() time.Time)
-	// problem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	problem.UpdateDefaultUpdatedAt = problemDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// problemDescStatement is the schema descriptor for statement field.
-	problemDescStatement := problemFields[1].Descriptor()
-	// problem.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
-	problem.StatementValidator = func() func(string) error {
-		validators := problemDescStatement.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(statement string) error {
-			for _, fn := range fns {
-				if err := fn(statement); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
 	roleMixin := schema.Role{}.Mixin()
 	roleMixinFields1 := roleMixin[1].Fields()
 	_ = roleMixinFields1
@@ -264,6 +167,105 @@ func init() {
 		return func(name string) error {
 			for _, fn := range fns {
 				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	selectionproblemMixin := schema.SelectionProblem{}.Mixin()
+	selectionproblemMixinFields1 := selectionproblemMixin[1].Fields()
+	_ = selectionproblemMixinFields1
+	selectionproblemFields := schema.SelectionProblem{}.Fields()
+	_ = selectionproblemFields
+	// selectionproblemDescCreatedAt is the schema descriptor for created_at field.
+	selectionproblemDescCreatedAt := selectionproblemMixinFields1[0].Descriptor()
+	// selectionproblem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	selectionproblem.DefaultCreatedAt = selectionproblemDescCreatedAt.Default.(func() time.Time)
+	// selectionproblemDescUpdatedAt is the schema descriptor for updated_at field.
+	selectionproblemDescUpdatedAt := selectionproblemMixinFields1[1].Descriptor()
+	// selectionproblem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	selectionproblem.DefaultUpdatedAt = selectionproblemDescUpdatedAt.Default.(func() time.Time)
+	// selectionproblem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	selectionproblem.UpdateDefaultUpdatedAt = selectionproblemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// selectionproblemDescStatement is the schema descriptor for statement field.
+	selectionproblemDescStatement := selectionproblemFields[0].Descriptor()
+	// selectionproblem.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	selectionproblem.StatementValidator = func() func(string) error {
+		validators := selectionproblemDescStatement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(statement string) error {
+			for _, fn := range fns {
+				if err := fn(statement); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	selectionproblemanswerMixin := schema.SelectionProblemAnswer{}.Mixin()
+	selectionproblemanswerMixinFields1 := selectionproblemanswerMixin[1].Fields()
+	_ = selectionproblemanswerMixinFields1
+	selectionproblemanswerFields := schema.SelectionProblemAnswer{}.Fields()
+	_ = selectionproblemanswerFields
+	// selectionproblemanswerDescCreatedAt is the schema descriptor for created_at field.
+	selectionproblemanswerDescCreatedAt := selectionproblemanswerMixinFields1[0].Descriptor()
+	// selectionproblemanswer.DefaultCreatedAt holds the default value on creation for the created_at field.
+	selectionproblemanswer.DefaultCreatedAt = selectionproblemanswerDescCreatedAt.Default.(func() time.Time)
+	// selectionproblemanswerDescUpdatedAt is the schema descriptor for updated_at field.
+	selectionproblemanswerDescUpdatedAt := selectionproblemanswerMixinFields1[1].Descriptor()
+	// selectionproblemanswer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	selectionproblemanswer.DefaultUpdatedAt = selectionproblemanswerDescUpdatedAt.Default.(func() time.Time)
+	// selectionproblemanswer.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	selectionproblemanswer.UpdateDefaultUpdatedAt = selectionproblemanswerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// selectionproblemanswerDescStatement is the schema descriptor for statement field.
+	selectionproblemanswerDescStatement := selectionproblemanswerFields[2].Descriptor()
+	// selectionproblemanswer.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	selectionproblemanswer.StatementValidator = func() func(string) error {
+		validators := selectionproblemanswerDescStatement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(statement string) error {
+			for _, fn := range fns {
+				if err := fn(statement); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	trueorfalseproblemMixin := schema.TrueOrFalseProblem{}.Mixin()
+	trueorfalseproblemMixinFields1 := trueorfalseproblemMixin[1].Fields()
+	_ = trueorfalseproblemMixinFields1
+	trueorfalseproblemFields := schema.TrueOrFalseProblem{}.Fields()
+	_ = trueorfalseproblemFields
+	// trueorfalseproblemDescCreatedAt is the schema descriptor for created_at field.
+	trueorfalseproblemDescCreatedAt := trueorfalseproblemMixinFields1[0].Descriptor()
+	// trueorfalseproblem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	trueorfalseproblem.DefaultCreatedAt = trueorfalseproblemDescCreatedAt.Default.(func() time.Time)
+	// trueorfalseproblemDescUpdatedAt is the schema descriptor for updated_at field.
+	trueorfalseproblemDescUpdatedAt := trueorfalseproblemMixinFields1[1].Descriptor()
+	// trueorfalseproblem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	trueorfalseproblem.DefaultUpdatedAt = trueorfalseproblemDescUpdatedAt.Default.(func() time.Time)
+	// trueorfalseproblem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	trueorfalseproblem.UpdateDefaultUpdatedAt = trueorfalseproblemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// trueorfalseproblemDescStatement is the schema descriptor for statement field.
+	trueorfalseproblemDescStatement := trueorfalseproblemFields[1].Descriptor()
+	// trueorfalseproblem.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	trueorfalseproblem.StatementValidator = func() func(string) error {
+		validators := trueorfalseproblemDescStatement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(statement string) error {
+			for _, fn := range fns {
+				if err := fn(statement); err != nil {
 					return err
 				}
 			}
@@ -417,26 +419,26 @@ func init() {
 			return nil
 		}
 	}()
-	workbookcategoryclassificationMixin := schema.WorkbookCategoryClassification{}.Mixin()
-	workbookcategoryclassificationMixinFields1 := workbookcategoryclassificationMixin[1].Fields()
-	_ = workbookcategoryclassificationMixinFields1
-	workbookcategoryclassificationFields := schema.WorkbookCategoryClassification{}.Fields()
-	_ = workbookcategoryclassificationFields
-	// workbookcategoryclassificationDescCreatedAt is the schema descriptor for created_at field.
-	workbookcategoryclassificationDescCreatedAt := workbookcategoryclassificationMixinFields1[0].Descriptor()
-	// workbookcategoryclassification.DefaultCreatedAt holds the default value on creation for the created_at field.
-	workbookcategoryclassification.DefaultCreatedAt = workbookcategoryclassificationDescCreatedAt.Default.(func() time.Time)
-	// workbookcategoryclassificationDescUpdatedAt is the schema descriptor for updated_at field.
-	workbookcategoryclassificationDescUpdatedAt := workbookcategoryclassificationMixinFields1[1].Descriptor()
-	// workbookcategoryclassification.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	workbookcategoryclassification.DefaultUpdatedAt = workbookcategoryclassificationDescUpdatedAt.Default.(func() time.Time)
-	// workbookcategoryclassification.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	workbookcategoryclassification.UpdateDefaultUpdatedAt = workbookcategoryclassificationDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// workbookcategoryclassificationDescName is the schema descriptor for name field.
-	workbookcategoryclassificationDescName := workbookcategoryclassificationFields[0].Descriptor()
-	// workbookcategoryclassification.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	workbookcategoryclassification.NameValidator = func() func(string) error {
-		validators := workbookcategoryclassificationDescName.Validators
+	workbookcategorydetailMixin := schema.WorkbookCategoryDetail{}.Mixin()
+	workbookcategorydetailMixinFields1 := workbookcategorydetailMixin[1].Fields()
+	_ = workbookcategorydetailMixinFields1
+	workbookcategorydetailFields := schema.WorkbookCategoryDetail{}.Fields()
+	_ = workbookcategorydetailFields
+	// workbookcategorydetailDescCreatedAt is the schema descriptor for created_at field.
+	workbookcategorydetailDescCreatedAt := workbookcategorydetailMixinFields1[0].Descriptor()
+	// workbookcategorydetail.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbookcategorydetail.DefaultCreatedAt = workbookcategorydetailDescCreatedAt.Default.(func() time.Time)
+	// workbookcategorydetailDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookcategorydetailDescUpdatedAt := workbookcategorydetailMixinFields1[1].Descriptor()
+	// workbookcategorydetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbookcategorydetail.DefaultUpdatedAt = workbookcategorydetailDescUpdatedAt.Default.(func() time.Time)
+	// workbookcategorydetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbookcategorydetail.UpdateDefaultUpdatedAt = workbookcategorydetailDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// workbookcategorydetailDescName is the schema descriptor for name field.
+	workbookcategorydetailDescName := workbookcategorydetailFields[0].Descriptor()
+	// workbookcategorydetail.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	workbookcategorydetail.NameValidator = func() func(string) error {
+		validators := workbookcategorydetailDescName.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

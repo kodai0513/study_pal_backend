@@ -5,5 +5,5 @@ import (
 )
 
 type UserRepository interface {
-	FindByName(name string) *entities.User
+	FindByName(string) *entities.User
 }

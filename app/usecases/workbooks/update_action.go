@@ -58,11 +58,9 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) (*WorkbookDto, usec
 	a.WorkbookRepository.Update(workbook)
 
 	return &WorkbookDto{
-			Id:          workbook.Id(),
 			Description: workbook.Description(),
 			IsPublic:    workbook.IsPublic(),
 			Title:       workbook.Title(),
-			UserId:      workbook.UserId(),
 		},
 		nil
 }

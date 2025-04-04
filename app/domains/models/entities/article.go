@@ -31,3 +31,7 @@ func (a *Article) Description() string {
 func (a *Article) UserId() uuid.UUID {
 	return a.userId
 }
+
+func (a *Article) SetDescription(description articles.Description) {
+	a.description = description
+}

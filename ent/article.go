@@ -27,8 +27,8 @@ type Article struct {
 	PageID *int `json:"page_id,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// PostID holds the value of the "post_id" field.
-	PostID uuid.UUID `json:"post_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArticleQuery when eager-loading is set.
 	Edges        ArticleEdges `json:"edges"`
@@ -66,7 +66,7 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case article.FieldCreatedAt, article.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case article.FieldID, article.FieldPostID:
+		case article.FieldID, article.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -114,11 +114,11 @@ func (a *Article) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.Description = value.String
 			}
-		case article.FieldPostID:
+		case article.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field post_id", values[i])
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value != nil {
-				a.PostID = *value
+				a.UserID = *value
 			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
@@ -175,8 +175,8 @@ func (a *Article) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(a.Description)
 	builder.WriteString(", ")
-	builder.WriteString("post_id=")
-	builder.WriteString(fmt.Sprintf("%v", a.PostID))
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", a.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

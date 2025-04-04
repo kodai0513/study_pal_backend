@@ -37,11 +37,9 @@ func (a *CreateAction) Execute(command *CreateActionCommand) (*WorkbookDto, usec
 	workbook := entities.CreateWorkbook(uuid.New(), description, command.UserId, title)
 	a.WorkbookRepository.Create(workbook)
 	return &WorkbookDto{
-			Id:          workbook.Id(),
 			Description: workbook.Description(),
 			IsPublic:    workbook.IsPublic(),
 			Title:       workbook.Title(),
-			UserId:      workbook.UserId(),
 		},
 		nil
 }

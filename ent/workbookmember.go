@@ -27,8 +27,8 @@ type WorkbookMember struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// RoleID holds the value of the "role_id" field.
 	RoleID uuid.UUID `json:"role_id,omitempty"`
-	// MemberID holds the value of the "member_id" field.
-	MemberID uuid.UUID `json:"member_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID uuid.UUID `json:"user_id,omitempty"`
 	// WorkbookID holds the value of the "workbook_id" field.
 	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -41,8 +41,8 @@ type WorkbookMember struct {
 type WorkbookMemberEdges struct {
 	// Role holds the value of the role edge.
 	Role *Role `json:"role,omitempty"`
-	// Member holds the value of the member edge.
-	Member *User `json:"member,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// Workbook holds the value of the workbook edge.
 	Workbook *Workbook `json:"workbook,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -61,15 +61,15 @@ func (e WorkbookMemberEdges) RoleOrErr() (*Role, error) {
 	return nil, &NotLoadedError{edge: "role"}
 }
 
-// MemberOrErr returns the Member value or an error if the edge
+// UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e WorkbookMemberEdges) MemberOrErr() (*User, error) {
-	if e.Member != nil {
-		return e.Member, nil
+func (e WorkbookMemberEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
+		return e.User, nil
 	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: user.Label}
 	}
-	return nil, &NotLoadedError{edge: "member"}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // WorkbookOrErr returns the Workbook value or an error if the edge
@@ -90,7 +90,7 @@ func (*WorkbookMember) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case workbookmember.FieldCreatedAt, workbookmember.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case workbookmember.FieldID, workbookmember.FieldRoleID, workbookmember.FieldMemberID, workbookmember.FieldWorkbookID:
+		case workbookmember.FieldID, workbookmember.FieldRoleID, workbookmember.FieldUserID, workbookmember.FieldWorkbookID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -131,11 +131,11 @@ func (wm *WorkbookMember) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				wm.RoleID = *value
 			}
-		case workbookmember.FieldMemberID:
+		case workbookmember.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field member_id", values[i])
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value != nil {
-				wm.MemberID = *value
+				wm.UserID = *value
 			}
 		case workbookmember.FieldWorkbookID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -161,9 +161,9 @@ func (wm *WorkbookMember) QueryRole() *RoleQuery {
 	return NewWorkbookMemberClient(wm.config).QueryRole(wm)
 }
 
-// QueryMember queries the "member" edge of the WorkbookMember entity.
-func (wm *WorkbookMember) QueryMember() *UserQuery {
-	return NewWorkbookMemberClient(wm.config).QueryMember(wm)
+// QueryUser queries the "user" edge of the WorkbookMember entity.
+func (wm *WorkbookMember) QueryUser() *UserQuery {
+	return NewWorkbookMemberClient(wm.config).QueryUser(wm)
 }
 
 // QueryWorkbook queries the "workbook" edge of the WorkbookMember entity.
@@ -203,8 +203,8 @@ func (wm *WorkbookMember) String() string {
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", wm.RoleID))
 	builder.WriteString(", ")
-	builder.WriteString("member_id=")
-	builder.WriteString(fmt.Sprintf("%v", wm.MemberID))
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", wm.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("workbook_id=")
 	builder.WriteString(fmt.Sprintf("%v", wm.WorkbookID))

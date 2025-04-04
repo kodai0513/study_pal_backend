@@ -6,7 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/descriptionproblem"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/trueorfalseproblem"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
@@ -52,9 +55,9 @@ func (wc *WorkbookCreate) SetNillableUpdatedAt(t *time.Time) *WorkbookCreate {
 	return wc
 }
 
-// SetCreatedID sets the "created_id" field.
-func (wc *WorkbookCreate) SetCreatedID(u uuid.UUID) *WorkbookCreate {
-	wc.mutation.SetCreatedID(u)
+// SetUserID sets the "user_id" field.
+func (wc *WorkbookCreate) SetUserID(u uuid.UUID) *WorkbookCreate {
+	wc.mutation.SetUserID(u)
 	return wc
 }
 
@@ -90,19 +93,54 @@ func (wc *WorkbookCreate) SetID(u uuid.UUID) *WorkbookCreate {
 	return wc
 }
 
-// AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wc *WorkbookCreate) AddProblemIDs(ids ...uuid.UUID) *WorkbookCreate {
-	wc.mutation.AddProblemIDs(ids...)
+// AddDescriptionProblemIDs adds the "description_problems" edge to the DescriptionProblem entity by IDs.
+func (wc *WorkbookCreate) AddDescriptionProblemIDs(ids ...uuid.UUID) *WorkbookCreate {
+	wc.mutation.AddDescriptionProblemIDs(ids...)
 	return wc
 }
 
-// AddProblems adds the "problems" edges to the Problem entity.
-func (wc *WorkbookCreate) AddProblems(p ...*Problem) *WorkbookCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddDescriptionProblems adds the "description_problems" edges to the DescriptionProblem entity.
+func (wc *WorkbookCreate) AddDescriptionProblems(d ...*DescriptionProblem) *WorkbookCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return wc.AddProblemIDs(ids...)
+	return wc.AddDescriptionProblemIDs(ids...)
+}
+
+// AddSelectionProblemIDs adds the "selection_problems" edge to the SelectionProblem entity by IDs.
+func (wc *WorkbookCreate) AddSelectionProblemIDs(ids ...uuid.UUID) *WorkbookCreate {
+	wc.mutation.AddSelectionProblemIDs(ids...)
+	return wc
+}
+
+// AddSelectionProblems adds the "selection_problems" edges to the SelectionProblem entity.
+func (wc *WorkbookCreate) AddSelectionProblems(s ...*SelectionProblem) *WorkbookCreate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wc.AddSelectionProblemIDs(ids...)
+}
+
+// AddTrueOrFalseProblemIDs adds the "true_or_false_problems" edge to the TrueOrFalseProblem entity by IDs.
+func (wc *WorkbookCreate) AddTrueOrFalseProblemIDs(ids ...uuid.UUID) *WorkbookCreate {
+	wc.mutation.AddTrueOrFalseProblemIDs(ids...)
+	return wc
+}
+
+// AddTrueOrFalseProblems adds the "true_or_false_problems" edges to the TrueOrFalseProblem entity.
+func (wc *WorkbookCreate) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *WorkbookCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return wc.AddTrueOrFalseProblemIDs(ids...)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (wc *WorkbookCreate) SetUser(u *User) *WorkbookCreate {
+	return wc.SetUserID(u.ID)
 }
 
 // AddWorkbookCategoryIDs adds the "workbook_categories" edge to the WorkbookCategory entity by IDs.
@@ -192,8 +230,8 @@ func (wc *WorkbookCreate) check() error {
 	if _, ok := wc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Workbook.updated_at"`)}
 	}
-	if _, ok := wc.mutation.CreatedID(); !ok {
-		return &ValidationError{Name: "created_id", err: errors.New(`ent: missing required field "Workbook.created_id"`)}
+	if _, ok := wc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Workbook.user_id"`)}
 	}
 	if _, ok := wc.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Workbook.description"`)}
@@ -213,6 +251,9 @@ func (wc *WorkbookCreate) check() error {
 		if err := workbook.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Workbook.title": %w`, err)}
 		}
+	}
+	if len(wc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Workbook.user"`)}
 	}
 	return nil
 }
@@ -257,10 +298,6 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 		_spec.SetField(workbook.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := wc.mutation.CreatedID(); ok {
-		_spec.SetField(workbook.FieldCreatedID, field.TypeUUID, value)
-		_node.CreatedID = value
-	}
 	if value, ok := wc.mutation.Description(); ok {
 		_spec.SetField(workbook.FieldDescription, field.TypeString, value)
 		_node.Description = &value
@@ -273,20 +310,69 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 		_spec.SetField(workbook.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
-	if nodes := wc.mutation.ProblemsIDs(); len(nodes) > 0 {
+	if nodes := wc.mutation.DescriptionProblemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbook.ProblemsTable,
-			Columns: []string{workbook.ProblemsColumn},
+			Table:   workbook.DescriptionProblemsTable,
+			Columns: []string{workbook.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.SelectionProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.SelectionProblemsTable,
+			Columns: []string{workbook.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.TrueOrFalseProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.TrueOrFalseProblemsTable,
+			Columns: []string{workbook.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   workbook.UserTable,
+			Columns: []string{workbook.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := wc.mutation.WorkbookCategoriesIDs(); len(nodes) > 0 {

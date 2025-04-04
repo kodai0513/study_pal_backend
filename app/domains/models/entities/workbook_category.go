@@ -7,19 +7,33 @@ import (
 )
 
 type WorkbookCategory struct {
-	id   uuid.UUID
-	name workbook_categories.Name
-	//problems                        []*Problem
-	//workbookCategoryClassifications []*WorkbookCategoryClassification
+	id         uuid.UUID
+	name       workbook_categories.Name
 	workbookId uuid.UUID
 }
 
-func NewWorkbookCategory(id uuid.UUID, name workbook_categories.Name, workbookId uuid.UUID) *WorkbookCategory {
+func CreateWorkbookCategory(id uuid.UUID, name workbook_categories.Name, workbookId uuid.UUID) *WorkbookCategory {
 	return &WorkbookCategory{
 		id:         id,
 		name:       name,
 		workbookId: workbookId,
 	}
+}
+
+func NewWorkbookCategory(
+	id uuid.UUID,
+	name workbook_categories.Name,
+	workbookId uuid.UUID,
+) *WorkbookCategory {
+	return &WorkbookCategory{
+		id:         id,
+		name:       name,
+		workbookId: workbookId,
+	}
+}
+
+func (w *WorkbookCategory) Id() uuid.UUID {
+	return w.id
 }
 
 func (w *WorkbookCategory) Name() string {
@@ -28,4 +42,8 @@ func (w *WorkbookCategory) Name() string {
 
 func (w *WorkbookCategory) WorkbookId() uuid.UUID {
 	return w.workbookId
+}
+
+func (w *WorkbookCategory) SetName(name workbook_categories.Name) {
+	w.name = name
 }

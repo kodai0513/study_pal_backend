@@ -22,21 +22,39 @@ const (
 	FieldName = "name"
 	// FieldWorkbookID holds the string denoting the workbook_id field in the database.
 	FieldWorkbookID = "workbook_id"
-	// EdgeProblems holds the string denoting the problems edge name in mutations.
-	EdgeProblems = "problems"
+	// EdgeDescriptionProblems holds the string denoting the description_problems edge name in mutations.
+	EdgeDescriptionProblems = "description_problems"
+	// EdgeSelectionProblems holds the string denoting the selection_problems edge name in mutations.
+	EdgeSelectionProblems = "selection_problems"
+	// EdgeTrueOrFalseProblems holds the string denoting the true_or_false_problems edge name in mutations.
+	EdgeTrueOrFalseProblems = "true_or_false_problems"
 	// EdgeWorkbook holds the string denoting the workbook edge name in mutations.
 	EdgeWorkbook = "workbook"
-	// EdgeWorkbookCategoryClassifications holds the string denoting the workbook_category_classifications edge name in mutations.
-	EdgeWorkbookCategoryClassifications = "workbook_category_classifications"
+	// EdgeWorkbookCategoryDetails holds the string denoting the workbook_category_details edge name in mutations.
+	EdgeWorkbookCategoryDetails = "workbook_category_details"
 	// Table holds the table name of the workbookcategory in the database.
 	Table = "workbook_categories"
-	// ProblemsTable is the table that holds the problems relation/edge.
-	ProblemsTable = "problems"
-	// ProblemsInverseTable is the table name for the Problem entity.
-	// It exists in this package in order to avoid circular dependency with the "problem" package.
-	ProblemsInverseTable = "problems"
-	// ProblemsColumn is the table column denoting the problems relation/edge.
-	ProblemsColumn = "workbook_category_id"
+	// DescriptionProblemsTable is the table that holds the description_problems relation/edge.
+	DescriptionProblemsTable = "description_problems"
+	// DescriptionProblemsInverseTable is the table name for the DescriptionProblem entity.
+	// It exists in this package in order to avoid circular dependency with the "descriptionproblem" package.
+	DescriptionProblemsInverseTable = "description_problems"
+	// DescriptionProblemsColumn is the table column denoting the description_problems relation/edge.
+	DescriptionProblemsColumn = "workbook_category_id"
+	// SelectionProblemsTable is the table that holds the selection_problems relation/edge.
+	SelectionProblemsTable = "selection_problems"
+	// SelectionProblemsInverseTable is the table name for the SelectionProblem entity.
+	// It exists in this package in order to avoid circular dependency with the "selectionproblem" package.
+	SelectionProblemsInverseTable = "selection_problems"
+	// SelectionProblemsColumn is the table column denoting the selection_problems relation/edge.
+	SelectionProblemsColumn = "workbook_category_id"
+	// TrueOrFalseProblemsTable is the table that holds the true_or_false_problems relation/edge.
+	TrueOrFalseProblemsTable = "true_or_false_problems"
+	// TrueOrFalseProblemsInverseTable is the table name for the TrueOrFalseProblem entity.
+	// It exists in this package in order to avoid circular dependency with the "trueorfalseproblem" package.
+	TrueOrFalseProblemsInverseTable = "true_or_false_problems"
+	// TrueOrFalseProblemsColumn is the table column denoting the true_or_false_problems relation/edge.
+	TrueOrFalseProblemsColumn = "workbook_category_id"
 	// WorkbookTable is the table that holds the workbook relation/edge.
 	WorkbookTable = "workbook_categories"
 	// WorkbookInverseTable is the table name for the Workbook entity.
@@ -44,13 +62,13 @@ const (
 	WorkbookInverseTable = "workbooks"
 	// WorkbookColumn is the table column denoting the workbook relation/edge.
 	WorkbookColumn = "workbook_id"
-	// WorkbookCategoryClassificationsTable is the table that holds the workbook_category_classifications relation/edge.
-	WorkbookCategoryClassificationsTable = "workbook_category_classifications"
-	// WorkbookCategoryClassificationsInverseTable is the table name for the WorkbookCategoryClassification entity.
-	// It exists in this package in order to avoid circular dependency with the "workbookcategoryclassification" package.
-	WorkbookCategoryClassificationsInverseTable = "workbook_category_classifications"
-	// WorkbookCategoryClassificationsColumn is the table column denoting the workbook_category_classifications relation/edge.
-	WorkbookCategoryClassificationsColumn = "workbook_category_workbook_category_classifications"
+	// WorkbookCategoryDetailsTable is the table that holds the workbook_category_details relation/edge.
+	WorkbookCategoryDetailsTable = "workbook_category_details"
+	// WorkbookCategoryDetailsInverseTable is the table name for the WorkbookCategoryDetail entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookcategorydetail" package.
+	WorkbookCategoryDetailsInverseTable = "workbook_category_details"
+	// WorkbookCategoryDetailsColumn is the table column denoting the workbook_category_details relation/edge.
+	WorkbookCategoryDetailsColumn = "workbook_category_workbook_category_details"
 )
 
 // Columns holds all SQL columns for workbookcategory fields.
@@ -111,17 +129,45 @@ func ByWorkbookID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkbookID, opts...).ToFunc()
 }
 
-// ByProblemsCount orders the results by problems count.
-func ByProblemsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDescriptionProblemsCount orders the results by description_problems count.
+func ByDescriptionProblemsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newProblemsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDescriptionProblemsStep(), opts...)
 	}
 }
 
-// ByProblems orders the results by problems terms.
-func ByProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDescriptionProblems orders the results by description_problems terms.
+func ByDescriptionProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDescriptionProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySelectionProblemsCount orders the results by selection_problems count.
+func BySelectionProblemsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSelectionProblemsStep(), opts...)
+	}
+}
+
+// BySelectionProblems orders the results by selection_problems terms.
+func BySelectionProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSelectionProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTrueOrFalseProblemsCount orders the results by true_or_false_problems count.
+func ByTrueOrFalseProblemsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTrueOrFalseProblemsStep(), opts...)
+	}
+}
+
+// ByTrueOrFalseProblems orders the results by true_or_false_problems terms.
+func ByTrueOrFalseProblems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTrueOrFalseProblemsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -132,24 +178,38 @@ func ByWorkbookField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByWorkbookCategoryClassificationsCount orders the results by workbook_category_classifications count.
-func ByWorkbookCategoryClassificationsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByWorkbookCategoryDetailsCount orders the results by workbook_category_details count.
+func ByWorkbookCategoryDetailsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newWorkbookCategoryClassificationsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newWorkbookCategoryDetailsStep(), opts...)
 	}
 }
 
-// ByWorkbookCategoryClassifications orders the results by workbook_category_classifications terms.
-func ByWorkbookCategoryClassifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByWorkbookCategoryDetails orders the results by workbook_category_details terms.
+func ByWorkbookCategoryDetails(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryClassificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryDetailsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newProblemsStep() *sqlgraph.Step {
+func newDescriptionProblemsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProblemsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, ProblemsTable, ProblemsColumn),
+		sqlgraph.To(DescriptionProblemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DescriptionProblemsTable, DescriptionProblemsColumn),
+	)
+}
+func newSelectionProblemsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SelectionProblemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SelectionProblemsTable, SelectionProblemsColumn),
+	)
+}
+func newTrueOrFalseProblemsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TrueOrFalseProblemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TrueOrFalseProblemsTable, TrueOrFalseProblemsColumn),
 	)
 }
 func newWorkbookStep() *sqlgraph.Step {
@@ -159,10 +219,10 @@ func newWorkbookStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookTable, WorkbookColumn),
 	)
 }
-func newWorkbookCategoryClassificationsStep() *sqlgraph.Step {
+func newWorkbookCategoryDetailsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WorkbookCategoryClassificationsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryClassificationsTable, WorkbookCategoryClassificationsColumn),
+		sqlgraph.To(WorkbookCategoryDetailsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryDetailsTable, WorkbookCategoryDetailsColumn),
 	)
 }

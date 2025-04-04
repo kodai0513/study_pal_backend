@@ -22,8 +22,8 @@ const (
 	FieldPageID = "page_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldPostID holds the string denoting the post_id field in the database.
-	FieldPostID = "post_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// EdgePost holds the string denoting the post edge name in mutations.
 	EdgePost = "post"
 	// Table holds the table name of the article in the database.
@@ -34,7 +34,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	PostInverseTable = "users"
 	// PostColumn is the table column denoting the post relation/edge.
-	PostColumn = "post_id"
+	PostColumn = "user_id"
 )
 
 // Columns holds all SQL columns for article fields.
@@ -44,7 +44,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldPageID,
 	FieldDescription,
-	FieldPostID,
+	FieldUserID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -96,9 +96,9 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByPostID orders the results by the post_id field.
-func ByPostID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPostID, opts...).ToFunc()
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByPostField orders the results by post field.

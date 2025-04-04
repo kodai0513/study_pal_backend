@@ -32,7 +32,7 @@ func (a *ArticleRepositoryImpl) Create(article *entities.Article) *entities.Arti
 		SaveX(a.ctx)
 
 	description, _ := articles.NewDescription(result.Description)
-	return entities.NewArticle(result.ID, description, result.PostID)
+	return entities.NewArticle(result.ID, description, result.UserID)
 }
 
 func (a *ArticleRepositoryImpl) Update(article *entities.Article) *entities.Article {
@@ -42,7 +42,7 @@ func (a *ArticleRepositoryImpl) Update(article *entities.Article) *entities.Arti
 		SaveX(a.ctx)
 
 	description, _ := articles.NewDescription(result.Description)
-	return entities.NewArticle(result.ID, description, result.PostID)
+	return entities.NewArticle(result.ID, description, result.UserID)
 }
 
 func (a *ArticleRepositoryImpl) Delete(id uuid.UUID) {
@@ -63,5 +63,5 @@ func (a *ArticleRepositoryImpl) FindById(id uuid.UUID) *entities.Article {
 
 	resultDescription, _ := articles.NewDescription(result.Description)
 
-	return entities.NewArticle(result.ID, resultDescription, result.PostID)
+	return entities.NewArticle(result.ID, resultDescription, result.UserID)
 }

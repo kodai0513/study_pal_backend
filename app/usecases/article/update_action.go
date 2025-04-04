@@ -46,9 +46,7 @@ func (c *UpdateAction) Execute(command *UpdateActionCommand) (*ArticleDto, useca
 	resultArticle := c.ArticleRepository.Update(article)
 
 	return &ArticleDto{
-			Id:          resultArticle.Id(),
 			Description: resultArticle.Description(),
-			UserId:      resultArticle.UserId(),
 		},
 		nil
 }

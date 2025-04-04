@@ -7,8 +7,11 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/predicate"
-	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/trueorfalseproblem"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookmember"
@@ -23,13 +26,16 @@ import (
 // WorkbookQuery is the builder for querying Workbook entities.
 type WorkbookQuery struct {
 	config
-	ctx                    *QueryContext
-	order                  []workbook.OrderOption
-	inters                 []Interceptor
-	predicates             []predicate.Workbook
-	withProblems           *ProblemQuery
-	withWorkbookCategories *WorkbookCategoryQuery
-	withWorkbookMembers    *WorkbookMemberQuery
+	ctx                     *QueryContext
+	order                   []workbook.OrderOption
+	inters                  []Interceptor
+	predicates              []predicate.Workbook
+	withDescriptionProblems *DescriptionProblemQuery
+	withSelectionProblems   *SelectionProblemQuery
+	withTrueOrFalseProblems *TrueOrFalseProblemQuery
+	withUser                *UserQuery
+	withWorkbookCategories  *WorkbookCategoryQuery
+	withWorkbookMembers     *WorkbookMemberQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,9 +72,9 @@ func (wq *WorkbookQuery) Order(o ...workbook.OrderOption) *WorkbookQuery {
 	return wq
 }
 
-// QueryProblems chains the current query on the "problems" edge.
-func (wq *WorkbookQuery) QueryProblems() *ProblemQuery {
-	query := (&ProblemClient{config: wq.config}).Query()
+// QueryDescriptionProblems chains the current query on the "description_problems" edge.
+func (wq *WorkbookQuery) QueryDescriptionProblems() *DescriptionProblemQuery {
+	query := (&DescriptionProblemClient{config: wq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -79,8 +85,74 @@ func (wq *WorkbookQuery) QueryProblems() *ProblemQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(workbook.Table, workbook.FieldID, selector),
-			sqlgraph.To(problem.Table, problem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbook.ProblemsTable, workbook.ProblemsColumn),
+			sqlgraph.To(descriptionproblem.Table, descriptionproblem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbook.DescriptionProblemsTable, workbook.DescriptionProblemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySelectionProblems chains the current query on the "selection_problems" edge.
+func (wq *WorkbookQuery) QuerySelectionProblems() *SelectionProblemQuery {
+	query := (&SelectionProblemClient{config: wq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, selector),
+			sqlgraph.To(selectionproblem.Table, selectionproblem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbook.SelectionProblemsTable, workbook.SelectionProblemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTrueOrFalseProblems chains the current query on the "true_or_false_problems" edge.
+func (wq *WorkbookQuery) QueryTrueOrFalseProblems() *TrueOrFalseProblemQuery {
+	query := (&TrueOrFalseProblemClient{config: wq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, selector),
+			sqlgraph.To(trueorfalseproblem.Table, trueorfalseproblem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbook.TrueOrFalseProblemsTable, workbook.TrueOrFalseProblemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (wq *WorkbookQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: wq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, workbook.UserTable, workbook.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -319,28 +391,64 @@ func (wq *WorkbookQuery) Clone() *WorkbookQuery {
 		return nil
 	}
 	return &WorkbookQuery{
-		config:                 wq.config,
-		ctx:                    wq.ctx.Clone(),
-		order:                  append([]workbook.OrderOption{}, wq.order...),
-		inters:                 append([]Interceptor{}, wq.inters...),
-		predicates:             append([]predicate.Workbook{}, wq.predicates...),
-		withProblems:           wq.withProblems.Clone(),
-		withWorkbookCategories: wq.withWorkbookCategories.Clone(),
-		withWorkbookMembers:    wq.withWorkbookMembers.Clone(),
+		config:                  wq.config,
+		ctx:                     wq.ctx.Clone(),
+		order:                   append([]workbook.OrderOption{}, wq.order...),
+		inters:                  append([]Interceptor{}, wq.inters...),
+		predicates:              append([]predicate.Workbook{}, wq.predicates...),
+		withDescriptionProblems: wq.withDescriptionProblems.Clone(),
+		withSelectionProblems:   wq.withSelectionProblems.Clone(),
+		withTrueOrFalseProblems: wq.withTrueOrFalseProblems.Clone(),
+		withUser:                wq.withUser.Clone(),
+		withWorkbookCategories:  wq.withWorkbookCategories.Clone(),
+		withWorkbookMembers:     wq.withWorkbookMembers.Clone(),
 		// clone intermediate query.
 		sql:  wq.sql.Clone(),
 		path: wq.path,
 	}
 }
 
-// WithProblems tells the query-builder to eager-load the nodes that are connected to
-// the "problems" edge. The optional arguments are used to configure the query builder of the edge.
-func (wq *WorkbookQuery) WithProblems(opts ...func(*ProblemQuery)) *WorkbookQuery {
-	query := (&ProblemClient{config: wq.config}).Query()
+// WithDescriptionProblems tells the query-builder to eager-load the nodes that are connected to
+// the "description_problems" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WorkbookQuery) WithDescriptionProblems(opts ...func(*DescriptionProblemQuery)) *WorkbookQuery {
+	query := (&DescriptionProblemClient{config: wq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	wq.withProblems = query
+	wq.withDescriptionProblems = query
+	return wq
+}
+
+// WithSelectionProblems tells the query-builder to eager-load the nodes that are connected to
+// the "selection_problems" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WorkbookQuery) WithSelectionProblems(opts ...func(*SelectionProblemQuery)) *WorkbookQuery {
+	query := (&SelectionProblemClient{config: wq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withSelectionProblems = query
+	return wq
+}
+
+// WithTrueOrFalseProblems tells the query-builder to eager-load the nodes that are connected to
+// the "true_or_false_problems" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WorkbookQuery) WithTrueOrFalseProblems(opts ...func(*TrueOrFalseProblemQuery)) *WorkbookQuery {
+	query := (&TrueOrFalseProblemClient{config: wq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withTrueOrFalseProblems = query
+	return wq
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WorkbookQuery) WithUser(opts ...func(*UserQuery)) *WorkbookQuery {
+	query := (&UserClient{config: wq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withUser = query
 	return wq
 }
 
@@ -444,8 +552,11 @@ func (wq *WorkbookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wor
 	var (
 		nodes       = []*Workbook{}
 		_spec       = wq.querySpec()
-		loadedTypes = [3]bool{
-			wq.withProblems != nil,
+		loadedTypes = [6]bool{
+			wq.withDescriptionProblems != nil,
+			wq.withSelectionProblems != nil,
+			wq.withTrueOrFalseProblems != nil,
+			wq.withUser != nil,
 			wq.withWorkbookCategories != nil,
 			wq.withWorkbookMembers != nil,
 		}
@@ -468,10 +579,36 @@ func (wq *WorkbookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wor
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := wq.withProblems; query != nil {
-		if err := wq.loadProblems(ctx, query, nodes,
-			func(n *Workbook) { n.Edges.Problems = []*Problem{} },
-			func(n *Workbook, e *Problem) { n.Edges.Problems = append(n.Edges.Problems, e) }); err != nil {
+	if query := wq.withDescriptionProblems; query != nil {
+		if err := wq.loadDescriptionProblems(ctx, query, nodes,
+			func(n *Workbook) { n.Edges.DescriptionProblems = []*DescriptionProblem{} },
+			func(n *Workbook, e *DescriptionProblem) {
+				n.Edges.DescriptionProblems = append(n.Edges.DescriptionProblems, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := wq.withSelectionProblems; query != nil {
+		if err := wq.loadSelectionProblems(ctx, query, nodes,
+			func(n *Workbook) { n.Edges.SelectionProblems = []*SelectionProblem{} },
+			func(n *Workbook, e *SelectionProblem) {
+				n.Edges.SelectionProblems = append(n.Edges.SelectionProblems, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := wq.withTrueOrFalseProblems; query != nil {
+		if err := wq.loadTrueOrFalseProblems(ctx, query, nodes,
+			func(n *Workbook) { n.Edges.TrueOrFalseProblems = []*TrueOrFalseProblem{} },
+			func(n *Workbook, e *TrueOrFalseProblem) {
+				n.Edges.TrueOrFalseProblems = append(n.Edges.TrueOrFalseProblems, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := wq.withUser; query != nil {
+		if err := wq.loadUser(ctx, query, nodes, nil,
+			func(n *Workbook, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -494,7 +631,7 @@ func (wq *WorkbookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wor
 	return nodes, nil
 }
 
-func (wq *WorkbookQuery) loadProblems(ctx context.Context, query *ProblemQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *Problem)) error {
+func (wq *WorkbookQuery) loadDescriptionProblems(ctx context.Context, query *DescriptionProblemQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *DescriptionProblem)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Workbook)
 	for i := range nodes {
@@ -505,10 +642,10 @@ func (wq *WorkbookQuery) loadProblems(ctx context.Context, query *ProblemQuery, 
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(problem.FieldWorkbookID)
+		query.ctx.AppendFieldOnce(descriptionproblem.FieldWorkbookID)
 	}
-	query.Where(predicate.Problem(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(workbook.ProblemsColumn), fks...))
+	query.Where(predicate.DescriptionProblem(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(workbook.DescriptionProblemsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -521,6 +658,95 @@ func (wq *WorkbookQuery) loadProblems(ctx context.Context, query *ProblemQuery, 
 			return fmt.Errorf(`unexpected referenced foreign-key "workbook_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (wq *WorkbookQuery) loadSelectionProblems(ctx context.Context, query *SelectionProblemQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *SelectionProblem)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Workbook)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(selectionproblem.FieldWorkbookID)
+	}
+	query.Where(predicate.SelectionProblem(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(workbook.SelectionProblemsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.WorkbookID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "workbook_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (wq *WorkbookQuery) loadTrueOrFalseProblems(ctx context.Context, query *TrueOrFalseProblemQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *TrueOrFalseProblem)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Workbook)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(trueorfalseproblem.FieldWorkbookID)
+	}
+	query.Where(predicate.TrueOrFalseProblem(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(workbook.TrueOrFalseProblemsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.WorkbookID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "workbook_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (wq *WorkbookQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *User)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Workbook)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -609,6 +835,9 @@ func (wq *WorkbookQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != workbook.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if wq.withUser != nil {
+			_spec.Node.AddColumnOnce(workbook.FieldUserID)
 		}
 	}
 	if ps := wq.predicates; len(ps) > 0 {

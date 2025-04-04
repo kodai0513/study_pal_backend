@@ -70,15 +70,21 @@ func (ac *ArticleCreate) SetDescription(s string) *ArticleCreate {
 	return ac
 }
 
-// SetPostID sets the "post_id" field.
-func (ac *ArticleCreate) SetPostID(u uuid.UUID) *ArticleCreate {
-	ac.mutation.SetPostID(u)
+// SetUserID sets the "user_id" field.
+func (ac *ArticleCreate) SetUserID(u uuid.UUID) *ArticleCreate {
+	ac.mutation.SetUserID(u)
 	return ac
 }
 
 // SetID sets the "id" field.
 func (ac *ArticleCreate) SetID(u uuid.UUID) *ArticleCreate {
 	ac.mutation.SetID(u)
+	return ac
+}
+
+// SetPostID sets the "post" edge to the User entity by ID.
+func (ac *ArticleCreate) SetPostID(id uuid.UUID) *ArticleCreate {
+	ac.mutation.SetPostID(id)
 	return ac
 }
 
@@ -148,8 +154,8 @@ func (ac *ArticleCreate) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Article.description": %w`, err)}
 		}
 	}
-	if _, ok := ac.mutation.PostID(); !ok {
-		return &ValidationError{Name: "post_id", err: errors.New(`ent: missing required field "Article.post_id"`)}
+	if _, ok := ac.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Article.user_id"`)}
 	}
 	if len(ac.mutation.PostIDs()) == 0 {
 		return &ValidationError{Name: "post", err: errors.New(`ent: missing required edge "Article.post"`)}
@@ -219,7 +225,7 @@ func (ac *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.PostID = nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

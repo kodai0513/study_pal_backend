@@ -9,6 +9,7 @@ import (
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/user"
+	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 
@@ -122,6 +123,21 @@ func (uu *UserUpdate) AddArticles(a ...*Article) *UserUpdate {
 	return uu.AddArticleIDs(ids...)
 }
 
+// AddWorkbookIDs adds the "workbooks" edge to the Workbook entity by IDs.
+func (uu *UserUpdate) AddWorkbookIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddWorkbookIDs(ids...)
+	return uu
+}
+
+// AddWorkbooks adds the "workbooks" edges to the Workbook entity.
+func (uu *UserUpdate) AddWorkbooks(w ...*Workbook) *UserUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWorkbookIDs(ids...)
+}
+
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
 func (uu *UserUpdate) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddWorkbookMemberIDs(ids...)
@@ -161,6 +177,27 @@ func (uu *UserUpdate) RemoveArticles(a ...*Article) *UserUpdate {
 		ids[i] = a[i].ID
 	}
 	return uu.RemoveArticleIDs(ids...)
+}
+
+// ClearWorkbooks clears all "workbooks" edges to the Workbook entity.
+func (uu *UserUpdate) ClearWorkbooks() *UserUpdate {
+	uu.mutation.ClearWorkbooks()
+	return uu
+}
+
+// RemoveWorkbookIDs removes the "workbooks" edge to Workbook entities by IDs.
+func (uu *UserUpdate) RemoveWorkbookIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveWorkbookIDs(ids...)
+	return uu
+}
+
+// RemoveWorkbooks removes "workbooks" edges to Workbook entities.
+func (uu *UserUpdate) RemoveWorkbooks(w ...*Workbook) *UserUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWorkbookIDs(ids...)
 }
 
 // ClearWorkbookMembers clears all "workbook_members" edges to the WorkbookMember entity.
@@ -313,6 +350,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.WorkbooksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWorkbooksIDs(); len(nodes) > 0 && !uu.mutation.WorkbooksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WorkbooksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -476,6 +558,21 @@ func (uuo *UserUpdateOne) AddArticles(a ...*Article) *UserUpdateOne {
 	return uuo.AddArticleIDs(ids...)
 }
 
+// AddWorkbookIDs adds the "workbooks" edge to the Workbook entity by IDs.
+func (uuo *UserUpdateOne) AddWorkbookIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddWorkbookIDs(ids...)
+	return uuo
+}
+
+// AddWorkbooks adds the "workbooks" edges to the Workbook entity.
+func (uuo *UserUpdateOne) AddWorkbooks(w ...*Workbook) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWorkbookIDs(ids...)
+}
+
 // AddWorkbookMemberIDs adds the "workbook_members" edge to the WorkbookMember entity by IDs.
 func (uuo *UserUpdateOne) AddWorkbookMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddWorkbookMemberIDs(ids...)
@@ -515,6 +612,27 @@ func (uuo *UserUpdateOne) RemoveArticles(a ...*Article) *UserUpdateOne {
 		ids[i] = a[i].ID
 	}
 	return uuo.RemoveArticleIDs(ids...)
+}
+
+// ClearWorkbooks clears all "workbooks" edges to the Workbook entity.
+func (uuo *UserUpdateOne) ClearWorkbooks() *UserUpdateOne {
+	uuo.mutation.ClearWorkbooks()
+	return uuo
+}
+
+// RemoveWorkbookIDs removes the "workbooks" edge to Workbook entities by IDs.
+func (uuo *UserUpdateOne) RemoveWorkbookIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveWorkbookIDs(ids...)
+	return uuo
+}
+
+// RemoveWorkbooks removes "workbooks" edges to Workbook entities.
+func (uuo *UserUpdateOne) RemoveWorkbooks(w ...*Workbook) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWorkbookIDs(ids...)
 }
 
 // ClearWorkbookMembers clears all "workbook_members" edges to the WorkbookMember entity.
@@ -697,6 +815,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WorkbooksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWorkbooksIDs(); len(nodes) > 0 && !uuo.mutation.WorkbooksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WorkbooksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbooksTable,
+			Columns: []string{user.WorkbooksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

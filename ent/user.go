@@ -40,11 +40,13 @@ type User struct {
 type UserEdges struct {
 	// Articles holds the value of the articles edge.
 	Articles []*Article `json:"articles,omitempty"`
+	// Workbooks holds the value of the workbooks edge.
+	Workbooks []*Workbook `json:"workbooks,omitempty"`
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ArticlesOrErr returns the Articles value or an error if the edge
@@ -56,10 +58,19 @@ func (e UserEdges) ArticlesOrErr() ([]*Article, error) {
 	return nil, &NotLoadedError{edge: "articles"}
 }
 
+// WorkbooksOrErr returns the Workbooks value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WorkbooksOrErr() ([]*Workbook, error) {
+	if e.loadedTypes[1] {
+		return e.Workbooks, nil
+	}
+	return nil, &NotLoadedError{edge: "workbooks"}
+}
+
 // WorkbookMembersOrErr returns the WorkbookMembers value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.WorkbookMembers, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_members"}
@@ -149,6 +160,11 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryArticles queries the "articles" edge of the User entity.
 func (u *User) QueryArticles() *ArticleQuery {
 	return NewUserClient(u.config).QueryArticles(u)
+}
+
+// QueryWorkbooks queries the "workbooks" edge of the User entity.
+func (u *User) QueryWorkbooks() *WorkbookQuery {
+	return NewUserClient(u.config).QueryWorkbooks(u)
 }
 
 // QueryWorkbookMembers queries the "workbook_members" edge of the User entity.

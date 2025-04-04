@@ -241,21 +241,67 @@ func WorkbookIDNotIn(vs ...uuid.UUID) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.FieldNotIn(FieldWorkbookID, vs...))
 }
 
-// HasProblems applies the HasEdge predicate on the "problems" edge.
-func HasProblems() predicate.WorkbookCategory {
+// HasDescriptionProblems applies the HasEdge predicate on the "description_problems" edge.
+func HasDescriptionProblems() predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ProblemsTable, ProblemsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, DescriptionProblemsTable, DescriptionProblemsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasProblemsWith applies the HasEdge predicate on the "problems" edge with a given conditions (other predicates).
-func HasProblemsWith(preds ...predicate.Problem) predicate.WorkbookCategory {
+// HasDescriptionProblemsWith applies the HasEdge predicate on the "description_problems" edge with a given conditions (other predicates).
+func HasDescriptionProblemsWith(preds ...predicate.DescriptionProblem) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(func(s *sql.Selector) {
-		step := newProblemsStep()
+		step := newDescriptionProblemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSelectionProblems applies the HasEdge predicate on the "selection_problems" edge.
+func HasSelectionProblems() predicate.WorkbookCategory {
+	return predicate.WorkbookCategory(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SelectionProblemsTable, SelectionProblemsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSelectionProblemsWith applies the HasEdge predicate on the "selection_problems" edge with a given conditions (other predicates).
+func HasSelectionProblemsWith(preds ...predicate.SelectionProblem) predicate.WorkbookCategory {
+	return predicate.WorkbookCategory(func(s *sql.Selector) {
+		step := newSelectionProblemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTrueOrFalseProblems applies the HasEdge predicate on the "true_or_false_problems" edge.
+func HasTrueOrFalseProblems() predicate.WorkbookCategory {
+	return predicate.WorkbookCategory(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TrueOrFalseProblemsTable, TrueOrFalseProblemsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTrueOrFalseProblemsWith applies the HasEdge predicate on the "true_or_false_problems" edge with a given conditions (other predicates).
+func HasTrueOrFalseProblemsWith(preds ...predicate.TrueOrFalseProblem) predicate.WorkbookCategory {
+	return predicate.WorkbookCategory(func(s *sql.Selector) {
+		step := newTrueOrFalseProblemsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -287,21 +333,21 @@ func HasWorkbookWith(preds ...predicate.Workbook) predicate.WorkbookCategory {
 	})
 }
 
-// HasWorkbookCategoryClassifications applies the HasEdge predicate on the "workbook_category_classifications" edge.
-func HasWorkbookCategoryClassifications() predicate.WorkbookCategory {
+// HasWorkbookCategoryDetails applies the HasEdge predicate on the "workbook_category_details" edge.
+func HasWorkbookCategoryDetails() predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryClassificationsTable, WorkbookCategoryClassificationsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryDetailsTable, WorkbookCategoryDetailsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWorkbookCategoryClassificationsWith applies the HasEdge predicate on the "workbook_category_classifications" edge with a given conditions (other predicates).
-func HasWorkbookCategoryClassificationsWith(preds ...predicate.WorkbookCategoryClassification) predicate.WorkbookCategory {
+// HasWorkbookCategoryDetailsWith applies the HasEdge predicate on the "workbook_category_details" edge with a given conditions (other predicates).
+func HasWorkbookCategoryDetailsWith(preds ...predicate.WorkbookCategoryDetail) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(func(s *sql.Selector) {
-		step := newWorkbookCategoryClassificationsStep()
+		step := newWorkbookCategoryDetailsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

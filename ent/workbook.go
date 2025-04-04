@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"time"
 
@@ -22,8 +23,8 @@ type Workbook struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// CreatedID holds the value of the "created_id" field.
-	CreatedID uuid.UUID `json:"created_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Description holds the value of the "description" field.
 	Description *string `json:"description,omitempty"`
 	// IsPublic holds the value of the "is_public" field.
@@ -38,30 +39,65 @@ type Workbook struct {
 
 // WorkbookEdges holds the relations/edges for other nodes in the graph.
 type WorkbookEdges struct {
-	// Problems holds the value of the problems edge.
-	Problems []*Problem `json:"problems,omitempty"`
+	// DescriptionProblems holds the value of the description_problems edge.
+	DescriptionProblems []*DescriptionProblem `json:"description_problems,omitempty"`
+	// SelectionProblems holds the value of the selection_problems edge.
+	SelectionProblems []*SelectionProblem `json:"selection_problems,omitempty"`
+	// TrueOrFalseProblems holds the value of the true_or_false_problems edge.
+	TrueOrFalseProblems []*TrueOrFalseProblem `json:"true_or_false_problems,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// WorkbookCategories holds the value of the workbook_categories edge.
 	WorkbookCategories []*WorkbookCategory `json:"workbook_categories,omitempty"`
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [6]bool
 }
 
-// ProblemsOrErr returns the Problems value or an error if the edge
+// DescriptionProblemsOrErr returns the DescriptionProblems value or an error if the edge
 // was not loaded in eager-loading.
-func (e WorkbookEdges) ProblemsOrErr() ([]*Problem, error) {
+func (e WorkbookEdges) DescriptionProblemsOrErr() ([]*DescriptionProblem, error) {
 	if e.loadedTypes[0] {
-		return e.Problems, nil
+		return e.DescriptionProblems, nil
 	}
-	return nil, &NotLoadedError{edge: "problems"}
+	return nil, &NotLoadedError{edge: "description_problems"}
+}
+
+// SelectionProblemsOrErr returns the SelectionProblems value or an error if the edge
+// was not loaded in eager-loading.
+func (e WorkbookEdges) SelectionProblemsOrErr() ([]*SelectionProblem, error) {
+	if e.loadedTypes[1] {
+		return e.SelectionProblems, nil
+	}
+	return nil, &NotLoadedError{edge: "selection_problems"}
+}
+
+// TrueOrFalseProblemsOrErr returns the TrueOrFalseProblems value or an error if the edge
+// was not loaded in eager-loading.
+func (e WorkbookEdges) TrueOrFalseProblemsOrErr() ([]*TrueOrFalseProblem, error) {
+	if e.loadedTypes[2] {
+		return e.TrueOrFalseProblems, nil
+	}
+	return nil, &NotLoadedError{edge: "true_or_false_problems"}
+}
+
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WorkbookEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
+		return e.User, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // WorkbookCategoriesOrErr returns the WorkbookCategories value or an error if the edge
 // was not loaded in eager-loading.
 func (e WorkbookEdges) WorkbookCategoriesOrErr() ([]*WorkbookCategory, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[4] {
 		return e.WorkbookCategories, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_categories"}
@@ -70,7 +106,7 @@ func (e WorkbookEdges) WorkbookCategoriesOrErr() ([]*WorkbookCategory, error) {
 // WorkbookMembersOrErr returns the WorkbookMembers value or an error if the edge
 // was not loaded in eager-loading.
 func (e WorkbookEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[5] {
 		return e.WorkbookMembers, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_members"}
@@ -87,7 +123,7 @@ func (*Workbook) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case workbook.FieldCreatedAt, workbook.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case workbook.FieldID, workbook.FieldCreatedID:
+		case workbook.FieldID, workbook.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -122,11 +158,11 @@ func (w *Workbook) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				w.UpdatedAt = value.Time
 			}
-		case workbook.FieldCreatedID:
+		case workbook.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field created_id", values[i])
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value != nil {
-				w.CreatedID = *value
+				w.UserID = *value
 			}
 		case workbook.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -160,9 +196,24 @@ func (w *Workbook) Value(name string) (ent.Value, error) {
 	return w.selectValues.Get(name)
 }
 
-// QueryProblems queries the "problems" edge of the Workbook entity.
-func (w *Workbook) QueryProblems() *ProblemQuery {
-	return NewWorkbookClient(w.config).QueryProblems(w)
+// QueryDescriptionProblems queries the "description_problems" edge of the Workbook entity.
+func (w *Workbook) QueryDescriptionProblems() *DescriptionProblemQuery {
+	return NewWorkbookClient(w.config).QueryDescriptionProblems(w)
+}
+
+// QuerySelectionProblems queries the "selection_problems" edge of the Workbook entity.
+func (w *Workbook) QuerySelectionProblems() *SelectionProblemQuery {
+	return NewWorkbookClient(w.config).QuerySelectionProblems(w)
+}
+
+// QueryTrueOrFalseProblems queries the "true_or_false_problems" edge of the Workbook entity.
+func (w *Workbook) QueryTrueOrFalseProblems() *TrueOrFalseProblemQuery {
+	return NewWorkbookClient(w.config).QueryTrueOrFalseProblems(w)
+}
+
+// QueryUser queries the "user" edge of the Workbook entity.
+func (w *Workbook) QueryUser() *UserQuery {
+	return NewWorkbookClient(w.config).QueryUser(w)
 }
 
 // QueryWorkbookCategories queries the "workbook_categories" edge of the Workbook entity.
@@ -204,8 +255,8 @@ func (w *Workbook) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(w.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("created_id=")
-	builder.WriteString(fmt.Sprintf("%v", w.CreatedID))
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", w.UserID))
 	builder.WriteString(", ")
 	if v := w.Description; v != nil {
 		builder.WriteString("description=")

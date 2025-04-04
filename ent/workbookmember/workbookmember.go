@@ -20,14 +20,14 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldRoleID holds the string denoting the role_id field in the database.
 	FieldRoleID = "role_id"
-	// FieldMemberID holds the string denoting the member_id field in the database.
-	FieldMemberID = "member_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldWorkbookID holds the string denoting the workbook_id field in the database.
 	FieldWorkbookID = "workbook_id"
 	// EdgeRole holds the string denoting the role edge name in mutations.
 	EdgeRole = "role"
-	// EdgeMember holds the string denoting the member edge name in mutations.
-	EdgeMember = "member"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// EdgeWorkbook holds the string denoting the workbook edge name in mutations.
 	EdgeWorkbook = "workbook"
 	// Table holds the table name of the workbookmember in the database.
@@ -39,13 +39,13 @@ const (
 	RoleInverseTable = "roles"
 	// RoleColumn is the table column denoting the role relation/edge.
 	RoleColumn = "role_id"
-	// MemberTable is the table that holds the member relation/edge.
-	MemberTable = "workbook_members"
-	// MemberInverseTable is the table name for the User entity.
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "workbook_members"
+	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	MemberInverseTable = "users"
-	// MemberColumn is the table column denoting the member relation/edge.
-	MemberColumn = "member_id"
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
 	// WorkbookTable is the table that holds the workbook relation/edge.
 	WorkbookTable = "workbook_members"
 	// WorkbookInverseTable is the table name for the Workbook entity.
@@ -61,7 +61,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldRoleID,
-	FieldMemberID,
+	FieldUserID,
 	FieldWorkbookID,
 }
 
@@ -107,9 +107,9 @@ func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
 }
 
-// ByMemberID orders the results by the member_id field.
-func ByMemberID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMemberID, opts...).ToFunc()
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByWorkbookID orders the results by the workbook_id field.
@@ -124,10 +124,10 @@ func ByRoleField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByMemberField orders the results by member field.
-func ByMemberField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMemberStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -144,11 +144,11 @@ func newRoleStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, RoleTable, RoleColumn),
 	)
 }
-func newMemberStep() *sqlgraph.Step {
+func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(MemberInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, MemberTable, MemberColumn),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }
 func newWorkbookStep() *sqlgraph.Step {

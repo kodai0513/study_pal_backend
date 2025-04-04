@@ -6,10 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"study-pal-backend/ent/problem"
+	"study-pal-backend/ent/descriptionproblem"
+	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategoryclassification"
+	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -70,19 +72,49 @@ func (wcc *WorkbookCategoryCreate) SetID(u uuid.UUID) *WorkbookCategoryCreate {
 	return wcc
 }
 
-// AddProblemIDs adds the "problems" edge to the Problem entity by IDs.
-func (wcc *WorkbookCategoryCreate) AddProblemIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
-	wcc.mutation.AddProblemIDs(ids...)
+// AddDescriptionProblemIDs adds the "description_problems" edge to the DescriptionProblem entity by IDs.
+func (wcc *WorkbookCategoryCreate) AddDescriptionProblemIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.AddDescriptionProblemIDs(ids...)
 	return wcc
 }
 
-// AddProblems adds the "problems" edges to the Problem entity.
-func (wcc *WorkbookCategoryCreate) AddProblems(p ...*Problem) *WorkbookCategoryCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddDescriptionProblems adds the "description_problems" edges to the DescriptionProblem entity.
+func (wcc *WorkbookCategoryCreate) AddDescriptionProblems(d ...*DescriptionProblem) *WorkbookCategoryCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return wcc.AddProblemIDs(ids...)
+	return wcc.AddDescriptionProblemIDs(ids...)
+}
+
+// AddSelectionProblemIDs adds the "selection_problems" edge to the SelectionProblem entity by IDs.
+func (wcc *WorkbookCategoryCreate) AddSelectionProblemIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.AddSelectionProblemIDs(ids...)
+	return wcc
+}
+
+// AddSelectionProblems adds the "selection_problems" edges to the SelectionProblem entity.
+func (wcc *WorkbookCategoryCreate) AddSelectionProblems(s ...*SelectionProblem) *WorkbookCategoryCreate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wcc.AddSelectionProblemIDs(ids...)
+}
+
+// AddTrueOrFalseProblemIDs adds the "true_or_false_problems" edge to the TrueOrFalseProblem entity by IDs.
+func (wcc *WorkbookCategoryCreate) AddTrueOrFalseProblemIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.AddTrueOrFalseProblemIDs(ids...)
+	return wcc
+}
+
+// AddTrueOrFalseProblems adds the "true_or_false_problems" edges to the TrueOrFalseProblem entity.
+func (wcc *WorkbookCategoryCreate) AddTrueOrFalseProblems(t ...*TrueOrFalseProblem) *WorkbookCategoryCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return wcc.AddTrueOrFalseProblemIDs(ids...)
 }
 
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
@@ -90,19 +122,19 @@ func (wcc *WorkbookCategoryCreate) SetWorkbook(w *Workbook) *WorkbookCategoryCre
 	return wcc.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryClassificationIDs adds the "workbook_category_classifications" edge to the WorkbookCategoryClassification entity by IDs.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClassificationIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
-	wcc.mutation.AddWorkbookCategoryClassificationIDs(ids...)
+// AddWorkbookCategoryDetailIDs adds the "workbook_category_details" edge to the WorkbookCategoryDetail entity by IDs.
+func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
+	wcc.mutation.AddWorkbookCategoryDetailIDs(ids...)
 	return wcc
 }
 
-// AddWorkbookCategoryClassifications adds the "workbook_category_classifications" edges to the WorkbookCategoryClassification entity.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryClassifications(w ...*WorkbookCategoryClassification) *WorkbookCategoryCreate {
+// AddWorkbookCategoryDetails adds the "workbook_category_details" edges to the WorkbookCategoryDetail entity.
+func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryCreate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return wcc.AddWorkbookCategoryClassificationIDs(ids...)
+	return wcc.AddWorkbookCategoryDetailIDs(ids...)
 }
 
 // Mutation returns the WorkbookCategoryMutation object of the builder.
@@ -219,15 +251,47 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 		_spec.SetField(workbookcategory.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := wcc.mutation.ProblemsIDs(); len(nodes) > 0 {
+	if nodes := wcc.mutation.DescriptionProblemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.ProblemsTable,
-			Columns: []string{workbookcategory.ProblemsColumn},
+			Table:   workbookcategory.DescriptionProblemsTable,
+			Columns: []string{workbookcategory.DescriptionProblemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(problem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(descriptionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wcc.mutation.SelectionProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbookcategory.SelectionProblemsTable,
+			Columns: []string{workbookcategory.SelectionProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(selectionproblem.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wcc.mutation.TrueOrFalseProblemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbookcategory.TrueOrFalseProblemsTable,
+			Columns: []string{workbookcategory.TrueOrFalseProblemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trueorfalseproblem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -252,15 +316,15 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 		_node.WorkbookID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := wcc.mutation.WorkbookCategoryClassificationsIDs(); len(nodes) > 0 {
+	if nodes := wcc.mutation.WorkbookCategoryDetailsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryClassificationsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryClassificationsColumn},
+			Table:   workbookcategory.WorkbookCategoryDetailsTable,
+			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategoryclassification.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
