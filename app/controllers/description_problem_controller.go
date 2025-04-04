@@ -69,7 +69,7 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 		return
 	}
 
-	action := description_problems.UpdateAction{
+	action := &description_problems.UpdateAction{
 		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(a.AppData.Client(), c),
 	}
 	descriptionProblemDto, usecaseErrGroup := action.Execute(
@@ -128,7 +128,7 @@ func (a *DescriptionProblemController) Delete(c *gin.Context) {
 		return
 	}
 
-	action := description_problems.DeleteAction{
+	action := &description_problems.DeleteAction{
 		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(a.AppData.Client(), c),
 	}
 	usecaseErrGroup := action.Execute(

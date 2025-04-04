@@ -68,7 +68,7 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 		return
 	}
 
-	action := true_or_false_problems.UpdateAction{
+	action := &true_or_false_problems.UpdateAction{
 		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(a.AppData.Client(), c),
 	}
 	trueOrFalseProblemDto, usecaseErrGroup := action.Execute(
@@ -127,7 +127,7 @@ func (a *TrueOrFalseProblemController) Delete(c *gin.Context) {
 		return
 	}
 
-	action := true_or_false_problems.DeleteAction{
+	action := &true_or_false_problems.DeleteAction{
 		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(a.AppData.Client(), c),
 	}
 	usecaseErrGroup := action.Execute(

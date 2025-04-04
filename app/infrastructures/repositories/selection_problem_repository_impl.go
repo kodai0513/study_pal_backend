@@ -8,6 +8,7 @@ import (
 	"study-pal-backend/app/domains/repositories"
 	"study-pal-backend/ent"
 	"study-pal-backend/ent/selectionproblem"
+	"study-pal-backend/ent/selectionproblemanswer"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -122,11 +123,21 @@ func (s *SelectionProblemRepositoryImpl) Update(problem *entities.SelectionProbl
 		SetStatement(problem.Statement()).
 		SaveX(s.ctx)
 
-	answerResults := s.client.SelectionProblemAnswer.MapCreateBulk(problem.SelectionProblemAnswers(), func(c *ent.SelectionProblemAnswerCreate, i int) {
-		c.SetIsCorrect(problem.SelectionProblemAnswers()[i].IsCorrect()).SetStatement(problem.SelectionProblemAnswers()[i].Statement())
+	s.client.SelectionProblemAnswer.Delete().
+		Where(
+			selectionproblemanswer.SelectionProblemIDEQ(problem.Id()),
+		).
+		ExecX(s.ctx)
+
+	createdAnswerResults := s.client.SelectionProblemAnswer.MapCreateBulk(problem.SelectionProblemAnswers(), func(c *ent.SelectionProblemAnswerCreate, i int) {
+		c.
+			SetID(problem.SelectionProblemAnswers()[i].Id()).
+			SetIsCorrect(problem.SelectionProblemAnswers()[i].IsCorrect()).
+			SetSelectionProblemID(problem.SelectionProblemAnswers()[i].SelectionProblemId()).
+			SetStatement(problem.SelectionProblemAnswers()[i].Statement())
 	}).SaveX(s.ctx)
 
-	answers := lo.Map(answerResults, func(answer *ent.SelectionProblemAnswer, _ int) *entities.SelectionProblemAnswer {
+	answers := lo.Map(createdAnswerResults, func(answer *ent.SelectionProblemAnswer, _ int) *entities.SelectionProblemAnswer {
 		statement, _ := selection_problem_answers.NewStatement(answer.Statement)
 		return entities.NewSelectionProblemAnswer(
 			answer.ID,

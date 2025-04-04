@@ -94,7 +94,7 @@ func main() {
 			trueOrFalseProblems.DELETE("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Delete)
 		}
 		v1.GET("/timelines", timelineController.Index)
-		v1.POST("/problems", problemController.Create)
+		v1.POST("/:workbook_id/problems", problemController.Create)
 		workbooks := v1.Group("/workbooks")
 		{
 			workbooks.POST("/", authRequired, workbookController.Create)

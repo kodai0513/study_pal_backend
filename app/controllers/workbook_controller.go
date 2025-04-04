@@ -43,7 +43,7 @@ func (a *WorkbookController) Create(c *gin.Context) {
 	var request CreateWorkbookRequest
 	c.BindJSON(&request)
 	userId, _ := c.Get("user_id")
-	action := workbooks.CreateAction{
+	action := &workbooks.CreateAction{
 		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
 	}
 	workbookDto, usecaseErrGroup := action.Execute(
@@ -126,7 +126,7 @@ func (a *WorkbookController) Update(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
-	action := workbooks.UpdateAction{
+	action := &workbooks.UpdateAction{
 		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
 	}
 	workbookDto, usecaseErrGroup := action.Execute(
@@ -186,7 +186,7 @@ func (a *WorkbookController) Delete(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
-	action := workbooks.DeleteAction{
+	action := &workbooks.DeleteAction{
 		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
 	}
 	usecaseErrGroup := action.Execute(

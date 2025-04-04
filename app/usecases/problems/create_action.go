@@ -92,29 +92,21 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 			problem.WorkbookCategoryId,
 			command.WorkbookId,
 		)
-		lo.ForEach(problem.SelectionProblemAnswers, func(answer *CreateSelectionProblemAnswer, _ int) {
+		answerEntities := lo.Map(problem.SelectionProblemAnswers, func(answer *CreateSelectionProblemAnswer, _ int) *entities.SelectionProblemAnswer {
 			statement, err := selection_problem_answers.NewStatement(answer.Statement)
 			if err != nil {
 				usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 			}
-			err = problemEntity.AddSelectionProblemAnswer(
-				entities.NewSelectionProblemAnswer(
-					uuid.New(),
-					answer.IsCorrect,
-					problemEntity.Id(),
-					statement,
-				),
+
+			return entities.NewSelectionProblemAnswer(
+				uuid.New(),
+				answer.IsCorrect,
+				problemEntity.Id(),
+				statement,
 			)
-			if err != nil {
-				usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
-			}
 		})
 
-		err = problemEntity.HasMinimumAnswers()
-		if err != nil {
-			usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
-		}
-		err = problemEntity.IsCorrectAnswer()
+		err = problemEntity.ReplaceSelectionProblemAnswer(answerEntities)
 		if err != nil {
 			usecaseErrGroup.AddOnlySameUsecaseError(usecase_error.NewUsecaseError(usecase_error.InvalidParameter, err))
 		}
