@@ -104,6 +104,7 @@ func main() {
 		}
 		workbookCategories := v1.Group("/:workbook_id/workbook-categories")
 		{
+			workbookCategories.GET("", authRequired, workbookCategoryController.Index)
 			workbookCategories.PUT("", authRequired, workbookCategoryController.Update)
 		}
 	}

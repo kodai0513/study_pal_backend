@@ -26,6 +26,38 @@ func NewWorkbookCategoryRepositoryImpl(client *ent.Client, ctx context.Context) 
 	}
 }
 
+func (w *WorkbookCategoryRepositoryImpl) FindByWorkbookId(workbookId uuid.UUID) []*entities.WorkbookCategory {
+	resultCategoryClosures := w.client.WorkbookCategoryClosure.Query().
+		Where(workbookcategoryclosure.WorkbookIDEQ(workbookId)).
+		Order(ent.Asc(workbookcategoryclosure.FieldPosition)).
+		AllX(w.ctx)
+	IdToResultCategories := lo.SliceToMap(
+		w.client.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).AllX(w.ctx),
+		func(w *ent.WorkbookCategory) (uuid.UUID, *ent.WorkbookCategory) {
+			return w.ID, w
+		},
+	)
+
+	categoryEntities := lo.FilterMap(resultCategoryClosures, func(w *ent.WorkbookCategoryClosure, _ int) (*entities.WorkbookCategory, bool) {
+		if !w.IsRoot {
+			return nil, false
+		}
+
+		name, _ := workbook_categories.NewName(IdToResultCategories[w.ChildID].Name)
+		return entities.CreateWorkbookCategory(
+			IdToResultCategories[w.ChildID].ID,
+			name,
+			IdToResultCategories[w.ChildID].WorkbookID,
+		), true
+	})
+
+	lo.ForEach(categoryEntities, func(w *entities.WorkbookCategory, _ int) {
+		createResult(resultCategoryClosures, w, IdToResultCategories, w.Id())
+	})
+
+	return categoryEntities
+}
+
 func (w *WorkbookCategoryRepositoryImpl) UpsertAndDeleteBulk(workbookCategories []*entities.WorkbookCategory, workbookId uuid.UUID) []*entities.WorkbookCategory {
 	var createData func(parentIds []uuid.UUID, position *int, category *entities.WorkbookCategory) ([]*ent.WorkbookCategory, []*ent.WorkbookCategoryClosure)
 	createData = func(parentIds []uuid.UUID, position *int, category *entities.WorkbookCategory) ([]*ent.WorkbookCategory, []*ent.WorkbookCategoryClosure) {
@@ -136,7 +168,7 @@ func (w *WorkbookCategoryRepositoryImpl) UpsertAndDeleteBulk(workbookCategories 
 		Where(workbookcategoryclosure.WorkbookIDEQ(workbookId)).
 		Order(ent.Asc(workbookcategoryclosure.FieldPosition)).
 		AllX(w.ctx)
-	IdToresultCategories := lo.SliceToMap(
+	IdToResultCategories := lo.SliceToMap(
 		w.client.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).AllX(w.ctx),
 		func(w *ent.WorkbookCategory) (uuid.UUID, *ent.WorkbookCategory) {
 			return w.ID, w
@@ -148,38 +180,43 @@ func (w *WorkbookCategoryRepositoryImpl) UpsertAndDeleteBulk(workbookCategories 
 			return nil, false
 		}
 
-		name, _ := workbook_categories.NewName(IdToresultCategories[w.ChildID].Name)
+		name, _ := workbook_categories.NewName(IdToResultCategories[w.ChildID].Name)
 		return entities.CreateWorkbookCategory(
-			IdToresultCategories[w.ChildID].ID,
+			IdToResultCategories[w.ChildID].ID,
 			name,
-			IdToresultCategories[w.ChildID].WorkbookID,
+			IdToResultCategories[w.ChildID].WorkbookID,
 		), true
 	})
 
-	var createResult func(parentId uuid.UUID, category *entities.WorkbookCategory)
-	createResult = func(parentId uuid.UUID, category *entities.WorkbookCategory) {
-		children := lo.FilterMap(resultCategoryClosures, func(closure *ent.WorkbookCategoryClosure, _ int) (*entities.WorkbookCategory, bool) {
-			// 子のデータだけを取得したい
-			if closure.ParentID != parentId || closure.Level != 1 {
-				return nil, false
-			}
-
-			name, _ := workbook_categories.NewName(IdToresultCategories[closure.ChildID].Name)
-			return entities.CreateWorkbookCategory(
-				IdToresultCategories[closure.ChildID].ID,
-				name,
-				IdToresultCategories[closure.ChildID].WorkbookID,
-			), true
-		})
-
-		lo.ForEach(children, func(child *entities.WorkbookCategory, _ int) {
-			category.AddChild(child)
-			createResult(child.Id(), child)
-		})
-	}
 	lo.ForEach(resultCategoryEntities, func(w *entities.WorkbookCategory, _ int) {
-		createResult(w.Id(), w)
+		createResult(resultCategoryClosures, w, IdToResultCategories, w.Id())
 	})
 
 	return resultCategoryEntities
+}
+
+func createResult(
+	categoryClosures []*ent.WorkbookCategoryClosure,
+	categoryEntity *entities.WorkbookCategory,
+	IdToCategories map[uuid.UUID]*ent.WorkbookCategory,
+	parentId uuid.UUID,
+) {
+	children := lo.FilterMap(categoryClosures, func(closure *ent.WorkbookCategoryClosure, _ int) (*entities.WorkbookCategory, bool) {
+		// 子のデータだけを取得したい
+		if closure.ParentID != parentId || closure.Level != 1 {
+			return nil, false
+		}
+
+		name, _ := workbook_categories.NewName(IdToCategories[closure.ChildID].Name)
+		return entities.CreateWorkbookCategory(
+			IdToCategories[closure.ChildID].ID,
+			name,
+			IdToCategories[closure.ChildID].WorkbookID,
+		), true
+	})
+
+	lo.ForEach(children, func(child *entities.WorkbookCategory, _ int) {
+		categoryEntity.AddChild(child)
+		createResult(categoryClosures, child, IdToCategories, child.Id())
+	})
 }

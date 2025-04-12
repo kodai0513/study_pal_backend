@@ -7,5 +7,6 @@ import (
 )
 
 type WorkbookCategoryRepository interface {
+	FindByWorkbookId(uuid.UUID) []*entities.WorkbookCategory
 	UpsertAndDeleteBulk([]*entities.WorkbookCategory, uuid.UUID) []*entities.WorkbookCategory
 }
