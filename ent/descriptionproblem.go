@@ -8,7 +8,6 @@ import (
 	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent"
@@ -33,8 +32,6 @@ type DescriptionProblem struct {
 	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// WorkbookCategoryID holds the value of the "workbook_category_id" field.
 	WorkbookCategoryID *uuid.UUID `json:"workbook_category_id,omitempty"`
-	// WorkbookCategoryDetailID holds the value of the "workbook_category_detail_id" field.
-	WorkbookCategoryDetailID *uuid.UUID `json:"workbook_category_detail_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DescriptionProblemQuery when eager-loading is set.
 	Edges        DescriptionProblemEdges `json:"edges"`
@@ -47,11 +44,9 @@ type DescriptionProblemEdges struct {
 	Workbook *Workbook `json:"workbook,omitempty"`
 	// WorkbookCategory holds the value of the workbook_category edge.
 	WorkbookCategory *WorkbookCategory `json:"workbook_category,omitempty"`
-	// WorkbookCategoryDetail holds the value of the workbook_category_detail edge.
-	WorkbookCategoryDetail *WorkbookCategoryDetail `json:"workbook_category_detail,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // WorkbookOrErr returns the Workbook value or an error if the edge
@@ -76,23 +71,12 @@ func (e DescriptionProblemEdges) WorkbookCategoryOrErr() (*WorkbookCategory, err
 	return nil, &NotLoadedError{edge: "workbook_category"}
 }
 
-// WorkbookCategoryDetailOrErr returns the WorkbookCategoryDetail value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e DescriptionProblemEdges) WorkbookCategoryDetailOrErr() (*WorkbookCategoryDetail, error) {
-	if e.WorkbookCategoryDetail != nil {
-		return e.WorkbookCategoryDetail, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: workbookcategorydetail.Label}
-	}
-	return nil, &NotLoadedError{edge: "workbook_category_detail"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*DescriptionProblem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case descriptionproblem.FieldWorkbookCategoryID, descriptionproblem.FieldWorkbookCategoryDetailID:
+		case descriptionproblem.FieldWorkbookCategoryID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case descriptionproblem.FieldCorrectStatement, descriptionproblem.FieldStatement:
 			values[i] = new(sql.NullString)
@@ -158,13 +142,6 @@ func (dp *DescriptionProblem) assignValues(columns []string, values []any) error
 				dp.WorkbookCategoryID = new(uuid.UUID)
 				*dp.WorkbookCategoryID = *value.S.(*uuid.UUID)
 			}
-		case descriptionproblem.FieldWorkbookCategoryDetailID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field workbook_category_detail_id", values[i])
-			} else if value.Valid {
-				dp.WorkbookCategoryDetailID = new(uuid.UUID)
-				*dp.WorkbookCategoryDetailID = *value.S.(*uuid.UUID)
-			}
 		default:
 			dp.selectValues.Set(columns[i], values[i])
 		}
@@ -186,11 +163,6 @@ func (dp *DescriptionProblem) QueryWorkbook() *WorkbookQuery {
 // QueryWorkbookCategory queries the "workbook_category" edge of the DescriptionProblem entity.
 func (dp *DescriptionProblem) QueryWorkbookCategory() *WorkbookCategoryQuery {
 	return NewDescriptionProblemClient(dp.config).QueryWorkbookCategory(dp)
-}
-
-// QueryWorkbookCategoryDetail queries the "workbook_category_detail" edge of the DescriptionProblem entity.
-func (dp *DescriptionProblem) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
-	return NewDescriptionProblemClient(dp.config).QueryWorkbookCategoryDetail(dp)
 }
 
 // Update returns a builder for updating this DescriptionProblem.
@@ -233,11 +205,6 @@ func (dp *DescriptionProblem) String() string {
 	builder.WriteString(", ")
 	if v := dp.WorkbookCategoryID; v != nil {
 		builder.WriteString("workbook_category_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := dp.WorkbookCategoryDetailID; v != nil {
-		builder.WriteString("workbook_category_detail_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

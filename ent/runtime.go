@@ -14,7 +14,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
+	"study-pal-backend/ent/workbookcategoryclosure"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 )
@@ -419,39 +419,21 @@ func init() {
 			return nil
 		}
 	}()
-	workbookcategorydetailMixin := schema.WorkbookCategoryDetail{}.Mixin()
-	workbookcategorydetailMixinFields1 := workbookcategorydetailMixin[1].Fields()
-	_ = workbookcategorydetailMixinFields1
-	workbookcategorydetailFields := schema.WorkbookCategoryDetail{}.Fields()
-	_ = workbookcategorydetailFields
-	// workbookcategorydetailDescCreatedAt is the schema descriptor for created_at field.
-	workbookcategorydetailDescCreatedAt := workbookcategorydetailMixinFields1[0].Descriptor()
-	// workbookcategorydetail.DefaultCreatedAt holds the default value on creation for the created_at field.
-	workbookcategorydetail.DefaultCreatedAt = workbookcategorydetailDescCreatedAt.Default.(func() time.Time)
-	// workbookcategorydetailDescUpdatedAt is the schema descriptor for updated_at field.
-	workbookcategorydetailDescUpdatedAt := workbookcategorydetailMixinFields1[1].Descriptor()
-	// workbookcategorydetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	workbookcategorydetail.DefaultUpdatedAt = workbookcategorydetailDescUpdatedAt.Default.(func() time.Time)
-	// workbookcategorydetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	workbookcategorydetail.UpdateDefaultUpdatedAt = workbookcategorydetailDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// workbookcategorydetailDescName is the schema descriptor for name field.
-	workbookcategorydetailDescName := workbookcategorydetailFields[0].Descriptor()
-	// workbookcategorydetail.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	workbookcategorydetail.NameValidator = func() func(string) error {
-		validators := workbookcategorydetailDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
+	workbookcategoryclosureMixin := schema.WorkbookCategoryClosure{}.Mixin()
+	workbookcategoryclosureMixinFields1 := workbookcategoryclosureMixin[1].Fields()
+	_ = workbookcategoryclosureMixinFields1
+	workbookcategoryclosureFields := schema.WorkbookCategoryClosure{}.Fields()
+	_ = workbookcategoryclosureFields
+	// workbookcategoryclosureDescCreatedAt is the schema descriptor for created_at field.
+	workbookcategoryclosureDescCreatedAt := workbookcategoryclosureMixinFields1[0].Descriptor()
+	// workbookcategoryclosure.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbookcategoryclosure.DefaultCreatedAt = workbookcategoryclosureDescCreatedAt.Default.(func() time.Time)
+	// workbookcategoryclosureDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookcategoryclosureDescUpdatedAt := workbookcategoryclosureMixinFields1[1].Descriptor()
+	// workbookcategoryclosure.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbookcategoryclosure.DefaultUpdatedAt = workbookcategoryclosureDescUpdatedAt.Default.(func() time.Time)
+	// workbookcategoryclosure.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbookcategoryclosure.UpdateDefaultUpdatedAt = workbookcategoryclosureDescUpdatedAt.UpdateDefault.(func() time.Time)
 	workbookmemberMixin := schema.WorkbookMember{}.Mixin()
 	workbookmemberMixinFields1 := workbookmemberMixin[1].Fields()
 	_ = workbookmemberMixinFields1

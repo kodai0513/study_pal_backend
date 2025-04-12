@@ -5,7 +5,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
@@ -32,7 +31,6 @@ func (TrueOrFalseProblem) Fields() []ent.Field {
 		field.String("statement").MaxLen(255).NotEmpty(),
 		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
 		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
-		field.UUID(workbookcategorydetail.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
 	}
 }
 
@@ -41,6 +39,5 @@ func (TrueOrFalseProblem) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From(workbook.Label, Workbook.Type).Ref(trueorfalseproblem.Table).Unique().Required().Field(workbook.Label + "_id"),
 		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(trueorfalseproblem.Table).Unique().Field(workbookcategory.Label + "_id"),
-		edge.From(workbookcategorydetail.Label, WorkbookCategoryDetail.Type).Ref(trueorfalseproblem.Table).Unique().Field(workbookcategorydetail.Label + "_id"),
 	}
 }

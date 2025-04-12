@@ -13,7 +13,6 @@ func TestDescriptionProblem_正常系(t *testing.T) {
 	problemId := uuid.New()
 	workbookId := uuid.New()
 	workbookCategoryId := uuid.New()
-	workbookCategoryDetailId := uuid.New()
 
 	// 問題文と正解の生成
 	statement, err := description_problems.NewStatement("これは記述問題です")
@@ -27,7 +26,6 @@ func TestDescriptionProblem_正常系(t *testing.T) {
 		problemId,
 		correctStatement,
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		workbookId,
 	)
@@ -38,7 +36,6 @@ func TestDescriptionProblem_正常系(t *testing.T) {
 	assert.Equal(t, "これが正解です", problem.CorrectStatement())
 	assert.Equal(t, workbookId, problem.WorkbookId())
 	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
-	assert.Equal(t, &workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
 }
 
 func TestDescriptionProblem_Statement_正常系(t *testing.T) {
@@ -108,7 +105,6 @@ func TestDescriptionProblem_全属性取得確認(t *testing.T) {
 	problemId := uuid.New()
 	workbookId := uuid.New()
 	workbookCategoryId := uuid.New()
-	workbookCategoryDetailId := uuid.New()
 
 	statement, _ := description_problems.NewStatement("問題文")
 	correctStatement, _ := description_problems.NewCorrectStatement("正解")
@@ -118,7 +114,6 @@ func TestDescriptionProblem_全属性取得確認(t *testing.T) {
 		problemId,
 		correctStatement,
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		workbookId,
 	)
@@ -129,7 +124,6 @@ func TestDescriptionProblem_全属性取得確認(t *testing.T) {
 	assert.Equal(t, "正解", problem.CorrectStatement())
 	assert.Equal(t, workbookId, problem.WorkbookId())
 	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
-	assert.Equal(t, &workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
 }
 
 // テスト用ヘルパー関数：指定した長さの文字列を生成

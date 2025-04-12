@@ -8,7 +8,6 @@ import (
 	"study-pal-backend/ent/selectionproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent"
@@ -31,8 +30,6 @@ type SelectionProblem struct {
 	WorkbookID uuid.UUID `json:"workbook_id,omitempty"`
 	// WorkbookCategoryID holds the value of the "workbook_category_id" field.
 	WorkbookCategoryID *uuid.UUID `json:"workbook_category_id,omitempty"`
-	// WorkbookCategoryDetailID holds the value of the "workbook_category_detail_id" field.
-	WorkbookCategoryDetailID *uuid.UUID `json:"workbook_category_detail_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SelectionProblemQuery when eager-loading is set.
 	Edges        SelectionProblemEdges `json:"edges"`
@@ -47,11 +44,9 @@ type SelectionProblemEdges struct {
 	Workbook *Workbook `json:"workbook,omitempty"`
 	// WorkbookCategory holds the value of the workbook_category edge.
 	WorkbookCategory *WorkbookCategory `json:"workbook_category,omitempty"`
-	// WorkbookCategoryDetail holds the value of the workbook_category_detail edge.
-	WorkbookCategoryDetail *WorkbookCategoryDetail `json:"workbook_category_detail,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // SelectionProblemAnswersOrErr returns the SelectionProblemAnswers value or an error if the edge
@@ -85,23 +80,12 @@ func (e SelectionProblemEdges) WorkbookCategoryOrErr() (*WorkbookCategory, error
 	return nil, &NotLoadedError{edge: "workbook_category"}
 }
 
-// WorkbookCategoryDetailOrErr returns the WorkbookCategoryDetail value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SelectionProblemEdges) WorkbookCategoryDetailOrErr() (*WorkbookCategoryDetail, error) {
-	if e.WorkbookCategoryDetail != nil {
-		return e.WorkbookCategoryDetail, nil
-	} else if e.loadedTypes[3] {
-		return nil, &NotFoundError{label: workbookcategorydetail.Label}
-	}
-	return nil, &NotLoadedError{edge: "workbook_category_detail"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*SelectionProblem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case selectionproblem.FieldWorkbookCategoryID, selectionproblem.FieldWorkbookCategoryDetailID:
+		case selectionproblem.FieldWorkbookCategoryID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case selectionproblem.FieldStatement:
 			values[i] = new(sql.NullString)
@@ -161,13 +145,6 @@ func (sp *SelectionProblem) assignValues(columns []string, values []any) error {
 				sp.WorkbookCategoryID = new(uuid.UUID)
 				*sp.WorkbookCategoryID = *value.S.(*uuid.UUID)
 			}
-		case selectionproblem.FieldWorkbookCategoryDetailID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field workbook_category_detail_id", values[i])
-			} else if value.Valid {
-				sp.WorkbookCategoryDetailID = new(uuid.UUID)
-				*sp.WorkbookCategoryDetailID = *value.S.(*uuid.UUID)
-			}
 		default:
 			sp.selectValues.Set(columns[i], values[i])
 		}
@@ -194,11 +171,6 @@ func (sp *SelectionProblem) QueryWorkbook() *WorkbookQuery {
 // QueryWorkbookCategory queries the "workbook_category" edge of the SelectionProblem entity.
 func (sp *SelectionProblem) QueryWorkbookCategory() *WorkbookCategoryQuery {
 	return NewSelectionProblemClient(sp.config).QueryWorkbookCategory(sp)
-}
-
-// QueryWorkbookCategoryDetail queries the "workbook_category_detail" edge of the SelectionProblem entity.
-func (sp *SelectionProblem) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
-	return NewSelectionProblemClient(sp.config).QueryWorkbookCategoryDetail(sp)
 }
 
 // Update returns a builder for updating this SelectionProblem.
@@ -238,11 +210,6 @@ func (sp *SelectionProblem) String() string {
 	builder.WriteString(", ")
 	if v := sp.WorkbookCategoryID; v != nil {
 		builder.WriteString("workbook_category_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := sp.WorkbookCategoryDetailID; v != nil {
-		builder.WriteString("workbook_category_detail_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

@@ -9,28 +9,25 @@ import (
 )
 
 type SelectionProblem struct {
-	id                       uuid.UUID
-	selectionProblemAnswers  []*SelectionProblemAnswer
-	statement                selection_problems.Statement
-	workbookCategoryDetailId *uuid.UUID
-	workbookCategoryId       *uuid.UUID
-	workbookId               uuid.UUID
+	id                      uuid.UUID
+	selectionProblemAnswers []*SelectionProblemAnswer
+	statement               selection_problems.Statement
+	workbookCategoryId      *uuid.UUID
+	workbookId              uuid.UUID
 }
 
 func CreateSelectionProblem(
 	id uuid.UUID,
 	statement selection_problems.Statement,
-	workbookCategoryDetailId *uuid.UUID,
 	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *SelectionProblem {
 	return &SelectionProblem{
-		id:                       id,
-		selectionProblemAnswers:  make([]*SelectionProblemAnswer, 0),
-		statement:                statement,
-		workbookCategoryDetailId: workbookCategoryDetailId,
-		workbookCategoryId:       workbookCategoryId,
-		workbookId:               workbookId,
+		id:                      id,
+		selectionProblemAnswers: make([]*SelectionProblemAnswer, 0),
+		statement:               statement,
+		workbookCategoryId:      workbookCategoryId,
+		workbookId:              workbookId,
 	}
 }
 
@@ -38,17 +35,15 @@ func NewSelectionProblem(
 	id uuid.UUID,
 	selectionProblemAnswers []*SelectionProblemAnswer,
 	statement selection_problems.Statement,
-	workbookCategoryDetailId *uuid.UUID,
 	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *SelectionProblem {
 	return &SelectionProblem{
-		id:                       id,
-		selectionProblemAnswers:  selectionProblemAnswers,
-		statement:                statement,
-		workbookCategoryDetailId: workbookCategoryDetailId,
-		workbookCategoryId:       workbookCategoryId,
-		workbookId:               workbookId,
+		id:                      id,
+		selectionProblemAnswers: selectionProblemAnswers,
+		statement:               statement,
+		workbookCategoryId:      workbookCategoryId,
+		workbookId:              workbookId,
 	}
 }
 
@@ -62,10 +57,6 @@ func (s *SelectionProblem) SelectionProblemAnswers() []*SelectionProblemAnswer {
 
 func (s *SelectionProblem) Statement() string {
 	return s.statement.Value()
-}
-
-func (s *SelectionProblem) WorkbookCategoryDetailId() *uuid.UUID {
-	return s.workbookCategoryDetailId
 }
 
 func (s *SelectionProblem) WorkbookCategoryId() *uuid.UUID {

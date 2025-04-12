@@ -11,7 +11,6 @@ import (
 	"study-pal-backend/ent/selectionproblemanswer"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -101,26 +100,6 @@ func (spu *SelectionProblemUpdate) ClearWorkbookCategoryID() *SelectionProblemUp
 	return spu
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (spu *SelectionProblemUpdate) SetWorkbookCategoryDetailID(u uuid.UUID) *SelectionProblemUpdate {
-	spu.mutation.SetWorkbookCategoryDetailID(u)
-	return spu
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (spu *SelectionProblemUpdate) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *SelectionProblemUpdate {
-	if u != nil {
-		spu.SetWorkbookCategoryDetailID(*u)
-	}
-	return spu
-}
-
-// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
-func (spu *SelectionProblemUpdate) ClearWorkbookCategoryDetailID() *SelectionProblemUpdate {
-	spu.mutation.ClearWorkbookCategoryDetailID()
-	return spu
-}
-
 // AddSelectionProblemAnswerIDs adds the "selection_problem_answers" edge to the SelectionProblemAnswer entity by IDs.
 func (spu *SelectionProblemUpdate) AddSelectionProblemAnswerIDs(ids ...uuid.UUID) *SelectionProblemUpdate {
 	spu.mutation.AddSelectionProblemAnswerIDs(ids...)
@@ -144,11 +123,6 @@ func (spu *SelectionProblemUpdate) SetWorkbook(w *Workbook) *SelectionProblemUpd
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (spu *SelectionProblemUpdate) SetWorkbookCategory(w *WorkbookCategory) *SelectionProblemUpdate {
 	return spu.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (spu *SelectionProblemUpdate) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *SelectionProblemUpdate {
-	return spu.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the SelectionProblemMutation object of the builder.
@@ -186,12 +160,6 @@ func (spu *SelectionProblemUpdate) ClearWorkbook() *SelectionProblemUpdate {
 // ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
 func (spu *SelectionProblemUpdate) ClearWorkbookCategory() *SelectionProblemUpdate {
 	spu.mutation.ClearWorkbookCategory()
-	return spu
-}
-
-// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (spu *SelectionProblemUpdate) ClearWorkbookCategoryDetail() *SelectionProblemUpdate {
-	spu.mutation.ClearWorkbookCategoryDetail()
 	return spu
 }
 
@@ -368,35 +336,6 @@ func (spu *SelectionProblemUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if spu.mutation.WorkbookCategoryDetailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   selectionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{selectionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := spu.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   selectionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{selectionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, spu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{selectionproblem.Label}
@@ -485,26 +424,6 @@ func (spuo *SelectionProblemUpdateOne) ClearWorkbookCategoryID() *SelectionProbl
 	return spuo
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (spuo *SelectionProblemUpdateOne) SetWorkbookCategoryDetailID(u uuid.UUID) *SelectionProblemUpdateOne {
-	spuo.mutation.SetWorkbookCategoryDetailID(u)
-	return spuo
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (spuo *SelectionProblemUpdateOne) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *SelectionProblemUpdateOne {
-	if u != nil {
-		spuo.SetWorkbookCategoryDetailID(*u)
-	}
-	return spuo
-}
-
-// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
-func (spuo *SelectionProblemUpdateOne) ClearWorkbookCategoryDetailID() *SelectionProblemUpdateOne {
-	spuo.mutation.ClearWorkbookCategoryDetailID()
-	return spuo
-}
-
 // AddSelectionProblemAnswerIDs adds the "selection_problem_answers" edge to the SelectionProblemAnswer entity by IDs.
 func (spuo *SelectionProblemUpdateOne) AddSelectionProblemAnswerIDs(ids ...uuid.UUID) *SelectionProblemUpdateOne {
 	spuo.mutation.AddSelectionProblemAnswerIDs(ids...)
@@ -528,11 +447,6 @@ func (spuo *SelectionProblemUpdateOne) SetWorkbook(w *Workbook) *SelectionProble
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (spuo *SelectionProblemUpdateOne) SetWorkbookCategory(w *WorkbookCategory) *SelectionProblemUpdateOne {
 	return spuo.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (spuo *SelectionProblemUpdateOne) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *SelectionProblemUpdateOne {
-	return spuo.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the SelectionProblemMutation object of the builder.
@@ -570,12 +484,6 @@ func (spuo *SelectionProblemUpdateOne) ClearWorkbook() *SelectionProblemUpdateOn
 // ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
 func (spuo *SelectionProblemUpdateOne) ClearWorkbookCategory() *SelectionProblemUpdateOne {
 	spuo.mutation.ClearWorkbookCategory()
-	return spuo
-}
-
-// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (spuo *SelectionProblemUpdateOne) ClearWorkbookCategoryDetail() *SelectionProblemUpdateOne {
-	spuo.mutation.ClearWorkbookCategoryDetail()
 	return spuo
 }
 
@@ -775,35 +683,6 @@ func (spuo *SelectionProblemUpdateOne) sqlSave(ctx context.Context) (_node *Sele
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if spuo.mutation.WorkbookCategoryDetailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   selectionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{selectionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := spuo.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   selectionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{selectionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -30,8 +30,6 @@ const (
 	EdgeTrueOrFalseProblems = "true_or_false_problems"
 	// EdgeWorkbook holds the string denoting the workbook edge name in mutations.
 	EdgeWorkbook = "workbook"
-	// EdgeWorkbookCategoryDetails holds the string denoting the workbook_category_details edge name in mutations.
-	EdgeWorkbookCategoryDetails = "workbook_category_details"
 	// Table holds the table name of the workbookcategory in the database.
 	Table = "workbook_categories"
 	// DescriptionProblemsTable is the table that holds the description_problems relation/edge.
@@ -62,13 +60,6 @@ const (
 	WorkbookInverseTable = "workbooks"
 	// WorkbookColumn is the table column denoting the workbook relation/edge.
 	WorkbookColumn = "workbook_id"
-	// WorkbookCategoryDetailsTable is the table that holds the workbook_category_details relation/edge.
-	WorkbookCategoryDetailsTable = "workbook_category_details"
-	// WorkbookCategoryDetailsInverseTable is the table name for the WorkbookCategoryDetail entity.
-	// It exists in this package in order to avoid circular dependency with the "workbookcategorydetail" package.
-	WorkbookCategoryDetailsInverseTable = "workbook_category_details"
-	// WorkbookCategoryDetailsColumn is the table column denoting the workbook_category_details relation/edge.
-	WorkbookCategoryDetailsColumn = "workbook_category_workbook_category_details"
 )
 
 // Columns holds all SQL columns for workbookcategory fields.
@@ -177,20 +168,6 @@ func ByWorkbookField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newWorkbookStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByWorkbookCategoryDetailsCount orders the results by workbook_category_details count.
-func ByWorkbookCategoryDetailsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newWorkbookCategoryDetailsStep(), opts...)
-	}
-}
-
-// ByWorkbookCategoryDetails orders the results by workbook_category_details terms.
-func ByWorkbookCategoryDetails(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryDetailsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newDescriptionProblemsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -217,12 +194,5 @@ func newWorkbookStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WorkbookInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookTable, WorkbookColumn),
-	)
-}
-func newWorkbookCategoryDetailsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WorkbookCategoryDetailsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryDetailsTable, WorkbookCategoryDetailsColumn),
 	)
 }

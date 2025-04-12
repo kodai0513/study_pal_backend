@@ -34,7 +34,6 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 			s.client.SelectionProblem.Create().
 				SetID(p.Id()).
 				SetStatement(p.Statement()).
-				SetNillableWorkbookCategoryDetailID(p.WorkbookCategoryDetailId()).
 				SetNillableWorkbookCategoryID(p.WorkbookCategoryId()).
 				SetWorkbookID(p.WorkbookId()),
 		)
@@ -72,7 +71,6 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 			problem.ID,
 			answers,
 			statement,
-			problem.WorkbookCategoryDetailID,
 			problem.WorkbookCategoryID,
 			problem.WorkbookID,
 		)
@@ -108,7 +106,6 @@ func (s *SelectionProblemRepositoryImpl) FindById(id uuid.UUID) *entities.Select
 		result.ID,
 		answers,
 		statement,
-		result.WorkbookCategoryDetailID,
 		result.WorkbookCategoryID,
 		result.WorkbookID,
 	)
@@ -152,7 +149,6 @@ func (s *SelectionProblemRepositoryImpl) Update(problem *entities.SelectionProbl
 		problemResult.ID,
 		answers,
 		statement,
-		problemResult.WorkbookCategoryDetailID,
 		problemResult.WorkbookCategoryID,
 		problemResult.WorkbookID,
 	)

@@ -12,7 +12,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -132,21 +131,6 @@ func (wcu *WorkbookCategoryUpdate) SetWorkbook(w *Workbook) *WorkbookCategoryUpd
 	return wcu.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryDetailIDs adds the "workbook_category_details" edge to the WorkbookCategoryDetail entity by IDs.
-func (wcu *WorkbookCategoryUpdate) AddWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryUpdate {
-	wcu.mutation.AddWorkbookCategoryDetailIDs(ids...)
-	return wcu
-}
-
-// AddWorkbookCategoryDetails adds the "workbook_category_details" edges to the WorkbookCategoryDetail entity.
-func (wcu *WorkbookCategoryUpdate) AddWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryUpdate {
-	ids := make([]uuid.UUID, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
-	}
-	return wcu.AddWorkbookCategoryDetailIDs(ids...)
-}
-
 // Mutation returns the WorkbookCategoryMutation object of the builder.
 func (wcu *WorkbookCategoryUpdate) Mutation() *WorkbookCategoryMutation {
 	return wcu.mutation
@@ -219,27 +203,6 @@ func (wcu *WorkbookCategoryUpdate) RemoveTrueOrFalseProblems(t ...*TrueOrFalsePr
 func (wcu *WorkbookCategoryUpdate) ClearWorkbook() *WorkbookCategoryUpdate {
 	wcu.mutation.ClearWorkbook()
 	return wcu
-}
-
-// ClearWorkbookCategoryDetails clears all "workbook_category_details" edges to the WorkbookCategoryDetail entity.
-func (wcu *WorkbookCategoryUpdate) ClearWorkbookCategoryDetails() *WorkbookCategoryUpdate {
-	wcu.mutation.ClearWorkbookCategoryDetails()
-	return wcu
-}
-
-// RemoveWorkbookCategoryDetailIDs removes the "workbook_category_details" edge to WorkbookCategoryDetail entities by IDs.
-func (wcu *WorkbookCategoryUpdate) RemoveWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryUpdate {
-	wcu.mutation.RemoveWorkbookCategoryDetailIDs(ids...)
-	return wcu
-}
-
-// RemoveWorkbookCategoryDetails removes "workbook_category_details" edges to WorkbookCategoryDetail entities.
-func (wcu *WorkbookCategoryUpdate) RemoveWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryUpdate {
-	ids := make([]uuid.UUID, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
-	}
-	return wcu.RemoveWorkbookCategoryDetailIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -476,51 +439,6 @@ func (wcu *WorkbookCategoryUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wcu.mutation.WorkbookCategoryDetailsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := wcu.mutation.RemovedWorkbookCategoryDetailsIDs(); len(nodes) > 0 && !wcu.mutation.WorkbookCategoryDetailsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := wcu.mutation.WorkbookCategoryDetailsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, wcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{workbookcategory.Label}
@@ -639,21 +557,6 @@ func (wcuo *WorkbookCategoryUpdateOne) SetWorkbook(w *Workbook) *WorkbookCategor
 	return wcuo.SetWorkbookID(w.ID)
 }
 
-// AddWorkbookCategoryDetailIDs adds the "workbook_category_details" edge to the WorkbookCategoryDetail entity by IDs.
-func (wcuo *WorkbookCategoryUpdateOne) AddWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryUpdateOne {
-	wcuo.mutation.AddWorkbookCategoryDetailIDs(ids...)
-	return wcuo
-}
-
-// AddWorkbookCategoryDetails adds the "workbook_category_details" edges to the WorkbookCategoryDetail entity.
-func (wcuo *WorkbookCategoryUpdateOne) AddWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryUpdateOne {
-	ids := make([]uuid.UUID, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
-	}
-	return wcuo.AddWorkbookCategoryDetailIDs(ids...)
-}
-
 // Mutation returns the WorkbookCategoryMutation object of the builder.
 func (wcuo *WorkbookCategoryUpdateOne) Mutation() *WorkbookCategoryMutation {
 	return wcuo.mutation
@@ -726,27 +629,6 @@ func (wcuo *WorkbookCategoryUpdateOne) RemoveTrueOrFalseProblems(t ...*TrueOrFal
 func (wcuo *WorkbookCategoryUpdateOne) ClearWorkbook() *WorkbookCategoryUpdateOne {
 	wcuo.mutation.ClearWorkbook()
 	return wcuo
-}
-
-// ClearWorkbookCategoryDetails clears all "workbook_category_details" edges to the WorkbookCategoryDetail entity.
-func (wcuo *WorkbookCategoryUpdateOne) ClearWorkbookCategoryDetails() *WorkbookCategoryUpdateOne {
-	wcuo.mutation.ClearWorkbookCategoryDetails()
-	return wcuo
-}
-
-// RemoveWorkbookCategoryDetailIDs removes the "workbook_category_details" edge to WorkbookCategoryDetail entities by IDs.
-func (wcuo *WorkbookCategoryUpdateOne) RemoveWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryUpdateOne {
-	wcuo.mutation.RemoveWorkbookCategoryDetailIDs(ids...)
-	return wcuo
-}
-
-// RemoveWorkbookCategoryDetails removes "workbook_category_details" edges to WorkbookCategoryDetail entities.
-func (wcuo *WorkbookCategoryUpdateOne) RemoveWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryUpdateOne {
-	ids := make([]uuid.UUID, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
-	}
-	return wcuo.RemoveWorkbookCategoryDetailIDs(ids...)
 }
 
 // Where appends a list predicates to the WorkbookCategoryUpdate builder.
@@ -1006,51 +888,6 @@ func (wcuo *WorkbookCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Work
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbook.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if wcuo.mutation.WorkbookCategoryDetailsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := wcuo.mutation.RemovedWorkbookCategoryDetailsIDs(); len(nodes) > 0 && !wcuo.mutation.WorkbookCategoryDetailsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := wcuo.mutation.WorkbookCategoryDetailsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

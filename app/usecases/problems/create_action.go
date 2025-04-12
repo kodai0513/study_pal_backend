@@ -15,17 +15,15 @@ import (
 )
 
 type CreateDescriptionProblem struct {
-	CorrentStatement         string
-	Statement                string
-	WorkbookCategoryDetailId *uuid.UUID
-	WorkbookCategoryId       *uuid.UUID
+	CorrentStatement   string
+	Statement          string
+	WorkbookCategoryId *uuid.UUID
 }
 
 type CreateSelectionProblem struct {
-	SelectionProblemAnswers  []*CreateSelectionProblemAnswer
-	Statement                string
-	WorkbookCategoryDetailId *uuid.UUID
-	WorkbookCategoryId       *uuid.UUID
+	SelectionProblemAnswers []*CreateSelectionProblemAnswer
+	Statement               string
+	WorkbookCategoryId      *uuid.UUID
 }
 
 type CreateSelectionProblemAnswer struct {
@@ -34,10 +32,9 @@ type CreateSelectionProblemAnswer struct {
 }
 
 type CreateTrueOrFalseProblem struct {
-	IsCorrect                bool
-	Statement                string
-	WorkbookCategoryDetailId *uuid.UUID
-	WorkbookCategoryId       *uuid.UUID
+	IsCorrect          bool
+	Statement          string
+	WorkbookCategoryId *uuid.UUID
 }
 
 type CreateActionCommand struct {
@@ -75,7 +72,6 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 			uuid.New(),
 			correctStatement,
 			statement,
-			problem.WorkbookCategoryDetailId,
 			problem.WorkbookCategoryId,
 			command.WorkbookId,
 		)
@@ -88,7 +84,6 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 		problemEntity := entities.CreateSelectionProblem(
 			uuid.New(),
 			statement,
-			problem.WorkbookCategoryDetailId,
 			problem.WorkbookCategoryId,
 			command.WorkbookId,
 		)
@@ -123,7 +118,6 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 			uuid.New(),
 			problem.IsCorrect,
 			statement,
-			problem.WorkbookCategoryDetailId,
 			problem.WorkbookCategoryId,
 			command.WorkbookId,
 		)
@@ -138,10 +132,9 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 	trueOrFalseProblemResults := c.TrueOrFalseRepository.CreateBulk(trueOrFalseProblems)
 	descriptionProblemDtos := lo.Map(DescriptionProblemResults, func(problem *entities.DescriptionProblem, _ int) *DescriptionProblemDto {
 		return &DescriptionProblemDto{
-			CorrentStatement:         problem.CorrectStatement(),
-			Statement:                problem.Statement(),
-			WorkbookCategoryDetailId: problem.WorkbookCategoryId(),
-			WorkbookCategoryId:       problem.WorkbookCategoryId(),
+			CorrentStatement:   problem.CorrectStatement(),
+			Statement:          problem.Statement(),
+			WorkbookCategoryId: problem.WorkbookCategoryId(),
 		}
 	})
 	selectionProblemDtos := lo.Map(selectoinProblemResults, func(problem *entities.SelectionProblem, _ int) *SelectionProblemDto {
@@ -153,18 +146,16 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 		})
 
 		return &SelectionProblemDto{
-			SelectionProblemAnswers:  answerDtos,
-			Statement:                problem.Statement(),
-			WorkbookCategoryDetailId: problem.WorkbookCategoryDetailId(),
-			WorkbookCategoryId:       problem.WorkbookCategoryId(),
+			SelectionProblemAnswers: answerDtos,
+			Statement:               problem.Statement(),
+			WorkbookCategoryId:      problem.WorkbookCategoryId(),
 		}
 	})
 	trueOrFalseProblemDtos := lo.Map(trueOrFalseProblemResults, func(problem *entities.TrueOrFalseProblem, _ int) *TrueOrFalseProblemDto {
 		return &TrueOrFalseProblemDto{
-			IsCorrect:                problem.IsCorrect(),
-			Statement:                problem.Statement(),
-			WorkbookCategoryDetailId: problem.WorkbookCategoryDetailId(),
-			WorkbookCategoryId:       problem.WorkbookCategoryId(),
+			IsCorrect:          problem.IsCorrect(),
+			Statement:          problem.Statement(),
+			WorkbookCategoryId: problem.WorkbookCategoryId(),
 		}
 	})
 

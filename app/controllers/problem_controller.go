@@ -18,17 +18,15 @@ type ProblemController struct {
 }
 
 type CreateDescriptionProblem struct {
-	CorrentStatement         string `json:"correct_statement"`
-	Statement                string `json:"statement"`
-	WorkbookCategoryDetailId string `json:"workbook_category_detail_id"`
-	WorkbookCategoryId       string `json:"workbook_category_id"`
+	CorrentStatement   string `json:"correct_statement"`
+	Statement          string `json:"statement"`
+	WorkbookCategoryId string `json:"workbook_category_id"`
 }
 
 type CreateSelectionProblem struct {
-	SelectionProblemAnswers  []*CreateSelectionProblemAnswer `json:"selection_problem_answers"`
-	Statement                string                          `json:"statement"`
-	WorkbookCategoryDetailId string                          `json:"workbook_category_detail_id"`
-	WorkbookCategoryId       string                          `json:"workbook_category_id"`
+	SelectionProblemAnswers []*CreateSelectionProblemAnswer `json:"selection_problem_answers"`
+	Statement               string                          `json:"statement"`
+	WorkbookCategoryId      string                          `json:"workbook_category_id"`
 }
 
 type CreateSelectionProblemAnswer struct {
@@ -37,10 +35,9 @@ type CreateSelectionProblemAnswer struct {
 }
 
 type CreateTrueOrFalseProblem struct {
-	IsCorrect                bool   `json:"is_correct"`
-	Statement                string `json:"statement"`
-	WorkbookCategoryDetailId string `json:"workbook_category_detail_id"`
-	WorkbookCategoryId       string `json:"workbook_category_id"`
+	IsCorrect          bool   `json:"is_correct"`
+	Statement          string `json:"statement"`
+	WorkbookCategoryId string `json:"workbook_category_id"`
 }
 
 type CreateProblem struct {
@@ -100,7 +97,6 @@ func (a *ProblemController) Create(c *gin.Context) {
 
 	invalidUuidErrors := make([]string, 0)
 	descriptionProblemCommands := lo.Map(request.DescriptionProblems, func(problem *CreateDescriptionProblem, _ int) *problems.CreateDescriptionProblem {
-		workbookCategoryDetailUuid, err := type_converts.StringToUuidOrNil(problem.WorkbookCategoryDetailId)
 		if err != nil {
 			invalidUuidErrors = append(invalidUuidErrors, err.Error())
 		}
@@ -109,10 +105,9 @@ func (a *ProblemController) Create(c *gin.Context) {
 			invalidUuidErrors = append(invalidUuidErrors, err.Error())
 		}
 		return &problems.CreateDescriptionProblem{
-			CorrentStatement:         problem.CorrentStatement,
-			Statement:                problem.Statement,
-			WorkbookCategoryDetailId: workbookCategoryDetailUuid,
-			WorkbookCategoryId:       workbookCategoryUuid,
+			CorrentStatement:   problem.CorrentStatement,
+			Statement:          problem.Statement,
+			WorkbookCategoryId: workbookCategoryUuid,
 		}
 	})
 	selectionProblemCommands := lo.Map(request.SelectionProblems, func(problem *CreateSelectionProblem, _ int) *problems.CreateSelectionProblem {
@@ -122,7 +117,6 @@ func (a *ProblemController) Create(c *gin.Context) {
 				Statement: answer.Statement,
 			}
 		})
-		workbookCategoryDetailUuid, err := type_converts.StringToUuidOrNil(problem.WorkbookCategoryDetailId)
 		if err != nil {
 			invalidUuidErrors = append(invalidUuidErrors, err.Error())
 		}
@@ -131,14 +125,12 @@ func (a *ProblemController) Create(c *gin.Context) {
 			invalidUuidErrors = append(invalidUuidErrors, err.Error())
 		}
 		return &problems.CreateSelectionProblem{
-			SelectionProblemAnswers:  answers,
-			Statement:                problem.Statement,
-			WorkbookCategoryDetailId: workbookCategoryDetailUuid,
-			WorkbookCategoryId:       workbookCategoryUuid,
+			SelectionProblemAnswers: answers,
+			Statement:               problem.Statement,
+			WorkbookCategoryId:      workbookCategoryUuid,
 		}
 	})
 	trueOrFalseProblemCommands := lo.Map(request.TrueOrFalseProblems, func(problem *CreateTrueOrFalseProblem, _ int) *problems.CreateTrueOrFalseProblem {
-		workbookCategoryDetailUuid, err := type_converts.StringToUuidOrNil(problem.WorkbookCategoryDetailId)
 		if err != nil {
 			invalidUuidErrors = append(invalidUuidErrors, err.Error())
 		}
@@ -147,10 +139,9 @@ func (a *ProblemController) Create(c *gin.Context) {
 			invalidUuidErrors = append(invalidUuidErrors, err.Error())
 		}
 		return &problems.CreateTrueOrFalseProblem{
-			IsCorrect:                problem.IsCorrect,
-			Statement:                problem.Statement,
-			WorkbookCategoryDetailId: workbookCategoryDetailUuid,
-			WorkbookCategoryId:       workbookCategoryUuid,
+			IsCorrect:          problem.IsCorrect,
+			Statement:          problem.Statement,
+			WorkbookCategoryId: workbookCategoryUuid,
 		}
 	})
 
@@ -193,10 +184,9 @@ func (a *ProblemController) Create(c *gin.Context) {
 
 	descriptionProblemReses := lo.Map(problemDto.DescriptionProblemDtos, func(problem *problems.DescriptionProblemDto, _ int) *CreateDescriptionProblem {
 		return &CreateDescriptionProblem{
-			CorrentStatement:         problem.CorrentStatement,
-			Statement:                problem.Statement,
-			WorkbookCategoryDetailId: type_converts.PointerUuidToString(problem.WorkbookCategoryDetailId),
-			WorkbookCategoryId:       type_converts.PointerUuidToString(problem.WorkbookCategoryId),
+			CorrentStatement:   problem.CorrentStatement,
+			Statement:          problem.Statement,
+			WorkbookCategoryId: type_converts.PointerUuidToString(problem.WorkbookCategoryId),
 		}
 	})
 	selectionProblemReses := lo.Map(problemDto.SelectionProblemDtos, func(problem *problems.SelectionProblemDto, _ int) *CreateSelectionProblem {
@@ -207,18 +197,16 @@ func (a *ProblemController) Create(c *gin.Context) {
 			}
 		})
 		return &CreateSelectionProblem{
-			SelectionProblemAnswers:  answers,
-			Statement:                problem.Statement,
-			WorkbookCategoryDetailId: type_converts.PointerUuidToString(problem.WorkbookCategoryDetailId),
-			WorkbookCategoryId:       type_converts.PointerUuidToString(problem.WorkbookCategoryId),
+			SelectionProblemAnswers: answers,
+			Statement:               problem.Statement,
+			WorkbookCategoryId:      type_converts.PointerUuidToString(problem.WorkbookCategoryId),
 		}
 	})
 	trueOrFalseDescriptionReses := lo.Map(problemDto.TrueOrFalseProblemDtos, func(problem *problems.TrueOrFalseProblemDto, _ int) *CreateTrueOrFalseProblem {
 		return &CreateTrueOrFalseProblem{
-			IsCorrect:                problem.IsCorrect,
-			Statement:                problem.Statement,
-			WorkbookCategoryDetailId: type_converts.PointerUuidToString(problem.WorkbookCategoryDetailId),
-			WorkbookCategoryId:       type_converts.PointerUuidToString(problem.WorkbookCategoryId),
+			IsCorrect:          problem.IsCorrect,
+			Statement:          problem.Statement,
+			WorkbookCategoryId: type_converts.PointerUuidToString(problem.WorkbookCategoryId),
 		}
 	})
 

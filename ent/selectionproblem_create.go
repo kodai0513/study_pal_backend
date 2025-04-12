@@ -10,7 +10,6 @@ import (
 	"study-pal-backend/ent/selectionproblemanswer"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -79,20 +78,6 @@ func (spc *SelectionProblemCreate) SetNillableWorkbookCategoryID(u *uuid.UUID) *
 	return spc
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (spc *SelectionProblemCreate) SetWorkbookCategoryDetailID(u uuid.UUID) *SelectionProblemCreate {
-	spc.mutation.SetWorkbookCategoryDetailID(u)
-	return spc
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (spc *SelectionProblemCreate) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *SelectionProblemCreate {
-	if u != nil {
-		spc.SetWorkbookCategoryDetailID(*u)
-	}
-	return spc
-}
-
 // SetID sets the "id" field.
 func (spc *SelectionProblemCreate) SetID(u uuid.UUID) *SelectionProblemCreate {
 	spc.mutation.SetID(u)
@@ -122,11 +107,6 @@ func (spc *SelectionProblemCreate) SetWorkbook(w *Workbook) *SelectionProblemCre
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (spc *SelectionProblemCreate) SetWorkbookCategory(w *WorkbookCategory) *SelectionProblemCreate {
 	return spc.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (spc *SelectionProblemCreate) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *SelectionProblemCreate {
-	return spc.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the SelectionProblemMutation object of the builder.
@@ -291,23 +271,6 @@ func (spc *SelectionProblemCreate) createSpec() (*SelectionProblem, *sqlgraph.Cr
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.WorkbookCategoryID = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := spc.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   selectionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{selectionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.WorkbookCategoryDetailID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

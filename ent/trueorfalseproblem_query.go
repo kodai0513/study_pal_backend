@@ -10,7 +10,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -22,13 +21,12 @@ import (
 // TrueOrFalseProblemQuery is the builder for querying TrueOrFalseProblem entities.
 type TrueOrFalseProblemQuery struct {
 	config
-	ctx                        *QueryContext
-	order                      []trueorfalseproblem.OrderOption
-	inters                     []Interceptor
-	predicates                 []predicate.TrueOrFalseProblem
-	withWorkbook               *WorkbookQuery
-	withWorkbookCategory       *WorkbookCategoryQuery
-	withWorkbookCategoryDetail *WorkbookCategoryDetailQuery
+	ctx                  *QueryContext
+	order                []trueorfalseproblem.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.TrueOrFalseProblem
+	withWorkbook         *WorkbookQuery
+	withWorkbookCategory *WorkbookCategoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -102,28 +100,6 @@ func (tofpq *TrueOrFalseProblemQuery) QueryWorkbookCategory() *WorkbookCategoryQ
 			sqlgraph.From(trueorfalseproblem.Table, trueorfalseproblem.FieldID, selector),
 			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, trueorfalseproblem.WorkbookCategoryTable, trueorfalseproblem.WorkbookCategoryColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tofpq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryWorkbookCategoryDetail chains the current query on the "workbook_category_detail" edge.
-func (tofpq *TrueOrFalseProblemQuery) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: tofpq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tofpq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tofpq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(trueorfalseproblem.Table, trueorfalseproblem.FieldID, selector),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, trueorfalseproblem.WorkbookCategoryDetailTable, trueorfalseproblem.WorkbookCategoryDetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tofpq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +294,13 @@ func (tofpq *TrueOrFalseProblemQuery) Clone() *TrueOrFalseProblemQuery {
 		return nil
 	}
 	return &TrueOrFalseProblemQuery{
-		config:                     tofpq.config,
-		ctx:                        tofpq.ctx.Clone(),
-		order:                      append([]trueorfalseproblem.OrderOption{}, tofpq.order...),
-		inters:                     append([]Interceptor{}, tofpq.inters...),
-		predicates:                 append([]predicate.TrueOrFalseProblem{}, tofpq.predicates...),
-		withWorkbook:               tofpq.withWorkbook.Clone(),
-		withWorkbookCategory:       tofpq.withWorkbookCategory.Clone(),
-		withWorkbookCategoryDetail: tofpq.withWorkbookCategoryDetail.Clone(),
+		config:               tofpq.config,
+		ctx:                  tofpq.ctx.Clone(),
+		order:                append([]trueorfalseproblem.OrderOption{}, tofpq.order...),
+		inters:               append([]Interceptor{}, tofpq.inters...),
+		predicates:           append([]predicate.TrueOrFalseProblem{}, tofpq.predicates...),
+		withWorkbook:         tofpq.withWorkbook.Clone(),
+		withWorkbookCategory: tofpq.withWorkbookCategory.Clone(),
 		// clone intermediate query.
 		sql:  tofpq.sql.Clone(),
 		path: tofpq.path,
@@ -351,17 +326,6 @@ func (tofpq *TrueOrFalseProblemQuery) WithWorkbookCategory(opts ...func(*Workboo
 		opt(query)
 	}
 	tofpq.withWorkbookCategory = query
-	return tofpq
-}
-
-// WithWorkbookCategoryDetail tells the query-builder to eager-load the nodes that are connected to
-// the "workbook_category_detail" edge. The optional arguments are used to configure the query builder of the edge.
-func (tofpq *TrueOrFalseProblemQuery) WithWorkbookCategoryDetail(opts ...func(*WorkbookCategoryDetailQuery)) *TrueOrFalseProblemQuery {
-	query := (&WorkbookCategoryDetailClient{config: tofpq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tofpq.withWorkbookCategoryDetail = query
 	return tofpq
 }
 
@@ -443,10 +407,9 @@ func (tofpq *TrueOrFalseProblemQuery) sqlAll(ctx context.Context, hooks ...query
 	var (
 		nodes       = []*TrueOrFalseProblem{}
 		_spec       = tofpq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			tofpq.withWorkbook != nil,
 			tofpq.withWorkbookCategory != nil,
-			tofpq.withWorkbookCategoryDetail != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -476,12 +439,6 @@ func (tofpq *TrueOrFalseProblemQuery) sqlAll(ctx context.Context, hooks ...query
 	if query := tofpq.withWorkbookCategory; query != nil {
 		if err := tofpq.loadWorkbookCategory(ctx, query, nodes, nil,
 			func(n *TrueOrFalseProblem, e *WorkbookCategory) { n.Edges.WorkbookCategory = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := tofpq.withWorkbookCategoryDetail; query != nil {
-		if err := tofpq.loadWorkbookCategoryDetail(ctx, query, nodes, nil,
-			func(n *TrueOrFalseProblem, e *WorkbookCategoryDetail) { n.Edges.WorkbookCategoryDetail = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -549,38 +506,6 @@ func (tofpq *TrueOrFalseProblemQuery) loadWorkbookCategory(ctx context.Context, 
 	}
 	return nil
 }
-func (tofpq *TrueOrFalseProblemQuery) loadWorkbookCategoryDetail(ctx context.Context, query *WorkbookCategoryDetailQuery, nodes []*TrueOrFalseProblem, init func(*TrueOrFalseProblem), assign func(*TrueOrFalseProblem, *WorkbookCategoryDetail)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*TrueOrFalseProblem)
-	for i := range nodes {
-		if nodes[i].WorkbookCategoryDetailID == nil {
-			continue
-		}
-		fk := *nodes[i].WorkbookCategoryDetailID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(workbookcategorydetail.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "workbook_category_detail_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 
 func (tofpq *TrueOrFalseProblemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tofpq.querySpec()
@@ -612,9 +537,6 @@ func (tofpq *TrueOrFalseProblemQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if tofpq.withWorkbookCategory != nil {
 			_spec.Node.AddColumnOnce(trueorfalseproblem.FieldWorkbookCategoryID)
-		}
-		if tofpq.withWorkbookCategoryDetail != nil {
-			_spec.Node.AddColumnOnce(trueorfalseproblem.FieldWorkbookCategoryDetailID)
 		}
 	}
 	if ps := tofpq.predicates; len(ps) > 0 {

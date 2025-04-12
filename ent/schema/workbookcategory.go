@@ -7,7 +7,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -43,6 +42,5 @@ func (WorkbookCategory) Edges() []ent.Edge {
 		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From(workbook.Label, Workbook.Type).Ref(workbookcategory.Table).Unique().Required().Field(workbook.Label + "_id"),
-		edge.To(workbookcategorydetail.Table, WorkbookCategoryDetail.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

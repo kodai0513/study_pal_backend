@@ -17,7 +17,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
+	"study-pal-backend/ent/workbookcategoryclosure"
 	"study-pal-backend/ent/workbookmember"
 	"sync"
 
@@ -84,18 +84,18 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			article.Table:                article.ValidColumn,
-			descriptionproblem.Table:     descriptionproblem.ValidColumn,
-			permission.Table:             permission.ValidColumn,
-			role.Table:                   role.ValidColumn,
-			selectionproblem.Table:       selectionproblem.ValidColumn,
-			selectionproblemanswer.Table: selectionproblemanswer.ValidColumn,
-			trueorfalseproblem.Table:     trueorfalseproblem.ValidColumn,
-			user.Table:                   user.ValidColumn,
-			workbook.Table:               workbook.ValidColumn,
-			workbookcategory.Table:       workbookcategory.ValidColumn,
-			workbookcategorydetail.Table: workbookcategorydetail.ValidColumn,
-			workbookmember.Table:         workbookmember.ValidColumn,
+			article.Table:                 article.ValidColumn,
+			descriptionproblem.Table:      descriptionproblem.ValidColumn,
+			permission.Table:              permission.ValidColumn,
+			role.Table:                    role.ValidColumn,
+			selectionproblem.Table:        selectionproblem.ValidColumn,
+			selectionproblemanswer.Table:  selectionproblemanswer.ValidColumn,
+			trueorfalseproblem.Table:      trueorfalseproblem.ValidColumn,
+			user.Table:                    user.ValidColumn,
+			workbook.Table:                workbook.ValidColumn,
+			workbookcategory.Table:        workbookcategory.ValidColumn,
+			workbookcategoryclosure.Table: workbookcategoryclosure.ValidColumn,
+			workbookmember.Table:          workbookmember.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

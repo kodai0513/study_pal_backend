@@ -13,7 +13,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -25,15 +24,14 @@ import (
 // WorkbookCategoryQuery is the builder for querying WorkbookCategory entities.
 type WorkbookCategoryQuery struct {
 	config
-	ctx                         *QueryContext
-	order                       []workbookcategory.OrderOption
-	inters                      []Interceptor
-	predicates                  []predicate.WorkbookCategory
-	withDescriptionProblems     *DescriptionProblemQuery
-	withSelectionProblems       *SelectionProblemQuery
-	withTrueOrFalseProblems     *TrueOrFalseProblemQuery
-	withWorkbook                *WorkbookQuery
-	withWorkbookCategoryDetails *WorkbookCategoryDetailQuery
+	ctx                     *QueryContext
+	order                   []workbookcategory.OrderOption
+	inters                  []Interceptor
+	predicates              []predicate.WorkbookCategory
+	withDescriptionProblems *DescriptionProblemQuery
+	withSelectionProblems   *SelectionProblemQuery
+	withTrueOrFalseProblems *TrueOrFalseProblemQuery
+	withWorkbook            *WorkbookQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -151,28 +149,6 @@ func (wcq *WorkbookCategoryQuery) QueryWorkbook() *WorkbookQuery {
 			sqlgraph.From(workbookcategory.Table, workbookcategory.FieldID, selector),
 			sqlgraph.To(workbook.Table, workbook.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, workbookcategory.WorkbookTable, workbookcategory.WorkbookColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(wcq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryWorkbookCategoryDetails chains the current query on the "workbook_category_details" edge.
-func (wcq *WorkbookCategoryQuery) QueryWorkbookCategoryDetails() *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: wcq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := wcq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := wcq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(workbookcategory.Table, workbookcategory.FieldID, selector),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryDetailsTable, workbookcategory.WorkbookCategoryDetailsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wcq.driver.Dialect(), step)
 		return fromU, nil
@@ -367,16 +343,15 @@ func (wcq *WorkbookCategoryQuery) Clone() *WorkbookCategoryQuery {
 		return nil
 	}
 	return &WorkbookCategoryQuery{
-		config:                      wcq.config,
-		ctx:                         wcq.ctx.Clone(),
-		order:                       append([]workbookcategory.OrderOption{}, wcq.order...),
-		inters:                      append([]Interceptor{}, wcq.inters...),
-		predicates:                  append([]predicate.WorkbookCategory{}, wcq.predicates...),
-		withDescriptionProblems:     wcq.withDescriptionProblems.Clone(),
-		withSelectionProblems:       wcq.withSelectionProblems.Clone(),
-		withTrueOrFalseProblems:     wcq.withTrueOrFalseProblems.Clone(),
-		withWorkbook:                wcq.withWorkbook.Clone(),
-		withWorkbookCategoryDetails: wcq.withWorkbookCategoryDetails.Clone(),
+		config:                  wcq.config,
+		ctx:                     wcq.ctx.Clone(),
+		order:                   append([]workbookcategory.OrderOption{}, wcq.order...),
+		inters:                  append([]Interceptor{}, wcq.inters...),
+		predicates:              append([]predicate.WorkbookCategory{}, wcq.predicates...),
+		withDescriptionProblems: wcq.withDescriptionProblems.Clone(),
+		withSelectionProblems:   wcq.withSelectionProblems.Clone(),
+		withTrueOrFalseProblems: wcq.withTrueOrFalseProblems.Clone(),
+		withWorkbook:            wcq.withWorkbook.Clone(),
 		// clone intermediate query.
 		sql:  wcq.sql.Clone(),
 		path: wcq.path,
@@ -424,17 +399,6 @@ func (wcq *WorkbookCategoryQuery) WithWorkbook(opts ...func(*WorkbookQuery)) *Wo
 		opt(query)
 	}
 	wcq.withWorkbook = query
-	return wcq
-}
-
-// WithWorkbookCategoryDetails tells the query-builder to eager-load the nodes that are connected to
-// the "workbook_category_details" edge. The optional arguments are used to configure the query builder of the edge.
-func (wcq *WorkbookCategoryQuery) WithWorkbookCategoryDetails(opts ...func(*WorkbookCategoryDetailQuery)) *WorkbookCategoryQuery {
-	query := (&WorkbookCategoryDetailClient{config: wcq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	wcq.withWorkbookCategoryDetails = query
 	return wcq
 }
 
@@ -516,12 +480,11 @@ func (wcq *WorkbookCategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*WorkbookCategory{}
 		_spec       = wcq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [4]bool{
 			wcq.withDescriptionProblems != nil,
 			wcq.withSelectionProblems != nil,
 			wcq.withTrueOrFalseProblems != nil,
 			wcq.withWorkbook != nil,
-			wcq.withWorkbookCategoryDetails != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -572,15 +535,6 @@ func (wcq *WorkbookCategoryQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if query := wcq.withWorkbook; query != nil {
 		if err := wcq.loadWorkbook(ctx, query, nodes, nil,
 			func(n *WorkbookCategory, e *Workbook) { n.Edges.Workbook = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := wcq.withWorkbookCategoryDetails; query != nil {
-		if err := wcq.loadWorkbookCategoryDetails(ctx, query, nodes,
-			func(n *WorkbookCategory) { n.Edges.WorkbookCategoryDetails = []*WorkbookCategoryDetail{} },
-			func(n *WorkbookCategory, e *WorkbookCategoryDetail) {
-				n.Edges.WorkbookCategoryDetails = append(n.Edges.WorkbookCategoryDetails, e)
-			}); err != nil {
 			return nil, err
 		}
 	}
@@ -712,37 +666,6 @@ func (wcq *WorkbookCategoryQuery) loadWorkbook(ctx context.Context, query *Workb
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
-	}
-	return nil
-}
-func (wcq *WorkbookCategoryQuery) loadWorkbookCategoryDetails(ctx context.Context, query *WorkbookCategoryDetailQuery, nodes []*WorkbookCategory, init func(*WorkbookCategory), assign func(*WorkbookCategory, *WorkbookCategoryDetail)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*WorkbookCategory)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.WorkbookCategoryDetail(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(workbookcategory.WorkbookCategoryDetailsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.workbook_category_workbook_category_details
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "workbook_category_workbook_category_details" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "workbook_category_workbook_category_details" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

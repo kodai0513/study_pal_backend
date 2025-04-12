@@ -11,7 +11,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -120,21 +119,6 @@ func (wcc *WorkbookCategoryCreate) AddTrueOrFalseProblems(t ...*TrueOrFalseProbl
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
 func (wcc *WorkbookCategoryCreate) SetWorkbook(w *Workbook) *WorkbookCategoryCreate {
 	return wcc.SetWorkbookID(w.ID)
-}
-
-// AddWorkbookCategoryDetailIDs adds the "workbook_category_details" edge to the WorkbookCategoryDetail entity by IDs.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryDetailIDs(ids ...uuid.UUID) *WorkbookCategoryCreate {
-	wcc.mutation.AddWorkbookCategoryDetailIDs(ids...)
-	return wcc
-}
-
-// AddWorkbookCategoryDetails adds the "workbook_category_details" edges to the WorkbookCategoryDetail entity.
-func (wcc *WorkbookCategoryCreate) AddWorkbookCategoryDetails(w ...*WorkbookCategoryDetail) *WorkbookCategoryCreate {
-	ids := make([]uuid.UUID, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
-	}
-	return wcc.AddWorkbookCategoryDetailIDs(ids...)
 }
 
 // Mutation returns the WorkbookCategoryMutation object of the builder.
@@ -314,22 +298,6 @@ func (wcc *WorkbookCategoryCreate) createSpec() (*WorkbookCategory, *sqlgraph.Cr
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.WorkbookID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := wcc.mutation.WorkbookCategoryDetailsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   workbookcategory.WorkbookCategoryDetailsTable,
-			Columns: []string{workbookcategory.WorkbookCategoryDetailsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

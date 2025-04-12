@@ -9,7 +9,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -84,20 +83,6 @@ func (tofpc *TrueOrFalseProblemCreate) SetNillableWorkbookCategoryID(u *uuid.UUI
 	return tofpc
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (tofpc *TrueOrFalseProblemCreate) SetWorkbookCategoryDetailID(u uuid.UUID) *TrueOrFalseProblemCreate {
-	tofpc.mutation.SetWorkbookCategoryDetailID(u)
-	return tofpc
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (tofpc *TrueOrFalseProblemCreate) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *TrueOrFalseProblemCreate {
-	if u != nil {
-		tofpc.SetWorkbookCategoryDetailID(*u)
-	}
-	return tofpc
-}
-
 // SetID sets the "id" field.
 func (tofpc *TrueOrFalseProblemCreate) SetID(u uuid.UUID) *TrueOrFalseProblemCreate {
 	tofpc.mutation.SetID(u)
@@ -112,11 +97,6 @@ func (tofpc *TrueOrFalseProblemCreate) SetWorkbook(w *Workbook) *TrueOrFalseProb
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (tofpc *TrueOrFalseProblemCreate) SetWorkbookCategory(w *WorkbookCategory) *TrueOrFalseProblemCreate {
 	return tofpc.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (tofpc *TrueOrFalseProblemCreate) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *TrueOrFalseProblemCreate {
-	return tofpc.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the TrueOrFalseProblemMutation object of the builder.
@@ -272,23 +252,6 @@ func (tofpc *TrueOrFalseProblemCreate) createSpec() (*TrueOrFalseProblem, *sqlgr
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.WorkbookCategoryID = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tofpc.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   trueorfalseproblem.WorkbookCategoryDetailTable,
-			Columns: []string{trueorfalseproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.WorkbookCategoryDetailID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

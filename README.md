@@ -102,7 +102,7 @@ http://localhost:8080/swagger/index.html
 ### ローカル環境の操作
 
 ```sh
-# 開発サーバーに入れる
+# 開発サーバーに入る
 docker exec -it study_pal_backend sh
 
 # 開発サーバーのログを表示する

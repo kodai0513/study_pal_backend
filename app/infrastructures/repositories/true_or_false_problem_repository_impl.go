@@ -29,7 +29,6 @@ func (t *TrueOrFalseProblemRepositoryImpl) CreateBulk(problems []*entities.TrueO
 		tofpc.SetID(problems[i].Id()).
 			SetIsCorrect(problems[i].IsCorrect()).
 			SetStatement(problems[i].Statement()).
-			SetNillableWorkbookCategoryDetailID(problems[i].WorkbookCategoryDetailId()).
 			SetNillableWorkbookCategoryID(problems[i].WorkbookCategoryId()).
 			SetWorkbookID(problems[i].WorkbookId())
 	}).SaveX(t.ctx)
@@ -40,7 +39,6 @@ func (t *TrueOrFalseProblemRepositoryImpl) CreateBulk(problems []*entities.TrueO
 			result.ID,
 			result.IsCorrect,
 			satement,
-			result.WorkbookCategoryDetailID,
 			result.WorkbookCategoryID,
 			result.WorkbookID,
 		)
@@ -67,7 +65,6 @@ func (t *TrueOrFalseProblemRepositoryImpl) FindById(id uuid.UUID) *entities.True
 		result.ID,
 		result.IsCorrect,
 		statement,
-		result.WorkbookCategoryDetailID,
 		result.WorkbookCategoryID,
 		result.WorkbookID,
 	)
@@ -84,7 +81,6 @@ func (t *TrueOrFalseProblemRepositoryImpl) Update(problem *entities.TrueOrFalseP
 		result.ID,
 		result.IsCorrect,
 		statement,
-		result.WorkbookCategoryDetailID,
 		result.WorkbookCategoryID,
 		result.WorkbookID,
 	)
