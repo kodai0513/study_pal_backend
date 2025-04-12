@@ -10,7 +10,6 @@ import (
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -114,26 +113,6 @@ func (dpu *DescriptionProblemUpdate) ClearWorkbookCategoryID() *DescriptionProbl
 	return dpu
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (dpu *DescriptionProblemUpdate) SetWorkbookCategoryDetailID(u uuid.UUID) *DescriptionProblemUpdate {
-	dpu.mutation.SetWorkbookCategoryDetailID(u)
-	return dpu
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (dpu *DescriptionProblemUpdate) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *DescriptionProblemUpdate {
-	if u != nil {
-		dpu.SetWorkbookCategoryDetailID(*u)
-	}
-	return dpu
-}
-
-// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
-func (dpu *DescriptionProblemUpdate) ClearWorkbookCategoryDetailID() *DescriptionProblemUpdate {
-	dpu.mutation.ClearWorkbookCategoryDetailID()
-	return dpu
-}
-
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
 func (dpu *DescriptionProblemUpdate) SetWorkbook(w *Workbook) *DescriptionProblemUpdate {
 	return dpu.SetWorkbookID(w.ID)
@@ -142,11 +121,6 @@ func (dpu *DescriptionProblemUpdate) SetWorkbook(w *Workbook) *DescriptionProble
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (dpu *DescriptionProblemUpdate) SetWorkbookCategory(w *WorkbookCategory) *DescriptionProblemUpdate {
 	return dpu.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (dpu *DescriptionProblemUpdate) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *DescriptionProblemUpdate {
-	return dpu.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the DescriptionProblemMutation object of the builder.
@@ -163,12 +137,6 @@ func (dpu *DescriptionProblemUpdate) ClearWorkbook() *DescriptionProblemUpdate {
 // ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
 func (dpu *DescriptionProblemUpdate) ClearWorkbookCategory() *DescriptionProblemUpdate {
 	dpu.mutation.ClearWorkbookCategory()
-	return dpu
-}
-
-// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (dpu *DescriptionProblemUpdate) ClearWorkbookCategoryDetail() *DescriptionProblemUpdate {
-	dpu.mutation.ClearWorkbookCategoryDetail()
 	return dpu
 }
 
@@ -308,35 +276,6 @@ func (dpu *DescriptionProblemUpdate) sqlSave(ctx context.Context) (n int, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if dpu.mutation.WorkbookCategoryDetailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   descriptionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{descriptionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := dpu.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   descriptionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{descriptionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dpu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{descriptionproblem.Label}
@@ -439,26 +378,6 @@ func (dpuo *DescriptionProblemUpdateOne) ClearWorkbookCategoryID() *DescriptionP
 	return dpuo
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (dpuo *DescriptionProblemUpdateOne) SetWorkbookCategoryDetailID(u uuid.UUID) *DescriptionProblemUpdateOne {
-	dpuo.mutation.SetWorkbookCategoryDetailID(u)
-	return dpuo
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (dpuo *DescriptionProblemUpdateOne) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *DescriptionProblemUpdateOne {
-	if u != nil {
-		dpuo.SetWorkbookCategoryDetailID(*u)
-	}
-	return dpuo
-}
-
-// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
-func (dpuo *DescriptionProblemUpdateOne) ClearWorkbookCategoryDetailID() *DescriptionProblemUpdateOne {
-	dpuo.mutation.ClearWorkbookCategoryDetailID()
-	return dpuo
-}
-
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
 func (dpuo *DescriptionProblemUpdateOne) SetWorkbook(w *Workbook) *DescriptionProblemUpdateOne {
 	return dpuo.SetWorkbookID(w.ID)
@@ -467,11 +386,6 @@ func (dpuo *DescriptionProblemUpdateOne) SetWorkbook(w *Workbook) *DescriptionPr
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (dpuo *DescriptionProblemUpdateOne) SetWorkbookCategory(w *WorkbookCategory) *DescriptionProblemUpdateOne {
 	return dpuo.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (dpuo *DescriptionProblemUpdateOne) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *DescriptionProblemUpdateOne {
-	return dpuo.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the DescriptionProblemMutation object of the builder.
@@ -488,12 +402,6 @@ func (dpuo *DescriptionProblemUpdateOne) ClearWorkbook() *DescriptionProblemUpda
 // ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
 func (dpuo *DescriptionProblemUpdateOne) ClearWorkbookCategory() *DescriptionProblemUpdateOne {
 	dpuo.mutation.ClearWorkbookCategory()
-	return dpuo
-}
-
-// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (dpuo *DescriptionProblemUpdateOne) ClearWorkbookCategoryDetail() *DescriptionProblemUpdateOne {
-	dpuo.mutation.ClearWorkbookCategoryDetail()
 	return dpuo
 }
 
@@ -656,35 +564,6 @@ func (dpuo *DescriptionProblemUpdateOne) sqlSave(ctx context.Context) (_node *De
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if dpuo.mutation.WorkbookCategoryDetailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   descriptionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{descriptionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := dpuo.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   descriptionproblem.WorkbookCategoryDetailTable,
-			Columns: []string{descriptionproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

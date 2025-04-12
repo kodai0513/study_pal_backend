@@ -11,7 +11,6 @@ import (
 func TestTrueOrFalseProblem_正常系(t *testing.T) {
 	// UUIDの生成
 	problemId := uuid.New()
-	workbookCategoryDetailId := uuid.New()
 	workbookCategoryId := uuid.New()
 	workbookId := uuid.New()
 
@@ -22,7 +21,6 @@ func TestTrueOrFalseProblem_正常系(t *testing.T) {
 		problemId,
 		true, // isCorrect = true
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		workbookId,
 	)
@@ -31,7 +29,6 @@ func TestTrueOrFalseProblem_正常系(t *testing.T) {
 	assert.Equal(t, problemId, problem.Id())
 	assert.Equal(t, true, problem.IsCorrect())
 	assert.Equal(t, "これは〇×問題です", problem.Statement())
-	assert.Equal(t, &workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
 	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
 	assert.Equal(t, workbookId, problem.WorkbookId())
 }
@@ -41,13 +38,11 @@ func TestTrueOrFalseProblem_SetIsCorrect(t *testing.T) {
 	statement, err := true_or_false_problems.NewStatement("これは〇×問題です")
 	assert.NoError(t, err)
 	problemId := uuid.New()
-	workbookCategoryDetailId := uuid.New()
 	workbookCategoryId := uuid.New()
 	problem := NewTrueOrFalseProblem(
 		problemId,
 		true, // 初期値はtrue
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		uuid.New(),
 	)
@@ -68,13 +63,11 @@ func TestTrueOrFalseProblem_Statement_正常系(t *testing.T) {
 	// TrueOrFalseProblemの作成
 	statement, err := true_or_false_problems.NewStatement("これは通常の長さの〇×問題文です。")
 	assert.NoError(t, err)
-	workbookCategoryDetailId := uuid.New()
 	workbookCategoryId := uuid.New()
 	problem := NewTrueOrFalseProblem(
 		uuid.New(),
 		true,
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		uuid.New(),
 	)
@@ -117,7 +110,6 @@ func TestTrueOrFalseProblem_全属性取得確認(t *testing.T) {
 	statement, err := true_or_false_problems.NewStatement("〇×問題の文章")
 	assert.NoError(t, err)
 	problemId := uuid.New()
-	workbookCategoryDetailId := uuid.New()
 	workbookCategoryId := uuid.New()
 	workbookId := uuid.New()
 
@@ -126,7 +118,6 @@ func TestTrueOrFalseProblem_全属性取得確認(t *testing.T) {
 		problemId,
 		false,
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		workbookId,
 	)
@@ -135,7 +126,6 @@ func TestTrueOrFalseProblem_全属性取得確認(t *testing.T) {
 	assert.Equal(t, problemId, problem.Id())
 	assert.Equal(t, false, problem.IsCorrect())
 	assert.Equal(t, "〇×問題の文章", problem.Statement())
-	assert.Equal(t, &workbookCategoryDetailId, problem.WorkbookCategoryDetailId())
 	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
 	assert.Equal(t, workbookId, problem.WorkbookId())
 }

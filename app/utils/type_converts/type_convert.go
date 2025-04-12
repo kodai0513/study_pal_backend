@@ -32,6 +32,12 @@ func PointerUuidToString(value *uuid.UUID) string {
 	if value == nil {
 		return ""
 	}
-
 	return value.String()
+}
+
+func PointerUuidToUuidIfNilWhenNewUuid(value *uuid.UUID) uuid.UUID {
+	if value == nil {
+		return uuid.New()
+	}
+	return *value
 }

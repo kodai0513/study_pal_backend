@@ -43,11 +43,9 @@ type WorkbookCategoryEdges struct {
 	TrueOrFalseProblems []*TrueOrFalseProblem `json:"true_or_false_problems,omitempty"`
 	// Workbook holds the value of the workbook edge.
 	Workbook *Workbook `json:"workbook,omitempty"`
-	// WorkbookCategoryDetails holds the value of the workbook_category_details edge.
-	WorkbookCategoryDetails []*WorkbookCategoryDetail `json:"workbook_category_details,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [4]bool
 }
 
 // DescriptionProblemsOrErr returns the DescriptionProblems value or an error if the edge
@@ -86,15 +84,6 @@ func (e WorkbookCategoryEdges) WorkbookOrErr() (*Workbook, error) {
 		return nil, &NotFoundError{label: workbook.Label}
 	}
 	return nil, &NotLoadedError{edge: "workbook"}
-}
-
-// WorkbookCategoryDetailsOrErr returns the WorkbookCategoryDetails value or an error if the edge
-// was not loaded in eager-loading.
-func (e WorkbookCategoryEdges) WorkbookCategoryDetailsOrErr() ([]*WorkbookCategoryDetail, error) {
-	if e.loadedTypes[4] {
-		return e.WorkbookCategoryDetails, nil
-	}
-	return nil, &NotLoadedError{edge: "workbook_category_details"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -184,11 +173,6 @@ func (wc *WorkbookCategory) QueryTrueOrFalseProblems() *TrueOrFalseProblemQuery 
 // QueryWorkbook queries the "workbook" edge of the WorkbookCategory entity.
 func (wc *WorkbookCategory) QueryWorkbook() *WorkbookQuery {
 	return NewWorkbookCategoryClient(wc.config).QueryWorkbook(wc)
-}
-
-// QueryWorkbookCategoryDetails queries the "workbook_category_details" edge of the WorkbookCategory entity.
-func (wc *WorkbookCategory) QueryWorkbookCategoryDetails() *WorkbookCategoryDetailQuery {
-	return NewWorkbookCategoryClient(wc.config).QueryWorkbookCategoryDetails(wc)
 }
 
 // Update returns a builder for updating this WorkbookCategory.

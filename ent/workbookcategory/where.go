@@ -333,29 +333,6 @@ func HasWorkbookWith(preds ...predicate.Workbook) predicate.WorkbookCategory {
 	})
 }
 
-// HasWorkbookCategoryDetails applies the HasEdge predicate on the "workbook_category_details" edge.
-func HasWorkbookCategoryDetails() predicate.WorkbookCategory {
-	return predicate.WorkbookCategory(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WorkbookCategoryDetailsTable, WorkbookCategoryDetailsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasWorkbookCategoryDetailsWith applies the HasEdge predicate on the "workbook_category_details" edge with a given conditions (other predicates).
-func HasWorkbookCategoryDetailsWith(preds ...predicate.WorkbookCategoryDetail) predicate.WorkbookCategory {
-	return predicate.WorkbookCategory(func(s *sql.Selector) {
-		step := newWorkbookCategoryDetailsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.WorkbookCategory) predicate.WorkbookCategory {
 	return predicate.WorkbookCategory(sql.AndPredicates(predicates...))

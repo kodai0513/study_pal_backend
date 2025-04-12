@@ -21,7 +21,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
+	"study-pal-backend/ent/workbookcategoryclosure"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -56,8 +56,8 @@ type Client struct {
 	Workbook *WorkbookClient
 	// WorkbookCategory is the client for interacting with the WorkbookCategory builders.
 	WorkbookCategory *WorkbookCategoryClient
-	// WorkbookCategoryDetail is the client for interacting with the WorkbookCategoryDetail builders.
-	WorkbookCategoryDetail *WorkbookCategoryDetailClient
+	// WorkbookCategoryClosure is the client for interacting with the WorkbookCategoryClosure builders.
+	WorkbookCategoryClosure *WorkbookCategoryClosureClient
 	// WorkbookMember is the client for interacting with the WorkbookMember builders.
 	WorkbookMember *WorkbookMemberClient
 }
@@ -81,7 +81,7 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 	c.Workbook = NewWorkbookClient(c.config)
 	c.WorkbookCategory = NewWorkbookCategoryClient(c.config)
-	c.WorkbookCategoryDetail = NewWorkbookCategoryDetailClient(c.config)
+	c.WorkbookCategoryClosure = NewWorkbookCategoryClosureClient(c.config)
 	c.WorkbookMember = NewWorkbookMemberClient(c.config)
 }
 
@@ -173,20 +173,20 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                    ctx,
-		config:                 cfg,
-		Article:                NewArticleClient(cfg),
-		DescriptionProblem:     NewDescriptionProblemClient(cfg),
-		Permission:             NewPermissionClient(cfg),
-		Role:                   NewRoleClient(cfg),
-		SelectionProblem:       NewSelectionProblemClient(cfg),
-		SelectionProblemAnswer: NewSelectionProblemAnswerClient(cfg),
-		TrueOrFalseProblem:     NewTrueOrFalseProblemClient(cfg),
-		User:                   NewUserClient(cfg),
-		Workbook:               NewWorkbookClient(cfg),
-		WorkbookCategory:       NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryDetail: NewWorkbookCategoryDetailClient(cfg),
-		WorkbookMember:         NewWorkbookMemberClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Article:                 NewArticleClient(cfg),
+		DescriptionProblem:      NewDescriptionProblemClient(cfg),
+		Permission:              NewPermissionClient(cfg),
+		Role:                    NewRoleClient(cfg),
+		SelectionProblem:        NewSelectionProblemClient(cfg),
+		SelectionProblemAnswer:  NewSelectionProblemAnswerClient(cfg),
+		TrueOrFalseProblem:      NewTrueOrFalseProblemClient(cfg),
+		User:                    NewUserClient(cfg),
+		Workbook:                NewWorkbookClient(cfg),
+		WorkbookCategory:        NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryClosure: NewWorkbookCategoryClosureClient(cfg),
+		WorkbookMember:          NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -204,20 +204,20 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                    ctx,
-		config:                 cfg,
-		Article:                NewArticleClient(cfg),
-		DescriptionProblem:     NewDescriptionProblemClient(cfg),
-		Permission:             NewPermissionClient(cfg),
-		Role:                   NewRoleClient(cfg),
-		SelectionProblem:       NewSelectionProblemClient(cfg),
-		SelectionProblemAnswer: NewSelectionProblemAnswerClient(cfg),
-		TrueOrFalseProblem:     NewTrueOrFalseProblemClient(cfg),
-		User:                   NewUserClient(cfg),
-		Workbook:               NewWorkbookClient(cfg),
-		WorkbookCategory:       NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryDetail: NewWorkbookCategoryDetailClient(cfg),
-		WorkbookMember:         NewWorkbookMemberClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Article:                 NewArticleClient(cfg),
+		DescriptionProblem:      NewDescriptionProblemClient(cfg),
+		Permission:              NewPermissionClient(cfg),
+		Role:                    NewRoleClient(cfg),
+		SelectionProblem:        NewSelectionProblemClient(cfg),
+		SelectionProblemAnswer:  NewSelectionProblemAnswerClient(cfg),
+		TrueOrFalseProblem:      NewTrueOrFalseProblemClient(cfg),
+		User:                    NewUserClient(cfg),
+		Workbook:                NewWorkbookClient(cfg),
+		WorkbookCategory:        NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryClosure: NewWorkbookCategoryClosureClient(cfg),
+		WorkbookMember:          NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -249,7 +249,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Article, c.DescriptionProblem, c.Permission, c.Role, c.SelectionProblem,
 		c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryDetail, c.WorkbookMember,
+		c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
 	} {
 		n.Use(hooks...)
 	}
@@ -261,7 +261,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Article, c.DescriptionProblem, c.Permission, c.Role, c.SelectionProblem,
 		c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryDetail, c.WorkbookMember,
+		c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -290,8 +290,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Workbook.mutate(ctx, m)
 	case *WorkbookCategoryMutation:
 		return c.WorkbookCategory.mutate(ctx, m)
-	case *WorkbookCategoryDetailMutation:
-		return c.WorkbookCategoryDetail.mutate(ctx, m)
+	case *WorkbookCategoryClosureMutation:
+		return c.WorkbookCategoryClosure.mutate(ctx, m)
 	case *WorkbookMemberMutation:
 		return c.WorkbookMember.mutate(ctx, m)
 	default:
@@ -581,22 +581,6 @@ func (c *DescriptionProblemClient) QueryWorkbookCategory(dp *DescriptionProblem)
 			sqlgraph.From(descriptionproblem.Table, descriptionproblem.FieldID, id),
 			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, descriptionproblem.WorkbookCategoryTable, descriptionproblem.WorkbookCategoryColumn),
-		)
-		fromV = sqlgraph.Neighbors(dp.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryWorkbookCategoryDetail queries the workbook_category_detail edge of a DescriptionProblem.
-func (c *DescriptionProblemClient) QueryWorkbookCategoryDetail(dp *DescriptionProblem) *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := dp.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(descriptionproblem.Table, descriptionproblem.FieldID, id),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, descriptionproblem.WorkbookCategoryDetailTable, descriptionproblem.WorkbookCategoryDetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(dp.driver.Dialect(), step)
 		return fromV, nil
@@ -1099,22 +1083,6 @@ func (c *SelectionProblemClient) QueryWorkbookCategory(sp *SelectionProblem) *Wo
 	return query
 }
 
-// QueryWorkbookCategoryDetail queries the workbook_category_detail edge of a SelectionProblem.
-func (c *SelectionProblemClient) QueryWorkbookCategoryDetail(sp *SelectionProblem) *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sp.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(selectionproblem.Table, selectionproblem.FieldID, id),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, selectionproblem.WorkbookCategoryDetailTable, selectionproblem.WorkbookCategoryDetailColumn),
-		)
-		fromV = sqlgraph.Neighbors(sp.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *SelectionProblemClient) Hooks() []Hook {
 	return c.hooks.SelectionProblem
@@ -1422,22 +1390,6 @@ func (c *TrueOrFalseProblemClient) QueryWorkbookCategory(tofp *TrueOrFalseProble
 			sqlgraph.From(trueorfalseproblem.Table, trueorfalseproblem.FieldID, id),
 			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, trueorfalseproblem.WorkbookCategoryTable, trueorfalseproblem.WorkbookCategoryColumn),
-		)
-		fromV = sqlgraph.Neighbors(tofp.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryWorkbookCategoryDetail queries the workbook_category_detail edge of a TrueOrFalseProblem.
-func (c *TrueOrFalseProblemClient) QueryWorkbookCategoryDetail(tofp *TrueOrFalseProblem) *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := tofp.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(trueorfalseproblem.Table, trueorfalseproblem.FieldID, id),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, trueorfalseproblem.WorkbookCategoryDetailTable, trueorfalseproblem.WorkbookCategoryDetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(tofp.driver.Dialect(), step)
 		return fromV, nil
@@ -2052,22 +2004,6 @@ func (c *WorkbookCategoryClient) QueryWorkbook(wc *WorkbookCategory) *WorkbookQu
 	return query
 }
 
-// QueryWorkbookCategoryDetails queries the workbook_category_details edge of a WorkbookCategory.
-func (c *WorkbookCategoryClient) QueryWorkbookCategoryDetails(wc *WorkbookCategory) *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := wc.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(workbookcategory.Table, workbookcategory.FieldID, id),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategory.WorkbookCategoryDetailsTable, workbookcategory.WorkbookCategoryDetailsColumn),
-		)
-		fromV = sqlgraph.Neighbors(wc.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *WorkbookCategoryClient) Hooks() []Hook {
 	return c.hooks.WorkbookCategory
@@ -2093,107 +2029,107 @@ func (c *WorkbookCategoryClient) mutate(ctx context.Context, m *WorkbookCategory
 	}
 }
 
-// WorkbookCategoryDetailClient is a client for the WorkbookCategoryDetail schema.
-type WorkbookCategoryDetailClient struct {
+// WorkbookCategoryClosureClient is a client for the WorkbookCategoryClosure schema.
+type WorkbookCategoryClosureClient struct {
 	config
 }
 
-// NewWorkbookCategoryDetailClient returns a client for the WorkbookCategoryDetail from the given config.
-func NewWorkbookCategoryDetailClient(c config) *WorkbookCategoryDetailClient {
-	return &WorkbookCategoryDetailClient{config: c}
+// NewWorkbookCategoryClosureClient returns a client for the WorkbookCategoryClosure from the given config.
+func NewWorkbookCategoryClosureClient(c config) *WorkbookCategoryClosureClient {
+	return &WorkbookCategoryClosureClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `workbookcategorydetail.Hooks(f(g(h())))`.
-func (c *WorkbookCategoryDetailClient) Use(hooks ...Hook) {
-	c.hooks.WorkbookCategoryDetail = append(c.hooks.WorkbookCategoryDetail, hooks...)
+// A call to `Use(f, g, h)` equals to `workbookcategoryclosure.Hooks(f(g(h())))`.
+func (c *WorkbookCategoryClosureClient) Use(hooks ...Hook) {
+	c.hooks.WorkbookCategoryClosure = append(c.hooks.WorkbookCategoryClosure, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `workbookcategorydetail.Intercept(f(g(h())))`.
-func (c *WorkbookCategoryDetailClient) Intercept(interceptors ...Interceptor) {
-	c.inters.WorkbookCategoryDetail = append(c.inters.WorkbookCategoryDetail, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `workbookcategoryclosure.Intercept(f(g(h())))`.
+func (c *WorkbookCategoryClosureClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WorkbookCategoryClosure = append(c.inters.WorkbookCategoryClosure, interceptors...)
 }
 
-// Create returns a builder for creating a WorkbookCategoryDetail entity.
-func (c *WorkbookCategoryDetailClient) Create() *WorkbookCategoryDetailCreate {
-	mutation := newWorkbookCategoryDetailMutation(c.config, OpCreate)
-	return &WorkbookCategoryDetailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a WorkbookCategoryClosure entity.
+func (c *WorkbookCategoryClosureClient) Create() *WorkbookCategoryClosureCreate {
+	mutation := newWorkbookCategoryClosureMutation(c.config, OpCreate)
+	return &WorkbookCategoryClosureCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of WorkbookCategoryDetail entities.
-func (c *WorkbookCategoryDetailClient) CreateBulk(builders ...*WorkbookCategoryDetailCreate) *WorkbookCategoryDetailCreateBulk {
-	return &WorkbookCategoryDetailCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of WorkbookCategoryClosure entities.
+func (c *WorkbookCategoryClosureClient) CreateBulk(builders ...*WorkbookCategoryClosureCreate) *WorkbookCategoryClosureCreateBulk {
+	return &WorkbookCategoryClosureCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *WorkbookCategoryDetailClient) MapCreateBulk(slice any, setFunc func(*WorkbookCategoryDetailCreate, int)) *WorkbookCategoryDetailCreateBulk {
+func (c *WorkbookCategoryClosureClient) MapCreateBulk(slice any, setFunc func(*WorkbookCategoryClosureCreate, int)) *WorkbookCategoryClosureCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &WorkbookCategoryDetailCreateBulk{err: fmt.Errorf("calling to WorkbookCategoryDetailClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &WorkbookCategoryClosureCreateBulk{err: fmt.Errorf("calling to WorkbookCategoryClosureClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*WorkbookCategoryDetailCreate, rv.Len())
+	builders := make([]*WorkbookCategoryClosureCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &WorkbookCategoryDetailCreateBulk{config: c.config, builders: builders}
+	return &WorkbookCategoryClosureCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for WorkbookCategoryDetail.
-func (c *WorkbookCategoryDetailClient) Update() *WorkbookCategoryDetailUpdate {
-	mutation := newWorkbookCategoryDetailMutation(c.config, OpUpdate)
-	return &WorkbookCategoryDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for WorkbookCategoryClosure.
+func (c *WorkbookCategoryClosureClient) Update() *WorkbookCategoryClosureUpdate {
+	mutation := newWorkbookCategoryClosureMutation(c.config, OpUpdate)
+	return &WorkbookCategoryClosureUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *WorkbookCategoryDetailClient) UpdateOne(wcd *WorkbookCategoryDetail) *WorkbookCategoryDetailUpdateOne {
-	mutation := newWorkbookCategoryDetailMutation(c.config, OpUpdateOne, withWorkbookCategoryDetail(wcd))
-	return &WorkbookCategoryDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *WorkbookCategoryClosureClient) UpdateOne(wcc *WorkbookCategoryClosure) *WorkbookCategoryClosureUpdateOne {
+	mutation := newWorkbookCategoryClosureMutation(c.config, OpUpdateOne, withWorkbookCategoryClosure(wcc))
+	return &WorkbookCategoryClosureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WorkbookCategoryDetailClient) UpdateOneID(id uuid.UUID) *WorkbookCategoryDetailUpdateOne {
-	mutation := newWorkbookCategoryDetailMutation(c.config, OpUpdateOne, withWorkbookCategoryDetailID(id))
-	return &WorkbookCategoryDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *WorkbookCategoryClosureClient) UpdateOneID(id uuid.UUID) *WorkbookCategoryClosureUpdateOne {
+	mutation := newWorkbookCategoryClosureMutation(c.config, OpUpdateOne, withWorkbookCategoryClosureID(id))
+	return &WorkbookCategoryClosureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for WorkbookCategoryDetail.
-func (c *WorkbookCategoryDetailClient) Delete() *WorkbookCategoryDetailDelete {
-	mutation := newWorkbookCategoryDetailMutation(c.config, OpDelete)
-	return &WorkbookCategoryDetailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for WorkbookCategoryClosure.
+func (c *WorkbookCategoryClosureClient) Delete() *WorkbookCategoryClosureDelete {
+	mutation := newWorkbookCategoryClosureMutation(c.config, OpDelete)
+	return &WorkbookCategoryClosureDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *WorkbookCategoryDetailClient) DeleteOne(wcd *WorkbookCategoryDetail) *WorkbookCategoryDetailDeleteOne {
-	return c.DeleteOneID(wcd.ID)
+func (c *WorkbookCategoryClosureClient) DeleteOne(wcc *WorkbookCategoryClosure) *WorkbookCategoryClosureDeleteOne {
+	return c.DeleteOneID(wcc.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WorkbookCategoryDetailClient) DeleteOneID(id uuid.UUID) *WorkbookCategoryDetailDeleteOne {
-	builder := c.Delete().Where(workbookcategorydetail.ID(id))
+func (c *WorkbookCategoryClosureClient) DeleteOneID(id uuid.UUID) *WorkbookCategoryClosureDeleteOne {
+	builder := c.Delete().Where(workbookcategoryclosure.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &WorkbookCategoryDetailDeleteOne{builder}
+	return &WorkbookCategoryClosureDeleteOne{builder}
 }
 
-// Query returns a query builder for WorkbookCategoryDetail.
-func (c *WorkbookCategoryDetailClient) Query() *WorkbookCategoryDetailQuery {
-	return &WorkbookCategoryDetailQuery{
+// Query returns a query builder for WorkbookCategoryClosure.
+func (c *WorkbookCategoryClosureClient) Query() *WorkbookCategoryClosureQuery {
+	return &WorkbookCategoryClosureQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeWorkbookCategoryDetail},
+		ctx:    &QueryContext{Type: TypeWorkbookCategoryClosure},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a WorkbookCategoryDetail entity by its id.
-func (c *WorkbookCategoryDetailClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookCategoryDetail, error) {
-	return c.Query().Where(workbookcategorydetail.ID(id)).Only(ctx)
+// Get returns a WorkbookCategoryClosure entity by its id.
+func (c *WorkbookCategoryClosureClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookCategoryClosure, error) {
+	return c.Query().Where(workbookcategoryclosure.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WorkbookCategoryDetailClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookCategoryDetail {
+func (c *WorkbookCategoryClosureClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookCategoryClosure {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2201,76 +2137,60 @@ func (c *WorkbookCategoryDetailClient) GetX(ctx context.Context, id uuid.UUID) *
 	return obj
 }
 
-// QueryDescriptionProblems queries the description_problems edge of a WorkbookCategoryDetail.
-func (c *WorkbookCategoryDetailClient) QueryDescriptionProblems(wcd *WorkbookCategoryDetail) *DescriptionProblemQuery {
-	query := (&DescriptionProblemClient{config: c.config}).Query()
+// QueryChildCategory queries the child_category edge of a WorkbookCategoryClosure.
+func (c *WorkbookCategoryClosureClient) QueryChildCategory(wcc *WorkbookCategoryClosure) *WorkbookCategoryQuery {
+	query := (&WorkbookCategoryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := wcd.ID
+		id := wcc.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(workbookcategorydetail.Table, workbookcategorydetail.FieldID, id),
-			sqlgraph.To(descriptionproblem.Table, descriptionproblem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategorydetail.DescriptionProblemsTable, workbookcategorydetail.DescriptionProblemsColumn),
+			sqlgraph.From(workbookcategoryclosure.Table, workbookcategoryclosure.FieldID, id),
+			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, workbookcategoryclosure.ChildCategoryTable, workbookcategoryclosure.ChildCategoryColumn),
 		)
-		fromV = sqlgraph.Neighbors(wcd.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(wcc.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QuerySelectionProblems queries the selection_problems edge of a WorkbookCategoryDetail.
-func (c *WorkbookCategoryDetailClient) QuerySelectionProblems(wcd *WorkbookCategoryDetail) *SelectionProblemQuery {
-	query := (&SelectionProblemClient{config: c.config}).Query()
+// QueryParentCategory queries the parent_category edge of a WorkbookCategoryClosure.
+func (c *WorkbookCategoryClosureClient) QueryParentCategory(wcc *WorkbookCategoryClosure) *WorkbookCategoryQuery {
+	query := (&WorkbookCategoryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := wcd.ID
+		id := wcc.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(workbookcategorydetail.Table, workbookcategorydetail.FieldID, id),
-			sqlgraph.To(selectionproblem.Table, selectionproblem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategorydetail.SelectionProblemsTable, workbookcategorydetail.SelectionProblemsColumn),
+			sqlgraph.From(workbookcategoryclosure.Table, workbookcategoryclosure.FieldID, id),
+			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, workbookcategoryclosure.ParentCategoryTable, workbookcategoryclosure.ParentCategoryColumn),
 		)
-		fromV = sqlgraph.Neighbors(wcd.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTrueOrFalseProblems queries the true_or_false_problems edge of a WorkbookCategoryDetail.
-func (c *WorkbookCategoryDetailClient) QueryTrueOrFalseProblems(wcd *WorkbookCategoryDetail) *TrueOrFalseProblemQuery {
-	query := (&TrueOrFalseProblemClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := wcd.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(workbookcategorydetail.Table, workbookcategorydetail.FieldID, id),
-			sqlgraph.To(trueorfalseproblem.Table, trueorfalseproblem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, workbookcategorydetail.TrueOrFalseProblemsTable, workbookcategorydetail.TrueOrFalseProblemsColumn),
-		)
-		fromV = sqlgraph.Neighbors(wcd.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(wcc.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *WorkbookCategoryDetailClient) Hooks() []Hook {
-	return c.hooks.WorkbookCategoryDetail
+func (c *WorkbookCategoryClosureClient) Hooks() []Hook {
+	return c.hooks.WorkbookCategoryClosure
 }
 
 // Interceptors returns the client interceptors.
-func (c *WorkbookCategoryDetailClient) Interceptors() []Interceptor {
-	return c.inters.WorkbookCategoryDetail
+func (c *WorkbookCategoryClosureClient) Interceptors() []Interceptor {
+	return c.inters.WorkbookCategoryClosure
 }
 
-func (c *WorkbookCategoryDetailClient) mutate(ctx context.Context, m *WorkbookCategoryDetailMutation) (Value, error) {
+func (c *WorkbookCategoryClosureClient) mutate(ctx context.Context, m *WorkbookCategoryClosureMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&WorkbookCategoryDetailCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryClosureCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&WorkbookCategoryDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryClosureUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&WorkbookCategoryDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&WorkbookCategoryClosureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&WorkbookCategoryDetailDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&WorkbookCategoryClosureDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown WorkbookCategoryDetail mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown WorkbookCategoryClosure mutation op: %q", m.Op())
 	}
 }
 
@@ -2460,11 +2380,11 @@ type (
 	hooks struct {
 		Article, DescriptionProblem, Permission, Role, SelectionProblem,
 		SelectionProblemAnswer, TrueOrFalseProblem, User, Workbook, WorkbookCategory,
-		WorkbookCategoryDetail, WorkbookMember []ent.Hook
+		WorkbookCategoryClosure, WorkbookMember []ent.Hook
 	}
 	inters struct {
 		Article, DescriptionProblem, Permission, Role, SelectionProblem,
 		SelectionProblemAnswer, TrueOrFalseProblem, User, Workbook, WorkbookCategory,
-		WorkbookCategoryDetail, WorkbookMember []ent.Interceptor
+		WorkbookCategoryClosure, WorkbookMember []ent.Interceptor
 	}
 )

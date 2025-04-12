@@ -29,7 +29,6 @@ func (d *DescriptionProblemRepositoryImpl) CreateBulk(problems []*entities.Descr
 		dpc.SetID(problems[i].Id()).
 			SetCorrectStatement(problems[i].CorrectStatement()).
 			SetStatement(problems[i].Statement()).
-			SetNillableWorkbookCategoryDetailID(problems[i].WorkbookCategoryDetailId()).
 			SetNillableWorkbookCategoryID(problems[i].WorkbookCategoryId()).
 			SetWorkbookID(problems[i].WorkbookId())
 	}).SaveX(d.ctx)
@@ -41,7 +40,6 @@ func (d *DescriptionProblemRepositoryImpl) CreateBulk(problems []*entities.Descr
 			result.ID,
 			correctStatement,
 			statement,
-			result.WorkbookCategoryDetailID,
 			result.WorkbookCategoryID,
 			result.WorkbookID,
 		)
@@ -73,7 +71,6 @@ func (d *DescriptionProblemRepositoryImpl) FindById(descriptionProblemId uuid.UU
 		result.ID,
 		correctStatement,
 		statement,
-		result.WorkbookCategoryDetailID,
 		result.WorkbookCategoryID,
 		result.WorkbookID,
 	)
@@ -91,7 +88,6 @@ func (d *DescriptionProblemRepositoryImpl) Update(problem *entities.DescriptionP
 		result.ID,
 		correctStatement,
 		statement,
-		result.WorkbookCategoryDetailID,
 		result.WorkbookCategoryID,
 		result.WorkbookID,
 	)

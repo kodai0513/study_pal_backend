@@ -7,29 +7,26 @@ import (
 )
 
 type TrueOrFalseProblem struct {
-	id                       uuid.UUID
-	isCorrect                bool
-	statement                true_or_false_problems.Statement
-	workbookCategoryDetailId *uuid.UUID
-	workbookCategoryId       *uuid.UUID
-	workbookId               uuid.UUID
+	id                 uuid.UUID
+	isCorrect          bool
+	statement          true_or_false_problems.Statement
+	workbookCategoryId *uuid.UUID
+	workbookId         uuid.UUID
 }
 
 func NewTrueOrFalseProblem(
 	id uuid.UUID,
 	isCorrect bool,
 	statement true_or_false_problems.Statement,
-	workbookCategoryDetailId *uuid.UUID,
 	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *TrueOrFalseProblem {
 	return &TrueOrFalseProblem{
-		id:                       id,
-		isCorrect:                isCorrect,
-		statement:                statement,
-		workbookCategoryDetailId: workbookCategoryDetailId,
-		workbookCategoryId:       workbookCategoryId,
-		workbookId:               workbookId,
+		id:                 id,
+		isCorrect:          isCorrect,
+		statement:          statement,
+		workbookCategoryId: workbookCategoryId,
+		workbookId:         workbookId,
 	}
 }
 
@@ -43,10 +40,6 @@ func (t *TrueOrFalseProblem) IsCorrect() bool {
 
 func (t *TrueOrFalseProblem) Statement() string {
 	return t.statement.Value()
-}
-
-func (t *TrueOrFalseProblem) WorkbookCategoryDetailId() *uuid.UUID {
-	return t.workbookCategoryDetailId
 }
 
 func (t *TrueOrFalseProblem) WorkbookCategoryId() *uuid.UUID {

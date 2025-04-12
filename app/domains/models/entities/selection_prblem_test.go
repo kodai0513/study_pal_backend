@@ -14,12 +14,10 @@ func TestSelectionProblem_ReplaceSelectionProblemAnswer_正常系とエラー系
 	// 問題の作成
 	statement, _ := selection_problems.NewStatement("これはテスト問題です")
 	problemId := uuid.New()
-	workbookCategoryDetailId := uuid.New()
 	workbookCategoryId := uuid.New()
 	problem := CreateSelectionProblem(
 		problemId,
 		statement,
-		&workbookCategoryDetailId,
 		&workbookCategoryId,
 		uuid.New(),
 	)

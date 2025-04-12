@@ -10,7 +10,6 @@ import (
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -22,13 +21,12 @@ import (
 // DescriptionProblemQuery is the builder for querying DescriptionProblem entities.
 type DescriptionProblemQuery struct {
 	config
-	ctx                        *QueryContext
-	order                      []descriptionproblem.OrderOption
-	inters                     []Interceptor
-	predicates                 []predicate.DescriptionProblem
-	withWorkbook               *WorkbookQuery
-	withWorkbookCategory       *WorkbookCategoryQuery
-	withWorkbookCategoryDetail *WorkbookCategoryDetailQuery
+	ctx                  *QueryContext
+	order                []descriptionproblem.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.DescriptionProblem
+	withWorkbook         *WorkbookQuery
+	withWorkbookCategory *WorkbookCategoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -102,28 +100,6 @@ func (dpq *DescriptionProblemQuery) QueryWorkbookCategory() *WorkbookCategoryQue
 			sqlgraph.From(descriptionproblem.Table, descriptionproblem.FieldID, selector),
 			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, descriptionproblem.WorkbookCategoryTable, descriptionproblem.WorkbookCategoryColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(dpq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryWorkbookCategoryDetail chains the current query on the "workbook_category_detail" edge.
-func (dpq *DescriptionProblemQuery) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: dpq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := dpq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := dpq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(descriptionproblem.Table, descriptionproblem.FieldID, selector),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, descriptionproblem.WorkbookCategoryDetailTable, descriptionproblem.WorkbookCategoryDetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dpq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +294,13 @@ func (dpq *DescriptionProblemQuery) Clone() *DescriptionProblemQuery {
 		return nil
 	}
 	return &DescriptionProblemQuery{
-		config:                     dpq.config,
-		ctx:                        dpq.ctx.Clone(),
-		order:                      append([]descriptionproblem.OrderOption{}, dpq.order...),
-		inters:                     append([]Interceptor{}, dpq.inters...),
-		predicates:                 append([]predicate.DescriptionProblem{}, dpq.predicates...),
-		withWorkbook:               dpq.withWorkbook.Clone(),
-		withWorkbookCategory:       dpq.withWorkbookCategory.Clone(),
-		withWorkbookCategoryDetail: dpq.withWorkbookCategoryDetail.Clone(),
+		config:               dpq.config,
+		ctx:                  dpq.ctx.Clone(),
+		order:                append([]descriptionproblem.OrderOption{}, dpq.order...),
+		inters:               append([]Interceptor{}, dpq.inters...),
+		predicates:           append([]predicate.DescriptionProblem{}, dpq.predicates...),
+		withWorkbook:         dpq.withWorkbook.Clone(),
+		withWorkbookCategory: dpq.withWorkbookCategory.Clone(),
 		// clone intermediate query.
 		sql:  dpq.sql.Clone(),
 		path: dpq.path,
@@ -351,17 +326,6 @@ func (dpq *DescriptionProblemQuery) WithWorkbookCategory(opts ...func(*WorkbookC
 		opt(query)
 	}
 	dpq.withWorkbookCategory = query
-	return dpq
-}
-
-// WithWorkbookCategoryDetail tells the query-builder to eager-load the nodes that are connected to
-// the "workbook_category_detail" edge. The optional arguments are used to configure the query builder of the edge.
-func (dpq *DescriptionProblemQuery) WithWorkbookCategoryDetail(opts ...func(*WorkbookCategoryDetailQuery)) *DescriptionProblemQuery {
-	query := (&WorkbookCategoryDetailClient{config: dpq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	dpq.withWorkbookCategoryDetail = query
 	return dpq
 }
 
@@ -443,10 +407,9 @@ func (dpq *DescriptionProblemQuery) sqlAll(ctx context.Context, hooks ...queryHo
 	var (
 		nodes       = []*DescriptionProblem{}
 		_spec       = dpq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			dpq.withWorkbook != nil,
 			dpq.withWorkbookCategory != nil,
-			dpq.withWorkbookCategoryDetail != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -476,12 +439,6 @@ func (dpq *DescriptionProblemQuery) sqlAll(ctx context.Context, hooks ...queryHo
 	if query := dpq.withWorkbookCategory; query != nil {
 		if err := dpq.loadWorkbookCategory(ctx, query, nodes, nil,
 			func(n *DescriptionProblem, e *WorkbookCategory) { n.Edges.WorkbookCategory = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := dpq.withWorkbookCategoryDetail; query != nil {
-		if err := dpq.loadWorkbookCategoryDetail(ctx, query, nodes, nil,
-			func(n *DescriptionProblem, e *WorkbookCategoryDetail) { n.Edges.WorkbookCategoryDetail = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -549,38 +506,6 @@ func (dpq *DescriptionProblemQuery) loadWorkbookCategory(ctx context.Context, qu
 	}
 	return nil
 }
-func (dpq *DescriptionProblemQuery) loadWorkbookCategoryDetail(ctx context.Context, query *WorkbookCategoryDetailQuery, nodes []*DescriptionProblem, init func(*DescriptionProblem), assign func(*DescriptionProblem, *WorkbookCategoryDetail)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*DescriptionProblem)
-	for i := range nodes {
-		if nodes[i].WorkbookCategoryDetailID == nil {
-			continue
-		}
-		fk := *nodes[i].WorkbookCategoryDetailID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(workbookcategorydetail.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "workbook_category_detail_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 
 func (dpq *DescriptionProblemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := dpq.querySpec()
@@ -612,9 +537,6 @@ func (dpq *DescriptionProblemQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if dpq.withWorkbookCategory != nil {
 			_spec.Node.AddColumnOnce(descriptionproblem.FieldWorkbookCategoryID)
-		}
-		if dpq.withWorkbookCategoryDetail != nil {
-			_spec.Node.AddColumnOnce(descriptionproblem.FieldWorkbookCategoryDetailID)
 		}
 	}
 	if ps := dpq.predicates; len(ps) > 0 {

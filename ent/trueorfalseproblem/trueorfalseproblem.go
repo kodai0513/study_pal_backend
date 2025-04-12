@@ -26,14 +26,10 @@ const (
 	FieldWorkbookID = "workbook_id"
 	// FieldWorkbookCategoryID holds the string denoting the workbook_category_id field in the database.
 	FieldWorkbookCategoryID = "workbook_category_id"
-	// FieldWorkbookCategoryDetailID holds the string denoting the workbook_category_detail_id field in the database.
-	FieldWorkbookCategoryDetailID = "workbook_category_detail_id"
 	// EdgeWorkbook holds the string denoting the workbook edge name in mutations.
 	EdgeWorkbook = "workbook"
 	// EdgeWorkbookCategory holds the string denoting the workbook_category edge name in mutations.
 	EdgeWorkbookCategory = "workbook_category"
-	// EdgeWorkbookCategoryDetail holds the string denoting the workbook_category_detail edge name in mutations.
-	EdgeWorkbookCategoryDetail = "workbook_category_detail"
 	// Table holds the table name of the trueorfalseproblem in the database.
 	Table = "true_or_false_problems"
 	// WorkbookTable is the table that holds the workbook relation/edge.
@@ -50,13 +46,6 @@ const (
 	WorkbookCategoryInverseTable = "workbook_categories"
 	// WorkbookCategoryColumn is the table column denoting the workbook_category relation/edge.
 	WorkbookCategoryColumn = "workbook_category_id"
-	// WorkbookCategoryDetailTable is the table that holds the workbook_category_detail relation/edge.
-	WorkbookCategoryDetailTable = "true_or_false_problems"
-	// WorkbookCategoryDetailInverseTable is the table name for the WorkbookCategoryDetail entity.
-	// It exists in this package in order to avoid circular dependency with the "workbookcategorydetail" package.
-	WorkbookCategoryDetailInverseTable = "workbook_category_details"
-	// WorkbookCategoryDetailColumn is the table column denoting the workbook_category_detail relation/edge.
-	WorkbookCategoryDetailColumn = "workbook_category_detail_id"
 )
 
 // Columns holds all SQL columns for trueorfalseproblem fields.
@@ -68,7 +57,6 @@ var Columns = []string{
 	FieldStatement,
 	FieldWorkbookID,
 	FieldWorkbookCategoryID,
-	FieldWorkbookCategoryDetailID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -130,11 +118,6 @@ func ByWorkbookCategoryID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkbookCategoryID, opts...).ToFunc()
 }
 
-// ByWorkbookCategoryDetailID orders the results by the workbook_category_detail_id field.
-func ByWorkbookCategoryDetailID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldWorkbookCategoryDetailID, opts...).ToFunc()
-}
-
 // ByWorkbookField orders the results by workbook field.
 func ByWorkbookField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -146,13 +129,6 @@ func ByWorkbookField(field string, opts ...sql.OrderTermOption) OrderOption {
 func ByWorkbookCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByWorkbookCategoryDetailField orders the results by workbook_category_detail field.
-func ByWorkbookCategoryDetailField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWorkbookCategoryDetailStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newWorkbookStep() *sqlgraph.Step {
@@ -167,12 +143,5 @@ func newWorkbookCategoryStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WorkbookCategoryInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryTable, WorkbookCategoryColumn),
-	)
-}
-func newWorkbookCategoryDetailStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WorkbookCategoryDetailInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryDetailTable, WorkbookCategoryDetailColumn),
 	)
 }

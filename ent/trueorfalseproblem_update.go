@@ -10,7 +10,6 @@ import (
 	"study-pal-backend/ent/trueorfalseproblem"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -114,26 +113,6 @@ func (tofpu *TrueOrFalseProblemUpdate) ClearWorkbookCategoryID() *TrueOrFalsePro
 	return tofpu
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (tofpu *TrueOrFalseProblemUpdate) SetWorkbookCategoryDetailID(u uuid.UUID) *TrueOrFalseProblemUpdate {
-	tofpu.mutation.SetWorkbookCategoryDetailID(u)
-	return tofpu
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (tofpu *TrueOrFalseProblemUpdate) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *TrueOrFalseProblemUpdate {
-	if u != nil {
-		tofpu.SetWorkbookCategoryDetailID(*u)
-	}
-	return tofpu
-}
-
-// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
-func (tofpu *TrueOrFalseProblemUpdate) ClearWorkbookCategoryDetailID() *TrueOrFalseProblemUpdate {
-	tofpu.mutation.ClearWorkbookCategoryDetailID()
-	return tofpu
-}
-
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
 func (tofpu *TrueOrFalseProblemUpdate) SetWorkbook(w *Workbook) *TrueOrFalseProblemUpdate {
 	return tofpu.SetWorkbookID(w.ID)
@@ -142,11 +121,6 @@ func (tofpu *TrueOrFalseProblemUpdate) SetWorkbook(w *Workbook) *TrueOrFalseProb
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (tofpu *TrueOrFalseProblemUpdate) SetWorkbookCategory(w *WorkbookCategory) *TrueOrFalseProblemUpdate {
 	return tofpu.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (tofpu *TrueOrFalseProblemUpdate) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *TrueOrFalseProblemUpdate {
-	return tofpu.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the TrueOrFalseProblemMutation object of the builder.
@@ -163,12 +137,6 @@ func (tofpu *TrueOrFalseProblemUpdate) ClearWorkbook() *TrueOrFalseProblemUpdate
 // ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
 func (tofpu *TrueOrFalseProblemUpdate) ClearWorkbookCategory() *TrueOrFalseProblemUpdate {
 	tofpu.mutation.ClearWorkbookCategory()
-	return tofpu
-}
-
-// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (tofpu *TrueOrFalseProblemUpdate) ClearWorkbookCategoryDetail() *TrueOrFalseProblemUpdate {
-	tofpu.mutation.ClearWorkbookCategoryDetail()
 	return tofpu
 }
 
@@ -303,35 +271,6 @@ func (tofpu *TrueOrFalseProblemUpdate) sqlSave(ctx context.Context) (n int, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tofpu.mutation.WorkbookCategoryDetailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   trueorfalseproblem.WorkbookCategoryDetailTable,
-			Columns: []string{trueorfalseproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tofpu.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   trueorfalseproblem.WorkbookCategoryDetailTable,
-			Columns: []string{trueorfalseproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tofpu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{trueorfalseproblem.Label}
@@ -434,26 +373,6 @@ func (tofpuo *TrueOrFalseProblemUpdateOne) ClearWorkbookCategoryID() *TrueOrFals
 	return tofpuo
 }
 
-// SetWorkbookCategoryDetailID sets the "workbook_category_detail_id" field.
-func (tofpuo *TrueOrFalseProblemUpdateOne) SetWorkbookCategoryDetailID(u uuid.UUID) *TrueOrFalseProblemUpdateOne {
-	tofpuo.mutation.SetWorkbookCategoryDetailID(u)
-	return tofpuo
-}
-
-// SetNillableWorkbookCategoryDetailID sets the "workbook_category_detail_id" field if the given value is not nil.
-func (tofpuo *TrueOrFalseProblemUpdateOne) SetNillableWorkbookCategoryDetailID(u *uuid.UUID) *TrueOrFalseProblemUpdateOne {
-	if u != nil {
-		tofpuo.SetWorkbookCategoryDetailID(*u)
-	}
-	return tofpuo
-}
-
-// ClearWorkbookCategoryDetailID clears the value of the "workbook_category_detail_id" field.
-func (tofpuo *TrueOrFalseProblemUpdateOne) ClearWorkbookCategoryDetailID() *TrueOrFalseProblemUpdateOne {
-	tofpuo.mutation.ClearWorkbookCategoryDetailID()
-	return tofpuo
-}
-
 // SetWorkbook sets the "workbook" edge to the Workbook entity.
 func (tofpuo *TrueOrFalseProblemUpdateOne) SetWorkbook(w *Workbook) *TrueOrFalseProblemUpdateOne {
 	return tofpuo.SetWorkbookID(w.ID)
@@ -462,11 +381,6 @@ func (tofpuo *TrueOrFalseProblemUpdateOne) SetWorkbook(w *Workbook) *TrueOrFalse
 // SetWorkbookCategory sets the "workbook_category" edge to the WorkbookCategory entity.
 func (tofpuo *TrueOrFalseProblemUpdateOne) SetWorkbookCategory(w *WorkbookCategory) *TrueOrFalseProblemUpdateOne {
 	return tofpuo.SetWorkbookCategoryID(w.ID)
-}
-
-// SetWorkbookCategoryDetail sets the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (tofpuo *TrueOrFalseProblemUpdateOne) SetWorkbookCategoryDetail(w *WorkbookCategoryDetail) *TrueOrFalseProblemUpdateOne {
-	return tofpuo.SetWorkbookCategoryDetailID(w.ID)
 }
 
 // Mutation returns the TrueOrFalseProblemMutation object of the builder.
@@ -483,12 +397,6 @@ func (tofpuo *TrueOrFalseProblemUpdateOne) ClearWorkbook() *TrueOrFalseProblemUp
 // ClearWorkbookCategory clears the "workbook_category" edge to the WorkbookCategory entity.
 func (tofpuo *TrueOrFalseProblemUpdateOne) ClearWorkbookCategory() *TrueOrFalseProblemUpdateOne {
 	tofpuo.mutation.ClearWorkbookCategory()
-	return tofpuo
-}
-
-// ClearWorkbookCategoryDetail clears the "workbook_category_detail" edge to the WorkbookCategoryDetail entity.
-func (tofpuo *TrueOrFalseProblemUpdateOne) ClearWorkbookCategoryDetail() *TrueOrFalseProblemUpdateOne {
-	tofpuo.mutation.ClearWorkbookCategoryDetail()
 	return tofpuo
 }
 
@@ -646,35 +554,6 @@ func (tofpuo *TrueOrFalseProblemUpdateOne) sqlSave(ctx context.Context) (_node *
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookcategory.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tofpuo.mutation.WorkbookCategoryDetailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   trueorfalseproblem.WorkbookCategoryDetailTable,
-			Columns: []string{trueorfalseproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tofpuo.mutation.WorkbookCategoryDetailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   trueorfalseproblem.WorkbookCategoryDetailTable,
-			Columns: []string{trueorfalseproblem.WorkbookCategoryDetailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(workbookcategorydetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

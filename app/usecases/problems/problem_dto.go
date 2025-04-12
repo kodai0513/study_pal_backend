@@ -3,17 +3,15 @@ package problems
 import "github.com/google/uuid"
 
 type DescriptionProblemDto struct {
-	CorrentStatement         string
-	Statement                string
-	WorkbookCategoryDetailId *uuid.UUID
-	WorkbookCategoryId       *uuid.UUID
+	CorrentStatement   string
+	Statement          string
+	WorkbookCategoryId *uuid.UUID
 }
 
 type SelectionProblemDto struct {
-	SelectionProblemAnswers  []*SelectionProblemAnswerDto
-	Statement                string
-	WorkbookCategoryDetailId *uuid.UUID
-	WorkbookCategoryId       *uuid.UUID
+	SelectionProblemAnswers []*SelectionProblemAnswerDto
+	Statement               string
+	WorkbookCategoryId      *uuid.UUID
 }
 
 type SelectionProblemAnswerDto struct {
@@ -22,10 +20,9 @@ type SelectionProblemAnswerDto struct {
 }
 
 type TrueOrFalseProblemDto struct {
-	IsCorrect                bool
-	Statement                string
-	WorkbookCategoryDetailId *uuid.UUID
-	WorkbookCategoryId       *uuid.UUID
+	IsCorrect          bool
+	Statement          string
+	WorkbookCategoryId *uuid.UUID
 }
 
 type ProblemDto struct {

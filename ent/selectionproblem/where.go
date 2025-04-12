@@ -81,11 +81,6 @@ func WorkbookCategoryID(v uuid.UUID) predicate.SelectionProblem {
 	return predicate.SelectionProblem(sql.FieldEQ(FieldWorkbookCategoryID, v))
 }
 
-// WorkbookCategoryDetailID applies equality check predicate on the "workbook_category_detail_id" field. It's identical to WorkbookCategoryDetailIDEQ.
-func WorkbookCategoryDetailID(v uuid.UUID) predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldEQ(FieldWorkbookCategoryDetailID, v))
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.SelectionProblem {
 	return predicate.SelectionProblem(sql.FieldEQ(FieldCreatedAt, v))
@@ -281,36 +276,6 @@ func WorkbookCategoryIDNotNil() predicate.SelectionProblem {
 	return predicate.SelectionProblem(sql.FieldNotNull(FieldWorkbookCategoryID))
 }
 
-// WorkbookCategoryDetailIDEQ applies the EQ predicate on the "workbook_category_detail_id" field.
-func WorkbookCategoryDetailIDEQ(v uuid.UUID) predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldEQ(FieldWorkbookCategoryDetailID, v))
-}
-
-// WorkbookCategoryDetailIDNEQ applies the NEQ predicate on the "workbook_category_detail_id" field.
-func WorkbookCategoryDetailIDNEQ(v uuid.UUID) predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldNEQ(FieldWorkbookCategoryDetailID, v))
-}
-
-// WorkbookCategoryDetailIDIn applies the In predicate on the "workbook_category_detail_id" field.
-func WorkbookCategoryDetailIDIn(vs ...uuid.UUID) predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldIn(FieldWorkbookCategoryDetailID, vs...))
-}
-
-// WorkbookCategoryDetailIDNotIn applies the NotIn predicate on the "workbook_category_detail_id" field.
-func WorkbookCategoryDetailIDNotIn(vs ...uuid.UUID) predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldNotIn(FieldWorkbookCategoryDetailID, vs...))
-}
-
-// WorkbookCategoryDetailIDIsNil applies the IsNil predicate on the "workbook_category_detail_id" field.
-func WorkbookCategoryDetailIDIsNil() predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldIsNull(FieldWorkbookCategoryDetailID))
-}
-
-// WorkbookCategoryDetailIDNotNil applies the NotNil predicate on the "workbook_category_detail_id" field.
-func WorkbookCategoryDetailIDNotNil() predicate.SelectionProblem {
-	return predicate.SelectionProblem(sql.FieldNotNull(FieldWorkbookCategoryDetailID))
-}
-
 // HasSelectionProblemAnswers applies the HasEdge predicate on the "selection_problem_answers" edge.
 func HasSelectionProblemAnswers() predicate.SelectionProblem {
 	return predicate.SelectionProblem(func(s *sql.Selector) {
@@ -372,29 +337,6 @@ func HasWorkbookCategory() predicate.SelectionProblem {
 func HasWorkbookCategoryWith(preds ...predicate.WorkbookCategory) predicate.SelectionProblem {
 	return predicate.SelectionProblem(func(s *sql.Selector) {
 		step := newWorkbookCategoryStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasWorkbookCategoryDetail applies the HasEdge predicate on the "workbook_category_detail" edge.
-func HasWorkbookCategoryDetail() predicate.SelectionProblem {
-	return predicate.SelectionProblem(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, WorkbookCategoryDetailTable, WorkbookCategoryDetailColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasWorkbookCategoryDetailWith applies the HasEdge predicate on the "workbook_category_detail" edge with a given conditions (other predicates).
-func HasWorkbookCategoryDetailWith(preds ...predicate.WorkbookCategoryDetail) predicate.SelectionProblem {
-	return predicate.SelectionProblem(func(s *sql.Selector) {
-		step := newWorkbookCategoryDetailStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

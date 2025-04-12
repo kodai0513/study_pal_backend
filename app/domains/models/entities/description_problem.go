@@ -7,29 +7,26 @@ import (
 )
 
 type DescriptionProblem struct {
-	id                       uuid.UUID
-	correntStatement         description_problems.CorrectStatement
-	statement                description_problems.Statement
-	workbookCategoryDetailId *uuid.UUID
-	workbookCategoryId       *uuid.UUID
-	workbookId               uuid.UUID
+	id                 uuid.UUID
+	correntStatement   description_problems.CorrectStatement
+	statement          description_problems.Statement
+	workbookCategoryId *uuid.UUID
+	workbookId         uuid.UUID
 }
 
 func NewDescriptionProblem(
 	id uuid.UUID,
 	correctStatement description_problems.CorrectStatement,
 	statement description_problems.Statement,
-	workbookCategoryDetailId *uuid.UUID,
 	workbookCategoryId *uuid.UUID,
 	workbookId uuid.UUID,
 ) *DescriptionProblem {
 	return &DescriptionProblem{
-		id:                       id,
-		correntStatement:         correctStatement,
-		statement:                statement,
-		workbookCategoryDetailId: workbookCategoryDetailId,
-		workbookCategoryId:       workbookCategoryId,
-		workbookId:               workbookId,
+		id:                 id,
+		correntStatement:   correctStatement,
+		statement:          statement,
+		workbookCategoryId: workbookCategoryId,
+		workbookId:         workbookId,
 	}
 }
 
@@ -43,10 +40,6 @@ func (d *DescriptionProblem) CorrectStatement() string {
 
 func (d *DescriptionProblem) Statement() string {
 	return d.statement.Value()
-}
-
-func (d *DescriptionProblem) WorkbookCategoryDetailId() *uuid.UUID {
-	return d.workbookCategoryDetailId
 }
 
 func (d *DescriptionProblem) WorkbookCategoryId() *uuid.UUID {

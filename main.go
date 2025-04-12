@@ -62,6 +62,7 @@ func main() {
 	timelineController := controllers.TimelineController{AppData: appData}
 	trueOrFalseProblemController := controllers.TrueOrFalseProblemController{AppData: appData}
 	workbookController := controllers.WorkbookController{AppData: appData}
+	workbookCategoryController := controllers.WorkbookCategoryController{AppData: appData}
 
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -100,6 +101,11 @@ func main() {
 			workbooks.POST("/", authRequired, workbookController.Create)
 			workbooks.PUT("/:workbook_id", authRequired, workbookController.Update)
 			workbooks.DELETE("/:workbook_id", authRequired, workbookController.Delete)
+		}
+		workbookCategories := v1.Group("/:workbook_id/workbook-categories")
+		{
+			workbookCategories.GET("", authRequired, workbookCategoryController.Index)
+			workbookCategories.PUT("", authRequired, workbookCategoryController.Update)
 		}
 	}
 

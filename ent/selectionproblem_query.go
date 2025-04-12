@@ -12,7 +12,6 @@ import (
 	"study-pal-backend/ent/selectionproblemanswer"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
-	"study-pal-backend/ent/workbookcategorydetail"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,7 +30,6 @@ type SelectionProblemQuery struct {
 	withSelectionProblemAnswers *SelectionProblemAnswerQuery
 	withWorkbook                *WorkbookQuery
 	withWorkbookCategory        *WorkbookCategoryQuery
-	withWorkbookCategoryDetail  *WorkbookCategoryDetailQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -127,28 +125,6 @@ func (spq *SelectionProblemQuery) QueryWorkbookCategory() *WorkbookCategoryQuery
 			sqlgraph.From(selectionproblem.Table, selectionproblem.FieldID, selector),
 			sqlgraph.To(workbookcategory.Table, workbookcategory.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, selectionproblem.WorkbookCategoryTable, selectionproblem.WorkbookCategoryColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(spq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryWorkbookCategoryDetail chains the current query on the "workbook_category_detail" edge.
-func (spq *SelectionProblemQuery) QueryWorkbookCategoryDetail() *WorkbookCategoryDetailQuery {
-	query := (&WorkbookCategoryDetailClient{config: spq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := spq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := spq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(selectionproblem.Table, selectionproblem.FieldID, selector),
-			sqlgraph.To(workbookcategorydetail.Table, workbookcategorydetail.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, selectionproblem.WorkbookCategoryDetailTable, selectionproblem.WorkbookCategoryDetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(spq.driver.Dialect(), step)
 		return fromU, nil
@@ -351,7 +327,6 @@ func (spq *SelectionProblemQuery) Clone() *SelectionProblemQuery {
 		withSelectionProblemAnswers: spq.withSelectionProblemAnswers.Clone(),
 		withWorkbook:                spq.withWorkbook.Clone(),
 		withWorkbookCategory:        spq.withWorkbookCategory.Clone(),
-		withWorkbookCategoryDetail:  spq.withWorkbookCategoryDetail.Clone(),
 		// clone intermediate query.
 		sql:  spq.sql.Clone(),
 		path: spq.path,
@@ -388,17 +363,6 @@ func (spq *SelectionProblemQuery) WithWorkbookCategory(opts ...func(*WorkbookCat
 		opt(query)
 	}
 	spq.withWorkbookCategory = query
-	return spq
-}
-
-// WithWorkbookCategoryDetail tells the query-builder to eager-load the nodes that are connected to
-// the "workbook_category_detail" edge. The optional arguments are used to configure the query builder of the edge.
-func (spq *SelectionProblemQuery) WithWorkbookCategoryDetail(opts ...func(*WorkbookCategoryDetailQuery)) *SelectionProblemQuery {
-	query := (&WorkbookCategoryDetailClient{config: spq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	spq.withWorkbookCategoryDetail = query
 	return spq
 }
 
@@ -480,11 +444,10 @@ func (spq *SelectionProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*SelectionProblem{}
 		_spec       = spq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			spq.withSelectionProblemAnswers != nil,
 			spq.withWorkbook != nil,
 			spq.withWorkbookCategory != nil,
-			spq.withWorkbookCategoryDetail != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -523,12 +486,6 @@ func (spq *SelectionProblemQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if query := spq.withWorkbookCategory; query != nil {
 		if err := spq.loadWorkbookCategory(ctx, query, nodes, nil,
 			func(n *SelectionProblem, e *WorkbookCategory) { n.Edges.WorkbookCategory = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := spq.withWorkbookCategoryDetail; query != nil {
-		if err := spq.loadWorkbookCategoryDetail(ctx, query, nodes, nil,
-			func(n *SelectionProblem, e *WorkbookCategoryDetail) { n.Edges.WorkbookCategoryDetail = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -626,38 +583,6 @@ func (spq *SelectionProblemQuery) loadWorkbookCategory(ctx context.Context, quer
 	}
 	return nil
 }
-func (spq *SelectionProblemQuery) loadWorkbookCategoryDetail(ctx context.Context, query *WorkbookCategoryDetailQuery, nodes []*SelectionProblem, init func(*SelectionProblem), assign func(*SelectionProblem, *WorkbookCategoryDetail)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*SelectionProblem)
-	for i := range nodes {
-		if nodes[i].WorkbookCategoryDetailID == nil {
-			continue
-		}
-		fk := *nodes[i].WorkbookCategoryDetailID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(workbookcategorydetail.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "workbook_category_detail_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 
 func (spq *SelectionProblemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := spq.querySpec()
@@ -689,9 +614,6 @@ func (spq *SelectionProblemQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if spq.withWorkbookCategory != nil {
 			_spec.Node.AddColumnOnce(selectionproblem.FieldWorkbookCategoryID)
-		}
-		if spq.withWorkbookCategoryDetail != nil {
-			_spec.Node.AddColumnOnce(selectionproblem.FieldWorkbookCategoryDetailID)
 		}
 	}
 	if ps := spq.predicates; len(ps) > 0 {
