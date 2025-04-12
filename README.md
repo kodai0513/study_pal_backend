@@ -41,24 +41,11 @@ go run -mod=mod entgo.io/ent/cmd/ent new User
 go generate ./ent
 ```
 
-#### atlasgoが入っていない場合はインストールしておく
+### マイグレーション実行
 ```sh
-curl -sSf https://atlasgo.sh | sh
-```
+cd cmd/migration
 
-#### マイグレーションファイルの生成
-```sh
-atlas migrate diff migration_name \
-    --dir "file://db/migrations" \
-    --to "ent://ent/schema" \
-    --dev-url "docker://postgres/15/study_pal?search_path=public"
-```
-
-#### マイグレーションの適用
-```sh
-atlas migrate apply \
-    --dir "file://db/migrations" \
-    --url "postgres://postgres:postgres@study_pal_db:5432/study_pal?search_path=public&sslmode=disable"
+go run main.go
 ```
 
 
