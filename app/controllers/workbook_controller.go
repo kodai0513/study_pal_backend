@@ -98,8 +98,9 @@ type UpdateWorkbookResponse struct {
 //	@Success		200			{object}	UpdateWorkbookResponse
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		404			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
-//	@Router			/workbooks/{workbook_id} [put]
+//	@Router			/workbooks/{workbook_id} [patch]
 func (a *WorkbookController) Update(c *gin.Context) {
 	var request UpdateWorkbookRequest
 	err := c.BindJSON(&request)

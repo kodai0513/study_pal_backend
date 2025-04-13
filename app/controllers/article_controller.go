@@ -106,8 +106,9 @@ type UpdateArticleResponse struct {
 //	@Success		200			{object}	nil
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		404			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
-//	@Router			/articles/{article_id} [put]
+//	@Router			/articles/{article_id} [patch]
 func (a *ArticleController) Update(c *gin.Context) {
 	var request UpdateArticleRequest
 	err := c.BindJSON(&request)
@@ -175,6 +176,7 @@ func (a *ArticleController) Update(c *gin.Context) {
 //	@Success		204			{object}	nil
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		404			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
 //	@Router			/articles/{article_id} [delete]
 func (a *ArticleController) Delete(c *gin.Context) {
