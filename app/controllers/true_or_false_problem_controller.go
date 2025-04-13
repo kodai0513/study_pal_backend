@@ -40,8 +40,9 @@ type UpdateTrueOrFalseProblemResponse struct {
 //	@Success	200							{object}	UpdateTrueOrFalseProblemResponse
 //	@Failure	400							{object}	app_types.ErrorResponse
 //	@Failure	401							{object}	app_types.ErrorResponse
+//	@Failure	404							{object}	app_types.ErrorResponse
 //	@Failure	500							{object}	app_types.ErrorResponse
-//	@Router		/true-or-false-problems/{true_or_false_problem_id} [put]
+//	@Router		/true-or-false-problems/{true_or_false_problem_id} [patch]
 func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 	var request UpdateTrueOrFalseProblemRequest
 	err := c.BindJSON(&request)
@@ -112,6 +113,7 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 //	@Success	204							{object}	nil
 //	@Failure	400							{object}	app_types.ErrorResponse
 //	@Failure	401							{object}	app_types.ErrorResponse
+//	@Failure	404							{object}	app_types.ErrorResponse
 //	@Failure	500							{object}	app_types.ErrorResponse
 //	@Router		/true-or-false-problems/{true_or_false_problem_id} [delete]
 func (a *TrueOrFalseProblemController) Delete(c *gin.Context) {

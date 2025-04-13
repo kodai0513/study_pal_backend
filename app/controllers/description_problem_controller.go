@@ -40,8 +40,9 @@ type UpdateDescriptionProblemResponse struct {
 //	@Success		200						{object}	UpdateDescriptionProblemResponse
 //	@Failure		400						{object}	app_types.ErrorResponse
 //	@Failure		401						{object}	app_types.ErrorResponse
+//	@Failure		404						{object}	app_types.ErrorResponse
 //	@Failure		500						{object}	app_types.ErrorResponse
-//	@Router			/description-problems/{description_problem_id} [put]
+//	@Router			/description-problems/{description_problem_id} [patch]
 func (a *DescriptionProblemController) Update(c *gin.Context) {
 	var request UpdateDescriptionProblemRequest
 	err := c.BindJSON(&request)
@@ -113,6 +114,7 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 //	@Success	204						{object}	nil
 //	@Failure	400						{object}	app_types.ErrorResponse
 //	@Failure	401						{object}	app_types.ErrorResponse
+//	@Failure	404						{object}	app_types.ErrorResponse
 //	@Failure	500						{object}	app_types.ErrorResponse
 //	@Router		/description-problems/{description_problem_id} [delete]
 func (a *DescriptionProblemController) Delete(c *gin.Context) {

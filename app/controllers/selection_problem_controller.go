@@ -46,8 +46,9 @@ type UpdateSelectionProblemResponse struct {
 //	@Success	200						{object}	UpdateSelectionProblemResponse
 //	@Failure	400						{object}	app_types.ErrorResponse
 //	@Failure	401						{object}	app_types.ErrorResponse
+//	@Failure	404						{object}	app_types.ErrorResponse
 //	@Failure	500						{object}	app_types.ErrorResponse
-//	@Router		/selection-problems/{selection_problem_id} [put]
+//	@Router		/selection-problems/{selection_problem_id} [patch]
 func (a *SelectionProblemController) Update(c *gin.Context) {
 	selectionProblemId, err := uuid.Parse(c.Param("selection_problem_id"))
 	if err != nil {
@@ -147,6 +148,7 @@ func (a *SelectionProblemController) Update(c *gin.Context) {
 //	@Success	204						{object}	nil
 //	@Failure	400						{object}	app_types.ErrorResponse
 //	@Failure	401						{object}	app_types.ErrorResponse
+//	@Failure	404						{object}	app_types.ErrorResponse
 //	@Failure	500						{object}	app_types.ErrorResponse
 //	@Router		/selection-problems/{selection_problem_id} [delete]
 func (a *SelectionProblemController) Delete(c *gin.Context) {

@@ -66,6 +66,7 @@ type CreateProblemResponse struct {
 //	@Success		201			{object}	CreateProblemResponse
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		404			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
 //	@Router			/{workbook_id}/problems [post]
 func (a *ProblemController) Create(c *gin.Context) {
