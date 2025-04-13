@@ -1,6 +1,4 @@
 .env
-/db/migrations
-/db/seeders
 go.sum
 /tmp/*
 /docs/*
