@@ -5,6 +5,7 @@ import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/workbook_categories"
 	"study-pal-backend/app/utils/type_converts"
 
@@ -54,8 +55,12 @@ func (a *WorkbookCategoryController) Index(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &workbook_categories.IndexAction{
-		WorkbookCategoryRepository: repositories.NewWorkbookCategoryRepositoryImpl(a.AppData.Client(), c),
+		WorkbookCategoryRepository: repositories.NewWorkbookCategoryRepositoryImpl(tx, c),
 	}
 
 	categoryDtos, usecaseErrGroup := action.Execute(
@@ -165,8 +170,13 @@ func (a *WorkbookCategoryController) Update(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &workbook_categories.UpdateAction{
-		WorkbookCategoryRepository: repositories.NewWorkbookCategoryRepositoryImpl(a.AppData.Client(), c),
+		Tx:                         trancaction.NewTx(tx),
+		WorkbookCategoryRepository: repositories.NewWorkbookCategoryRepositoryImpl(tx, c),
 	}
 	command := &workbook_categories.UpdateActionCommand{
 		WorkbookId:         workbookId,

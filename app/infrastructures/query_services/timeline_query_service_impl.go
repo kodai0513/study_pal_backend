@@ -34,7 +34,7 @@ func (t *TimelineQueryServiceImpl) Fetch(page *app_types.Page) ([]*timeline_quer
 		return t.client.Article.Query().WithPost().Where(article.PageIDGTE(type_converts.StringToInt(page.NextPageId, 0))).Limit(limit).AllX(t.ctx)
 	}
 
-	results, nextPage, err := create_pages.CreatePage[ent.Article](
+	results, nextPage, err := create_pages.CreatePage(
 		&baseQuery,
 		&nextQuery,
 		nil,

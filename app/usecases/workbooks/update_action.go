@@ -5,6 +5,7 @@ import (
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/workbooks"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -18,6 +19,7 @@ type UpdateActionCommand struct {
 	WorkbookId  uuid.UUID
 }
 type UpdateAction struct {
+	Tx                 trancaction.Tx
 	WorkbookRepository repositories.WorkbookRepository
 }
 
@@ -55,7 +57,14 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) (*WorkbookDto, usec
 
 	workbook.SetDescription(description)
 	workbook.SetTitle(title)
-	a.WorkbookRepository.Update(workbook)
+
+	err = trancaction.WithTx(a.Tx, func() {
+		a.WorkbookRepository.Update(workbook)
+	})
+
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
 
 	return &WorkbookDto{
 			Description: workbook.Description(),

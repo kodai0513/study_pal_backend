@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/selection_problems"
+	"study-pal-backend/app/usecases/shared/trancaction"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -96,9 +97,13 @@ func (a *SelectionProblemController) Update(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &selection_problems.UpdateAction{
-		SelectionProblemRepository: repositories.NewSelectionProblemRepositoryImpl(a.AppData.Client(), c),
+		SelectionProblemRepository: repositories.NewSelectionProblemRepositoryImpl(tx, c),
+		Tx:                         trancaction.NewTx(tx),
 	}
 	problemDto, usecaseErrGroup := action.Execute(
 		&selection_problems.UpdateActionCommand{
@@ -164,8 +169,13 @@ func (a *SelectionProblemController) Delete(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &selection_problems.DeleteAction{
-		SelectionProblemRepository: repositories.NewSelectionProblemRepositoryImpl(a.AppData.Client(), c),
+		SelectionProblemRepository: repositories.NewSelectionProblemRepositoryImpl(tx, c),
+		Tx:                         trancaction.NewTx(tx),
 	}
 	usecaseErrGroup := action.Execute(
 		&selection_problems.DeleteActionCommand{

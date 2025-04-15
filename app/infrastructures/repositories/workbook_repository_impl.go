@@ -14,20 +14,20 @@ import (
 )
 
 type WorkbookRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewWorkbookRepositoryImpl(client *ent.Client, ctx context.Context) repositories.WorkbookRepository {
+func NewWorkbookRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.WorkbookRepository {
 	return &WorkbookRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
 func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) *entities.Workbook {
 	// workbook 登録
-	resultWorkbook := w.client.Workbook.Create().
+	resultWorkbook := w.tx.Workbook.Create().
 		SetID(workbook.Id()).
 		SetUserID(workbook.UserId()).
 		SetDescription(workbook.Description()).
@@ -36,7 +36,7 @@ func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) *entities.W
 		SaveX(w.ctx)
 
 	// workbookMember 登録
-	resultMember := w.client.WorkbookMember.Create().
+	resultMember := w.tx.WorkbookMember.Create().
 		SetID(workbook.WorkbookMembers()[0].Id()).
 		SetRoleID(workbook.WorkbookMembers()[0].RoleId()).
 		SetUserID(workbook.WorkbookMembers()[0].UserId()).
@@ -60,15 +60,15 @@ func (w *WorkbookRepositoryImpl) Create(workbook *entities.Workbook) *entities.W
 }
 
 func (w *WorkbookRepositoryImpl) Delete(workbookId uuid.UUID) {
-	w.client.Workbook.DeleteOneID(workbookId).ExecX(w.ctx)
+	w.tx.Workbook.DeleteOneID(workbookId).ExecX(w.ctx)
 }
 
 func (w *WorkbookRepositoryImpl) ExistById(workbookId uuid.UUID) bool {
-	return w.client.Workbook.Query().Where(workbook.IDEQ(workbookId)).ExistX(w.ctx)
+	return w.tx.Workbook.Query().Where(workbook.IDEQ(workbookId)).ExistX(w.ctx)
 }
 
 func (w *WorkbookRepositoryImpl) FindById(workbookId uuid.UUID) *entities.Workbook {
-	result := w.client.Workbook.
+	result := w.tx.Workbook.
 		Query().
 		Where(workbook.IDEQ(workbookId)).
 		WithDescriptionProblems().
@@ -127,14 +127,14 @@ func (w *WorkbookRepositoryImpl) FindById(workbookId uuid.UUID) *entities.Workbo
 
 func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) *entities.Workbook {
 	// workbook 更新
-	resultWorkbook := w.client.Workbook.UpdateOneID(workbook.Id()).
+	resultWorkbook := w.tx.Workbook.UpdateOneID(workbook.Id()).
 		SetDescription(workbook.Description()).
 		SetTitle(workbook.Title()).
 		SetIsPublic(workbook.IsPublic()).
 		SaveX(w.ctx)
 
 	// workbookMember 更新
-	registerdMemberIds := w.client.WorkbookMember.Query().Where(workbookmember.WorkbookIDEQ(workbook.Id())).IDsX(w.ctx)
+	registerdMemberIds := w.tx.WorkbookMember.Query().Where(workbookmember.WorkbookIDEQ(workbook.Id())).IDsX(w.ctx)
 	newRegisterMemberIdKeys := lo.SliceToMap(
 		workbook.WorkbookMembers(),
 		func(workbookMember *entities.WorkbookMember) (uuid.UUID, uuid.UUID) {
@@ -145,7 +145,7 @@ func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) *entities.W
 		_, ok := newRegisterMemberIdKeys[registerdMemberId]
 		return !ok
 	})
-	w.client.WorkbookMember.Delete().
+	w.tx.WorkbookMember.Delete().
 		Where(
 			workbookmember.UserIDIn(deleteMemberIds...),
 			workbookmember.WorkbookIDEQ(workbook.Id()),
@@ -167,7 +167,7 @@ func (w *WorkbookRepositoryImpl) Update(workbook *entities.Workbook) *entities.W
 		},
 	)
 
-	resultMembers := w.client.WorkbookMember.MapCreateBulk(
+	resultMembers := w.tx.WorkbookMember.MapCreateBulk(
 		addRegisterMembers,
 		func(wmc *ent.WorkbookMemberCreate, i int) {
 			wmc.SetID(addRegisterMembers[i].Id()).

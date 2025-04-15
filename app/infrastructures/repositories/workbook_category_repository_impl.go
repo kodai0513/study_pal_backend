@@ -15,24 +15,24 @@ import (
 )
 
 type WorkbookCategoryRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewWorkbookCategoryRepositoryImpl(client *ent.Client, ctx context.Context) repositories.WorkbookCategoryRepository {
+func NewWorkbookCategoryRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.WorkbookCategoryRepository {
 	return &WorkbookCategoryRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
 func (w *WorkbookCategoryRepositoryImpl) FindByWorkbookId(workbookId uuid.UUID) []*entities.WorkbookCategory {
-	resultCategoryClosures := w.client.WorkbookCategoryClosure.Query().
+	resultCategoryClosures := w.tx.WorkbookCategoryClosure.Query().
 		Where(workbookcategoryclosure.WorkbookIDEQ(workbookId)).
 		Order(ent.Asc(workbookcategoryclosure.FieldPosition)).
 		AllX(w.ctx)
 	IdToResultCategories := lo.SliceToMap(
-		w.client.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).AllX(w.ctx),
+		w.tx.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).AllX(w.ctx),
 		func(w *ent.WorkbookCategory) (uuid.UUID, *ent.WorkbookCategory) {
 			return w.ID, w
 		},
@@ -127,13 +127,13 @@ func (w *WorkbookCategoryRepositoryImpl) UpsertAndDeleteBulk(workbookCategories 
 		lo.Map(newCategories, func(category *ent.WorkbookCategory, _ int) uuid.UUID {
 			return category.ID
 		}),
-		w.client.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).IDsX(w.ctx),
+		w.tx.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).IDsX(w.ctx),
 	)
 
 	IdToNewCategories := lo.SliceToMap(newCategories, func(w *ent.WorkbookCategory) (uuid.UUID, *ent.WorkbookCategory) {
 		return w.ID, w
 	})
-	w.client.WorkbookCategory.MapCreateBulk(
+	w.tx.WorkbookCategory.MapCreateBulk(
 		lo.FilterMap(split.CreateIds, func(createId uuid.UUID, _ int) (*ent.WorkbookCategory, bool) {
 			createCategory, ok := IdToNewCategories[createId]
 			return createCategory, ok
@@ -144,16 +144,16 @@ func (w *WorkbookCategoryRepositoryImpl) UpsertAndDeleteBulk(workbookCategories 
 				SetName(newCategories[i].Name).
 				SetWorkbookID(newCategories[i].WorkbookID)
 		}).SaveX(w.ctx)
-	w.client.WorkbookCategoryClosure.Delete().Where(workbookcategoryclosure.WorkbookIDEQ(workbookId)).ExecX(w.ctx)
-	w.client.WorkbookCategory.Delete().Where(workbookcategory.IDIn(split.DeleteIds...)).ExecX(w.ctx)
+	w.tx.WorkbookCategoryClosure.Delete().Where(workbookcategoryclosure.WorkbookIDEQ(workbookId)).ExecX(w.ctx)
+	w.tx.WorkbookCategory.Delete().Where(workbookcategory.IDIn(split.DeleteIds...)).ExecX(w.ctx)
 	lo.ForEach(split.UpdateIds, func(updateId uuid.UUID, _ int) {
 		updateCategory := IdToNewCategories[updateId]
-		w.client.WorkbookCategory.UpdateOneID(updateId).
+		w.tx.WorkbookCategory.UpdateOneID(updateId).
 			SetName(updateCategory.Name).
 			SaveX(w.ctx)
 	})
 
-	w.client.WorkbookCategoryClosure.MapCreateBulk(newCategoryClosures, func(c *ent.WorkbookCategoryClosureCreate, i int) {
+	w.tx.WorkbookCategoryClosure.MapCreateBulk(newCategoryClosures, func(c *ent.WorkbookCategoryClosureCreate, i int) {
 		c.
 			SetID(newCategoryClosures[i].ID).
 			SetWorkbookID(newCategoryClosures[i].WorkbookID).
@@ -164,12 +164,12 @@ func (w *WorkbookCategoryRepositoryImpl) UpsertAndDeleteBulk(workbookCategories 
 			SetLevel(newCategoryClosures[i].Level)
 	}).SaveX(w.ctx)
 
-	resultCategoryClosures := w.client.WorkbookCategoryClosure.Query().
+	resultCategoryClosures := w.tx.WorkbookCategoryClosure.Query().
 		Where(workbookcategoryclosure.WorkbookIDEQ(workbookId)).
 		Order(ent.Asc(workbookcategoryclosure.FieldPosition)).
 		AllX(w.ctx)
 	IdToResultCategories := lo.SliceToMap(
-		w.client.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).AllX(w.ctx),
+		w.tx.WorkbookCategory.Query().Where(workbookcategory.WorkbookIDEQ(workbookId)).AllX(w.ctx),
 		func(w *ent.WorkbookCategory) (uuid.UUID, *ent.WorkbookCategory) {
 			return w.ID, w
 		},

@@ -8,6 +8,7 @@ import (
 	"study-pal-backend/app/domains/models/value_objects/selection_problems"
 	"study-pal-backend/app/domains/models/value_objects/true_or_false_problems"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -48,6 +49,7 @@ type CreateAction struct {
 	DescriptionProblemRepository repositories.DescriptionProblemRepository
 	SelectionProblemRepository   repositories.SelectionProblemRepository
 	TrueOrFalseRepository        repositories.TrueOrFalseProblemRepository
+	Tx                           trancaction.Tx
 	WorkbookRepository           repositories.WorkbookRepository
 }
 
@@ -127,9 +129,18 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 		return nil, usecaseErrGroup
 	}
 
-	DescriptionProblemResults := c.DescriptionProblemRepository.CreateBulk(descriptionProblems)
-	selectoinProblemResults := c.SelectionProblemRepository.CreateBulk(selectoinProblems)
-	trueOrFalseProblemResults := c.TrueOrFalseRepository.CreateBulk(trueOrFalseProblems)
+	DescriptionProblemResults := []*entities.DescriptionProblem{}
+	selectoinProblemResults := []*entities.SelectionProblem{}
+	trueOrFalseProblemResults := []*entities.TrueOrFalseProblem{}
+	err := trancaction.WithTx(c.Tx, func() {
+		DescriptionProblemResults = c.DescriptionProblemRepository.CreateBulk(descriptionProblems)
+		selectoinProblemResults = c.SelectionProblemRepository.CreateBulk(selectoinProblems)
+		trueOrFalseProblemResults = c.TrueOrFalseRepository.CreateBulk(trueOrFalseProblems)
+	})
+
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
 	descriptionProblemDtos := lo.Map(DescriptionProblemResults, func(problem *entities.DescriptionProblem, _ int) *DescriptionProblemDto {
 		return &DescriptionProblemDto{
 			CorrentStatement:   problem.CorrectStatement(),

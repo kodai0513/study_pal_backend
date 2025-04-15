@@ -13,19 +13,19 @@ import (
 )
 
 type DescriptionProblemRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewDescriptionProblemRepositoryImpl(client *ent.Client, ctx context.Context) repositories.DescriptionProblemRepository {
+func NewDescriptionProblemRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.DescriptionProblemRepository {
 	return &DescriptionProblemRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
 func (d *DescriptionProblemRepositoryImpl) CreateBulk(problems []*entities.DescriptionProblem) []*entities.DescriptionProblem {
-	results := d.client.DescriptionProblem.MapCreateBulk(problems, func(dpc *ent.DescriptionProblemCreate, i int) {
+	results := d.tx.DescriptionProblem.MapCreateBulk(problems, func(dpc *ent.DescriptionProblemCreate, i int) {
 		dpc.SetID(problems[i].Id()).
 			SetCorrectStatement(problems[i].CorrectStatement()).
 			SetStatement(problems[i].Statement()).
@@ -47,19 +47,19 @@ func (d *DescriptionProblemRepositoryImpl) CreateBulk(problems []*entities.Descr
 }
 
 func (d *DescriptionProblemRepositoryImpl) Delete(descriptionProblemId uuid.UUID) {
-	d.client.DescriptionProblem.DeleteOneID(descriptionProblemId).ExecX(d.ctx)
+	d.tx.DescriptionProblem.DeleteOneID(descriptionProblemId).ExecX(d.ctx)
 }
 
 func (d *DescriptionProblemRepositoryImpl) ExistById(descriptionProblemId uuid.UUID) bool {
-	return d.client.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(descriptionProblemId)).ExistX(d.ctx)
+	return d.tx.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(descriptionProblemId)).ExistX(d.ctx)
 }
 
 func (d *DescriptionProblemRepositoryImpl) ExistByWorkbookId(workbookId uuid.UUID) bool {
-	return d.client.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(workbookId)).ExistX(d.ctx)
+	return d.tx.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(workbookId)).ExistX(d.ctx)
 }
 
 func (d *DescriptionProblemRepositoryImpl) FindById(descriptionProblemId uuid.UUID) *entities.DescriptionProblem {
-	result := d.client.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(descriptionProblemId)).FirstX(d.ctx)
+	result := d.tx.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(descriptionProblemId)).FirstX(d.ctx)
 
 	if result == nil {
 		return nil
@@ -77,7 +77,7 @@ func (d *DescriptionProblemRepositoryImpl) FindById(descriptionProblemId uuid.UU
 }
 
 func (d *DescriptionProblemRepositoryImpl) Update(problem *entities.DescriptionProblem) *entities.DescriptionProblem {
-	result := d.client.DescriptionProblem.UpdateOneID(problem.Id()).
+	result := d.tx.DescriptionProblem.UpdateOneID(problem.Id()).
 		SetCorrectStatement(problem.CorrectStatement()).
 		SetStatement(problem.Statement()).
 		SaveX(d.ctx)

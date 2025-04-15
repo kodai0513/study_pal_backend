@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/article"
+	"study-pal-backend/app/usecases/shared/trancaction"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -54,8 +55,13 @@ func (a *ArticleController) Create(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := article.CreateAction{
-		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
+		ArticleRepository: repositories.NewArticleRepositoryImpl(tx, c),
+		Tx:                trancaction.NewTx(tx),
 	}
 	articleDto, usecaseErrGroup := action.Execute(
 		&article.CreateActionCommand{
@@ -135,8 +141,13 @@ func (a *ArticleController) Update(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &article.UpdateAction{
-		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
+		ArticleRepository: repositories.NewArticleRepositoryImpl(tx, c),
+		Tx:                trancaction.NewTx(tx),
 	}
 	articleDto, usecaseErrGroup := action.Execute(
 		&article.UpdateActionCommand{
@@ -193,8 +204,13 @@ func (a *ArticleController) Delete(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := article.DeleteAction{
-		ArticleRepository: repositories.NewArticleRepositoryImpl(a.AppData.Client(), c),
+		ArticleRepository: repositories.NewArticleRepositoryImpl(tx, c),
+		Tx:                trancaction.NewTx(tx),
 	}
 	usecaseErrGroup := action.Execute(
 		&article.DeleteActionCommand{

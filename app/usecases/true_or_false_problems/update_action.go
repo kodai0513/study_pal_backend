@@ -2,8 +2,10 @@ package true_or_false_problems
 
 import (
 	"errors"
+	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/true_or_false_problems"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -17,6 +19,7 @@ type UpdateActionCommand struct {
 
 type UpdateAction struct {
 	TrueOrFalseProblemRepository repositories.TrueOrFalseProblemRepository
+	Tx                           trancaction.Tx
 }
 
 func (a *UpdateAction) Execute(command *UpdateActionCommand) (*TrueOrFalseProblemDto, usecase_error.UsecaseErrorGroup) {
@@ -33,7 +36,16 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) (*TrueOrFalseProble
 
 	problem.SetIsCorrect(command.IsCorrect)
 	problem.SetStatement(statement)
-	updatedProblem := a.TrueOrFalseProblemRepository.Update(problem)
+
+	var updatedProblem *entities.TrueOrFalseProblem
+	err = trancaction.WithTx(a.Tx, func() {
+		updatedProblem = a.TrueOrFalseProblemRepository.Update(problem)
+	})
+
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
+
 	return &TrueOrFalseProblemDto{
 		IsCorrect: updatedProblem.IsCorrect(),
 		Statement: updatedProblem.Statement(),

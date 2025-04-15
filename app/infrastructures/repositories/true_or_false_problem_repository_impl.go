@@ -13,19 +13,19 @@ import (
 )
 
 type TrueOrFalseProblemRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewTrueOrFalseProblemRepositoryImpl(client *ent.Client, ctx context.Context) repositories.TrueOrFalseProblemRepository {
+func NewTrueOrFalseProblemRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.TrueOrFalseProblemRepository {
 	return &TrueOrFalseProblemRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
 func (t *TrueOrFalseProblemRepositoryImpl) CreateBulk(problems []*entities.TrueOrFalseProblem) []*entities.TrueOrFalseProblem {
-	results := t.client.TrueOrFalseProblem.MapCreateBulk(problems, func(tofpc *ent.TrueOrFalseProblemCreate, i int) {
+	results := t.tx.TrueOrFalseProblem.MapCreateBulk(problems, func(tofpc *ent.TrueOrFalseProblemCreate, i int) {
 		tofpc.SetID(problems[i].Id()).
 			SetIsCorrect(problems[i].IsCorrect()).
 			SetStatement(problems[i].Statement()).
@@ -46,15 +46,15 @@ func (t *TrueOrFalseProblemRepositoryImpl) CreateBulk(problems []*entities.TrueO
 }
 
 func (t *TrueOrFalseProblemRepositoryImpl) Delete(id uuid.UUID) {
-	t.client.TrueOrFalseProblem.DeleteOneID(id).ExecX(t.ctx)
+	t.tx.TrueOrFalseProblem.DeleteOneID(id).ExecX(t.ctx)
 }
 
 func (t *TrueOrFalseProblemRepositoryImpl) ExistById(id uuid.UUID) bool {
-	return t.client.TrueOrFalseProblem.Query().Where(trueorfalseproblem.IDEQ(id)).ExistX(t.ctx)
+	return t.tx.TrueOrFalseProblem.Query().Where(trueorfalseproblem.IDEQ(id)).ExistX(t.ctx)
 }
 
 func (t *TrueOrFalseProblemRepositoryImpl) FindById(id uuid.UUID) *entities.TrueOrFalseProblem {
-	result := t.client.TrueOrFalseProblem.Query().Where(trueorfalseproblem.IDEQ(id)).FirstX(t.ctx)
+	result := t.tx.TrueOrFalseProblem.Query().Where(trueorfalseproblem.IDEQ(id)).FirstX(t.ctx)
 
 	if result == nil {
 		return nil
@@ -71,7 +71,7 @@ func (t *TrueOrFalseProblemRepositoryImpl) FindById(id uuid.UUID) *entities.True
 }
 
 func (t *TrueOrFalseProblemRepositoryImpl) Update(problem *entities.TrueOrFalseProblem) *entities.TrueOrFalseProblem {
-	result := t.client.TrueOrFalseProblem.UpdateOneID(problem.Id()).
+	result := t.tx.TrueOrFalseProblem.UpdateOneID(problem.Id()).
 		SetIsCorrect(problem.IsCorrect()).
 		SetStatement(problem.Statement()).
 		SaveX(t.ctx)

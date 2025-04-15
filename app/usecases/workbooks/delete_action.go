@@ -4,6 +4,7 @@ import (
 	"errors"
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type DeleteActionCommand struct {
 }
 
 type DeleteAction struct {
+	Tx                 trancaction.Tx
 	WorkbookRepository repositories.WorkbookRepository
 }
 
@@ -38,6 +40,13 @@ func (a *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.Useca
 		)
 	}
 
-	a.WorkbookRepository.Delete(workbook.Id())
+	err := trancaction.WithTx(a.Tx, func() {
+		a.WorkbookRepository.Delete(workbook.Id())
+	})
+
+	if err != nil {
+		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
+
 	return nil
 }

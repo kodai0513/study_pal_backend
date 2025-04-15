@@ -3,6 +3,7 @@ package true_or_false_problems
 import (
 	"errors"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -14,6 +15,7 @@ type DeleteActionCommand struct {
 
 type DeleteAction struct {
 	TrueOrFalseProblemRepository repositories.TrueOrFalseProblemRepository
+	Tx                           trancaction.Tx
 }
 
 func (a *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.UsecaseErrorGroup {
@@ -22,7 +24,13 @@ func (a *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.Useca
 		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("trueOrFalseProblem not found")))
 	}
 
-	a.TrueOrFalseProblemRepository.Delete(command.TrueOrFalseProblemId)
+	err := trancaction.WithTx(a.Tx, func() {
+		a.TrueOrFalseProblemRepository.Delete(command.TrueOrFalseProblemId)
+	})
+
+	if err != nil {
+		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
 
 	return nil
 }
