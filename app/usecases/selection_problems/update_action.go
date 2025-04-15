@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/domains/models/value_objects/selection_problem_answers"
 	"study-pal-backend/app/domains/models/value_objects/selection_problems"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -25,6 +26,7 @@ type UpdateActionCommand struct {
 
 type UpdateAction struct {
 	SelectionProblemRepository repositories.SelectionProblemRepository
+	Tx                         trancaction.Tx
 }
 
 func (a *UpdateAction) Execute(command *UpdateActionCommand) (*SelectionProblemDto, usecase_error.UsecaseErrorGroup) {
@@ -63,7 +65,14 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) (*SelectionProblemD
 		return nil, invalidUsecaseErrGroup
 	}
 
-	updatedProblem := a.SelectionProblemRepository.Update(problem)
+	var updatedProblem *entities.SelectionProblem
+	err = trancaction.WithTx(a.Tx, func() {
+		updatedProblem = a.SelectionProblemRepository.Update(problem)
+	})
+
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
 
 	answerDtos := lo.Map(updatedProblem.SelectionProblemAnswers(), func(answer *entities.SelectionProblemAnswer, _ int) *SelectionProblemAnswerDto {
 		return &SelectionProblemAnswerDto{

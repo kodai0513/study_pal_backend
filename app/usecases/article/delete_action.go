@@ -3,6 +3,7 @@ package article
 import (
 	"errors"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -15,6 +16,7 @@ type DeleteActionCommand struct {
 
 type DeleteAction struct {
 	ArticleRepository repositories.ArticleRepository
+	Tx                trancaction.Tx
 }
 
 func (c *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.UsecaseErrorGroup {
@@ -30,7 +32,13 @@ func (c *DeleteAction) Execute(command *DeleteActionCommand) usecase_error.Useca
 		)
 	}
 
-	c.ArticleRepository.Delete(command.ArticleId)
+	err := trancaction.WithTx(c.Tx, func() {
+		c.ArticleRepository.Delete(command.ArticleId)
+	})
+
+	if err != nil {
+		return usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
 
 	return nil
 }

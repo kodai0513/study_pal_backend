@@ -14,6 +14,8 @@ const (
 	QueryDataNotFoundError
 	// 許可されていない操作
 	UnPermittedOperation
+	// データベースエラー
+	DatabaseError
 )
 
 type usecaseError struct {

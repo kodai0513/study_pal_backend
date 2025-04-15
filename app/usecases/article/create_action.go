@@ -4,6 +4,7 @@ import (
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/articles"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ type CreateActionCommand struct {
 
 type CreateAction struct {
 	ArticleRepository repositories.ArticleRepository
+	Tx                trancaction.Tx
 }
 
 func (c *CreateAction) Execute(command *CreateActionCommand) (*ArticleDto, usecase_error.UsecaseErrorGroup) {
@@ -28,9 +30,17 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ArticleDto, useca
 	if usecaseErrGroup.IsError() {
 		return nil, usecaseErrGroup
 	}
-
 	article := entities.NewArticle(uuid.New(), description, command.UserId)
-	resultArticle := c.ArticleRepository.Create(article)
+
+	var resultArticle *entities.Article
+	err = trancaction.WithTx(c.Tx, func() {
+		resultArticle = c.ArticleRepository.Create(article)
+	})
+
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
+
 	return &ArticleDto{
 			Description: resultArticle.Description(),
 		},

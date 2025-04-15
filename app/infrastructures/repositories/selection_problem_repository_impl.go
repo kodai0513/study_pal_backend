@@ -15,14 +15,14 @@ import (
 )
 
 type SelectionProblemRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewSelectionProblemRepositoryImpl(client *ent.Client, ctx context.Context) repositories.SelectionProblemRepository {
+func NewSelectionProblemRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.SelectionProblemRepository {
 	return &SelectionProblemRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
@@ -31,7 +31,7 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 	problemAnswerCreateQueries := make([]*ent.SelectionProblemAnswerCreate, 0)
 	for _, p := range problems {
 		problemCreateQueries = append(problemCreateQueries,
-			s.client.SelectionProblem.Create().
+			s.tx.SelectionProblem.Create().
 				SetID(p.Id()).
 				SetStatement(p.Statement()).
 				SetNillableWorkbookCategoryID(p.WorkbookCategoryId()).
@@ -40,7 +40,7 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 
 		for _, pa := range p.SelectionProblemAnswers() {
 			problemAnswerCreateQueries = append(problemAnswerCreateQueries,
-				s.client.SelectionProblemAnswer.Create().
+				s.tx.SelectionProblemAnswer.Create().
 					SetID(pa.Id()).
 					SetIsCorrect(pa.IsCorrect()).
 					SetSelectionProblemID(pa.SelectionProblemId()).
@@ -49,8 +49,8 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 		}
 	}
 
-	resultProblems := s.client.SelectionProblem.CreateBulk(problemCreateQueries...).SaveX(s.ctx)
-	resultProblemAnswers := s.client.SelectionProblemAnswer.CreateBulk(problemAnswerCreateQueries...).SaveX(s.ctx)
+	resultProblems := s.tx.SelectionProblem.CreateBulk(problemCreateQueries...).SaveX(s.ctx)
+	resultProblemAnswers := s.tx.SelectionProblemAnswer.CreateBulk(problemAnswerCreateQueries...).SaveX(s.ctx)
 	resultProblemAnswerGroups := make(map[uuid.UUID][]*ent.SelectionProblemAnswer, 0)
 	for _, r := range resultProblemAnswers {
 		resultProblemAnswerGroups[r.SelectionProblemID] = append(resultProblemAnswerGroups[r.SelectionProblemID], r)
@@ -78,11 +78,11 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 }
 
 func (s *SelectionProblemRepositoryImpl) Delete(id uuid.UUID) {
-	s.client.SelectionProblem.DeleteOneID(id).ExecX(s.ctx)
+	s.tx.SelectionProblem.DeleteOneID(id).ExecX(s.ctx)
 }
 
 func (s *SelectionProblemRepositoryImpl) FindById(id uuid.UUID) *entities.SelectionProblem {
-	result := s.client.SelectionProblem.Query().
+	result := s.tx.SelectionProblem.Query().
 		Where(selectionproblem.IDEQ(id)).
 		WithSelectionProblemAnswers().
 		FirstX(s.ctx)
@@ -112,21 +112,21 @@ func (s *SelectionProblemRepositoryImpl) FindById(id uuid.UUID) *entities.Select
 }
 
 func (s *SelectionProblemRepositoryImpl) ExistById(id uuid.UUID) bool {
-	return s.client.SelectionProblem.Query().Where(selectionproblem.IDEQ(id)).ExistX(s.ctx)
+	return s.tx.SelectionProblem.Query().Where(selectionproblem.IDEQ(id)).ExistX(s.ctx)
 }
 
 func (s *SelectionProblemRepositoryImpl) Update(problem *entities.SelectionProblem) *entities.SelectionProblem {
-	problemResult := s.client.SelectionProblem.UpdateOneID(problem.Id()).
+	problemResult := s.tx.SelectionProblem.UpdateOneID(problem.Id()).
 		SetStatement(problem.Statement()).
 		SaveX(s.ctx)
 
-	s.client.SelectionProblemAnswer.Delete().
+	s.tx.SelectionProblemAnswer.Delete().
 		Where(
 			selectionproblemanswer.SelectionProblemIDEQ(problem.Id()),
 		).
 		ExecX(s.ctx)
 
-	createdAnswerResults := s.client.SelectionProblemAnswer.MapCreateBulk(problem.SelectionProblemAnswers(), func(c *ent.SelectionProblemAnswerCreate, i int) {
+	createdAnswerResults := s.tx.SelectionProblemAnswer.MapCreateBulk(problem.SelectionProblemAnswers(), func(c *ent.SelectionProblemAnswerCreate, i int) {
 		c.
 			SetID(problem.SelectionProblemAnswers()[i].Id()).
 			SetIsCorrect(problem.SelectionProblemAnswers()[i].IsCorrect()).

@@ -12,19 +12,19 @@ import (
 )
 
 type ArticleRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewArticleRepositoryImpl(client *ent.Client, ctx context.Context) repositories.ArticleRepository {
+func NewArticleRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.ArticleRepository {
 	return &ArticleRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
 func (a *ArticleRepositoryImpl) Create(article *entities.Article) *entities.Article {
-	result := a.client.Article.
+	result := a.tx.Article.
 		Create().
 		SetID(article.Id()).
 		SetDescription(article.Description()).
@@ -36,7 +36,7 @@ func (a *ArticleRepositoryImpl) Create(article *entities.Article) *entities.Arti
 }
 
 func (a *ArticleRepositoryImpl) Update(article *entities.Article) *entities.Article {
-	result := a.client.Article.
+	result := a.tx.Article.
 		UpdateOneID(article.Id()).
 		SetDescription(article.Description()).
 		SaveX(a.ctx)
@@ -46,13 +46,13 @@ func (a *ArticleRepositoryImpl) Update(article *entities.Article) *entities.Arti
 }
 
 func (a *ArticleRepositoryImpl) Delete(id uuid.UUID) {
-	a.client.Article.
+	a.tx.Article.
 		DeleteOneID(id).
 		ExecX(a.ctx)
 }
 
 func (a *ArticleRepositoryImpl) FindById(id uuid.UUID) *entities.Article {
-	result := a.client.Article.
+	result := a.tx.Article.
 		Query().
 		Where(article.IDEQ(id)).
 		FirstX(a.ctx)

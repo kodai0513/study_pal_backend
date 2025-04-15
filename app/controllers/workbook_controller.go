@@ -5,6 +5,7 @@ import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/workbooks"
 
 	"github.com/gin-gonic/gin"
@@ -43,8 +44,13 @@ func (a *WorkbookController) Create(c *gin.Context) {
 	var request CreateWorkbookRequest
 	c.BindJSON(&request)
 	userId, _ := c.Get("user_id")
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &workbooks.CreateAction{
-		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+		Tx:                 trancaction.NewTx(tx),
+		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(tx, c),
 	}
 	workbookDto, usecaseErrGroup := action.Execute(
 		&workbooks.CreateActionCommand{
@@ -127,8 +133,13 @@ func (a *WorkbookController) Update(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &workbooks.UpdateAction{
-		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+		Tx:                 trancaction.NewTx(tx),
+		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(tx, c),
 	}
 	workbookDto, usecaseErrGroup := action.Execute(
 		&workbooks.UpdateActionCommand{
@@ -187,8 +198,13 @@ func (a *WorkbookController) Delete(c *gin.Context) {
 		return
 	}
 	userId, _ := c.Get("user_id")
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &workbooks.DeleteAction{
-		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+		Tx:                 trancaction.NewTx(tx),
+		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(tx, c),
 	}
 	usecaseErrGroup := action.Execute(
 		&workbooks.DeleteActionCommand{

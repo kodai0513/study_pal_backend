@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/problems"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/utils/type_converts"
 
 	"github.com/gin-gonic/gin"
@@ -157,11 +158,16 @@ func (a *ProblemController) Create(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := problems.CreateAction{
-		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(a.AppData.Client(), c),
-		SelectionProblemRepository:   repositories.NewSelectionProblemRepositoryImpl(a.AppData.Client(), c),
-		TrueOrFalseRepository:        repositories.NewTrueOrFalseProblemRepositoryImpl(a.AppData.Client(), c),
-		WorkbookRepository:           repositories.NewWorkbookRepositoryImpl(a.AppData.Client(), c),
+		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(tx, c),
+		SelectionProblemRepository:   repositories.NewSelectionProblemRepositoryImpl(tx, c),
+		TrueOrFalseRepository:        repositories.NewTrueOrFalseProblemRepositoryImpl(tx, c),
+		Tx:                           trancaction.NewTx(tx),
+		WorkbookRepository:           repositories.NewWorkbookRepositoryImpl(tx, c),
 	}
 	problemDto, usecaseErrGroup := action.Execute(
 		&problems.CreateActionCommand{

@@ -10,19 +10,19 @@ import (
 )
 
 type UserRepositoryImpl struct {
-	client *ent.Client
-	ctx    context.Context
+	tx  *ent.Tx
+	ctx context.Context
 }
 
-func NewUserRepositoryImpl(client *ent.Client, ctx context.Context) repositories.UserRepository {
+func NewUserRepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.UserRepository {
 	return &UserRepositoryImpl{
-		client: client,
-		ctx:    ctx,
+		tx:  tx,
+		ctx: ctx,
 	}
 }
 
 func (u *UserRepositoryImpl) FindByName(name string) *entities.User {
-	result := u.client.User.
+	result := u.tx.User.
 		Query().
 		Where(user.NameEQ(name)).
 		FirstX(u.ctx)

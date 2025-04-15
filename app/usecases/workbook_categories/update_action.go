@@ -4,6 +4,7 @@ import (
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/workbook_categories"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 	"study-pal-backend/app/utils/type_converts"
 
@@ -23,6 +24,7 @@ type UpdateActionCommand struct {
 }
 
 type UpdateAction struct {
+	Tx                         trancaction.Tx
 	WorkbookCategoryRepository repositories.WorkbookCategoryRepository
 }
 
@@ -85,7 +87,14 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) ([]*WorkbookCategor
 		return nil, invalidUsecaseErrGroup
 	}
 
-	results := a.WorkbookCategoryRepository.UpsertAndDeleteBulk(categories, command.WorkbookId)
+	results := []*entities.WorkbookCategory{}
+	err := trancaction.WithTx(a.Tx, func() {
+		results = a.WorkbookCategoryRepository.UpsertAndDeleteBulk(categories, command.WorkbookId)
+	})
+
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.DatabaseError, err))
+	}
 
 	categoryDtos := lo.Map(results, func(root *entities.WorkbookCategory, _ int) *WorkbookCategoryDto {
 		children1Dtos := lo.Map(root.Children(), func(children1 *entities.WorkbookCategory, _ int) *WorkbookCategoryDto {

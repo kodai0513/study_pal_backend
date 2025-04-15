@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/description_problems"
+	"study-pal-backend/app/usecases/shared/trancaction"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -70,8 +71,13 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &description_problems.UpdateAction{
-		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(a.AppData.Client(), c),
+		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(tx, c),
+		Tx:                           trancaction.NewTx(tx),
 	}
 	descriptionProblemDto, usecaseErrGroup := action.Execute(
 		&description_problems.UpdateActionCommand{
@@ -130,8 +136,13 @@ func (a *DescriptionProblemController) Delete(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &description_problems.DeleteAction{
-		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(a.AppData.Client(), c),
+		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(tx, c),
+		Tx:                           trancaction.NewTx(tx),
 	}
 	usecaseErrGroup := action.Execute(
 		&description_problems.DeleteActionCommand{

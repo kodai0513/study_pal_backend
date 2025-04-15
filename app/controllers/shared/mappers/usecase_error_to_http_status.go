@@ -14,6 +14,8 @@ func UsecaseErrorToHttpStatus(usecaseErrGroup usecase_error.UsecaseErrorGroup) i
 		return http.StatusNotFound
 	case usecase_error.UnPermittedOperation:
 		return http.StatusUnauthorized
+	case usecase_error.DatabaseError:
+		return http.StatusInternalServerError
 	default:
 		panic(fmt.Sprintf("unexpected error type: %v in AppErrorToHttpStatus", usecaseErrGroup.UsecaseErrorType()))
 	}

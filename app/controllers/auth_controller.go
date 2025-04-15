@@ -110,7 +110,11 @@ func (a *AuthController) Login(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	repository := repositories.NewUserRepositoryImpl(a.AppData.Client(), c)
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
+	repository := repositories.NewUserRepositoryImpl(tx, c)
 	action := auth.LoginAction{
 		AppData:        *a.AppData,
 		UserRepository: repository,

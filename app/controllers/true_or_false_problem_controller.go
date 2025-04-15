@@ -5,6 +5,7 @@ import (
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
 	"study-pal-backend/app/infrastructures/repositories"
+	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/true_or_false_problems"
 
 	"github.com/gin-gonic/gin"
@@ -69,8 +70,13 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &true_or_false_problems.UpdateAction{
-		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(a.AppData.Client(), c),
+		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(tx, c),
+		Tx:                           trancaction.NewTx(tx),
 	}
 	trueOrFalseProblemDto, usecaseErrGroup := action.Execute(
 		&true_or_false_problems.UpdateActionCommand{
@@ -129,8 +135,13 @@ func (a *TrueOrFalseProblemController) Delete(c *gin.Context) {
 		return
 	}
 
+	tx, err := a.AppData.Client().Tx(c)
+	if err != nil {
+		panic(err)
+	}
 	action := &true_or_false_problems.DeleteAction{
-		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(a.AppData.Client(), c),
+		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(tx, c),
+		Tx:                           trancaction.NewTx(tx),
 	}
 	usecaseErrGroup := action.Execute(
 		&true_or_false_problems.DeleteActionCommand{
