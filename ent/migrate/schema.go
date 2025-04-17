@@ -32,6 +32,28 @@ var (
 			},
 		},
 	}
+	// ArticleLikesColumns holds the columns for the "article_likes" table.
+	ArticleLikesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true},
+		{Name: "article_id", Type: field.TypeUUID},
+	}
+	// ArticleLikesTable holds the schema information for the "article_likes" table.
+	ArticleLikesTable = &schema.Table{
+		Name:       "article_likes",
+		Columns:    ArticleLikesColumns,
+		PrimaryKey: []*schema.Column{ArticleLikesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "article_likes_articles_article_likes",
+				Columns:    []*schema.Column{ArticleLikesColumns[4]},
+				RefColumns: []*schema.Column{ArticlesColumns[0]},
+				OnDelete:   schema.Restrict,
+			},
+		},
+	}
 	// DescriptionProblemsColumns holds the columns for the "description_problems" table.
 	DescriptionProblemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -327,6 +349,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArticlesTable,
+		ArticleLikesTable,
 		DescriptionProblemsTable,
 		PermissionsTable,
 		RolesTable,
@@ -344,6 +367,7 @@ var (
 
 func init() {
 	ArticlesTable.ForeignKeys[0].RefTable = UsersTable
+	ArticleLikesTable.ForeignKeys[0].RefTable = ArticlesTable
 	DescriptionProblemsTable.ForeignKeys[0].RefTable = WorkbooksTable
 	DescriptionProblemsTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
 	SelectionProblemsTable.ForeignKeys[0].RefTable = WorkbooksTable

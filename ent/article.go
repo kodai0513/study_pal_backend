@@ -39,9 +39,11 @@ type Article struct {
 type ArticleEdges struct {
 	// Post holds the value of the post edge.
 	Post *User `json:"post,omitempty"`
+	// ArticleLikes holds the value of the article_likes edge.
+	ArticleLikes []*ArticleLike `json:"article_likes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // PostOrErr returns the Post value or an error if the edge
@@ -53,6 +55,15 @@ func (e ArticleEdges) PostOrErr() (*User, error) {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "post"}
+}
+
+// ArticleLikesOrErr returns the ArticleLikes value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArticleEdges) ArticleLikesOrErr() ([]*ArticleLike, error) {
+	if e.loadedTypes[1] {
+		return e.ArticleLikes, nil
+	}
+	return nil, &NotLoadedError{edge: "article_likes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -136,6 +147,11 @@ func (a *Article) Value(name string) (ent.Value, error) {
 // QueryPost queries the "post" edge of the Article entity.
 func (a *Article) QueryPost() *UserQuery {
 	return NewArticleClient(a.config).QueryPost(a)
+}
+
+// QueryArticleLikes queries the "article_likes" edge of the Article entity.
+func (a *Article) QueryArticleLikes() *ArticleLikeQuery {
+	return NewArticleClient(a.config).QueryArticleLikes(a)
 }
 
 // Update returns a builder for updating this Article.

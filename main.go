@@ -55,6 +55,7 @@ func main() {
 	jwtSecretKey := os.Getenv("JWT_SERCRET_KEY")
 	appData := app_types.NewAppData(client, jwtSecretKey)
 	articleController := controllers.ArticleController{AppData: appData}
+	articleLikeController := controllers.ArticleLikeController{AppData: appData}
 	authController := controllers.AuthController{AppData: appData}
 	descriptionProblemController := controllers.DescriptionProblemController{AppData: appData}
 	problemController := controllers.ProblemController{AppData: appData}
@@ -76,6 +77,12 @@ func main() {
 			articles.POST("/", authRequired, articleController.Create)
 			articles.PUT("/:article_id", authRequired, articleController.Update)
 			articles.DELETE("/:article_id", authRequired, articleController.Delete)
+
+			likes := articles.Group("/:article_id/likes")
+			{
+				likes.POST("", authRequired, articleLikeController.Create)
+				likes.DELETE("/:article_like_id", authRequired, articleLikeController.Delete)
+			}
 		}
 		descriptionProblems := v1.Group("/description-problems")
 		{

@@ -26,6 +26,8 @@ const (
 	FieldUserID = "user_id"
 	// EdgePost holds the string denoting the post edge name in mutations.
 	EdgePost = "post"
+	// EdgeArticleLikes holds the string denoting the article_likes edge name in mutations.
+	EdgeArticleLikes = "article_likes"
 	// Table holds the table name of the article in the database.
 	Table = "articles"
 	// PostTable is the table that holds the post relation/edge.
@@ -35,6 +37,13 @@ const (
 	PostInverseTable = "users"
 	// PostColumn is the table column denoting the post relation/edge.
 	PostColumn = "user_id"
+	// ArticleLikesTable is the table that holds the article_likes relation/edge.
+	ArticleLikesTable = "article_likes"
+	// ArticleLikesInverseTable is the table name for the ArticleLike entity.
+	// It exists in this package in order to avoid circular dependency with the "articlelike" package.
+	ArticleLikesInverseTable = "article_likes"
+	// ArticleLikesColumn is the table column denoting the article_likes relation/edge.
+	ArticleLikesColumn = "article_id"
 )
 
 // Columns holds all SQL columns for article fields.
@@ -107,10 +116,31 @@ func ByPostField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPostStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByArticleLikesCount orders the results by article_likes count.
+func ByArticleLikesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newArticleLikesStep(), opts...)
+	}
+}
+
+// ByArticleLikes orders the results by article_likes terms.
+func ByArticleLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newArticleLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPostStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PostInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, PostTable, PostColumn),
+	)
+}
+func newArticleLikesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ArticleLikesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ArticleLikesTable, ArticleLikesColumn),
 	)
 }

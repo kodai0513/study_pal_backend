@@ -4,9 +4,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/user"
 
@@ -20,11 +22,12 @@ import (
 // ArticleQuery is the builder for querying Article entities.
 type ArticleQuery struct {
 	config
-	ctx        *QueryContext
-	order      []article.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Article
-	withPost   *UserQuery
+	ctx              *QueryContext
+	order            []article.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.Article
+	withPost         *UserQuery
+	withArticleLikes *ArticleLikeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +79,28 @@ func (aq *ArticleQuery) QueryPost() *UserQuery {
 			sqlgraph.From(article.Table, article.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, article.PostTable, article.PostColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryArticleLikes chains the current query on the "article_likes" edge.
+func (aq *ArticleQuery) QueryArticleLikes() *ArticleLikeQuery {
+	query := (&ArticleLikeClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(article.Table, article.FieldID, selector),
+			sqlgraph.To(articlelike.Table, articlelike.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, article.ArticleLikesTable, article.ArticleLikesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +295,13 @@ func (aq *ArticleQuery) Clone() *ArticleQuery {
 		return nil
 	}
 	return &ArticleQuery{
-		config:     aq.config,
-		ctx:        aq.ctx.Clone(),
-		order:      append([]article.OrderOption{}, aq.order...),
-		inters:     append([]Interceptor{}, aq.inters...),
-		predicates: append([]predicate.Article{}, aq.predicates...),
-		withPost:   aq.withPost.Clone(),
+		config:           aq.config,
+		ctx:              aq.ctx.Clone(),
+		order:            append([]article.OrderOption{}, aq.order...),
+		inters:           append([]Interceptor{}, aq.inters...),
+		predicates:       append([]predicate.Article{}, aq.predicates...),
+		withPost:         aq.withPost.Clone(),
+		withArticleLikes: aq.withArticleLikes.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -290,6 +316,17 @@ func (aq *ArticleQuery) WithPost(opts ...func(*UserQuery)) *ArticleQuery {
 		opt(query)
 	}
 	aq.withPost = query
+	return aq
+}
+
+// WithArticleLikes tells the query-builder to eager-load the nodes that are connected to
+// the "article_likes" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArticleQuery) WithArticleLikes(opts ...func(*ArticleLikeQuery)) *ArticleQuery {
+	query := (&ArticleLikeClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withArticleLikes = query
 	return aq
 }
 
@@ -371,8 +408,9 @@ func (aq *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 	var (
 		nodes       = []*Article{}
 		_spec       = aq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			aq.withPost != nil,
+			aq.withArticleLikes != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +434,13 @@ func (aq *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 	if query := aq.withPost; query != nil {
 		if err := aq.loadPost(ctx, query, nodes, nil,
 			func(n *Article, e *User) { n.Edges.Post = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withArticleLikes; query != nil {
+		if err := aq.loadArticleLikes(ctx, query, nodes,
+			func(n *Article) { n.Edges.ArticleLikes = []*ArticleLike{} },
+			func(n *Article, e *ArticleLike) { n.Edges.ArticleLikes = append(n.Edges.ArticleLikes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +473,36 @@ func (aq *ArticleQuery) loadPost(ctx context.Context, query *UserQuery, nodes []
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (aq *ArticleQuery) loadArticleLikes(ctx context.Context, query *ArticleLikeQuery, nodes []*Article, init func(*Article), assign func(*Article, *ArticleLike)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Article)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(articlelike.FieldArticleID)
+	}
+	query.Where(predicate.ArticleLike(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(article.ArticleLikesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArticleID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "article_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

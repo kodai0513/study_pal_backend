@@ -9,6 +9,7 @@ import (
 type ArticleRepository interface {
 	Create(*entities.Article) *entities.Article
 	Delete(uuid.UUID)
+	ExistById(uuid.UUID) bool
 	FindById(uuid.UUID) *entities.Article
 	Update(*entities.Article) *entities.Article
 }
