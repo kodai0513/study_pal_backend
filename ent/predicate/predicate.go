@@ -9,6 +9,9 @@ import (
 // Article is the predicate function for article builders.
 type Article func(*sql.Selector)
 
+// ArticleLike is the predicate function for articlelike builders.
+type ArticleLike func(*sql.Selector)
+
 // DescriptionProblem is the predicate function for descriptionproblem builders.
 type DescriptionProblem func(*sql.Selector)
 

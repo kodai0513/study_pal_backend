@@ -2,10 +2,12 @@ package schema
 
 import (
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/user"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -36,5 +38,6 @@ func (Article) Fields() []ent.Field {
 func (Article) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("post", User.Type).Ref(article.Table).Unique().Required().Field(user.Label + "_id"),
+		edge.To(articlelike.Table, ArticleLike.Type).Annotations(entsql.OnDelete(entsql.Restrict)),
 	}
 }

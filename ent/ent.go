@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/role"
@@ -85,6 +86,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			article.Table:                 article.ValidColumn,
+			articlelike.Table:             articlelike.ValidColumn,
 			descriptionproblem.Table:      descriptionproblem.ValidColumn,
 			permission.Table:              permission.ValidColumn,
 			role.Table:                    role.ValidColumn,

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/role"
@@ -56,6 +57,21 @@ func init() {
 			return nil
 		}
 	}()
+	articlelikeMixin := schema.ArticleLike{}.Mixin()
+	articlelikeMixinFields1 := articlelikeMixin[1].Fields()
+	_ = articlelikeMixinFields1
+	articlelikeFields := schema.ArticleLike{}.Fields()
+	_ = articlelikeFields
+	// articlelikeDescCreatedAt is the schema descriptor for created_at field.
+	articlelikeDescCreatedAt := articlelikeMixinFields1[0].Descriptor()
+	// articlelike.DefaultCreatedAt holds the default value on creation for the created_at field.
+	articlelike.DefaultCreatedAt = articlelikeDescCreatedAt.Default.(func() time.Time)
+	// articlelikeDescUpdatedAt is the schema descriptor for updated_at field.
+	articlelikeDescUpdatedAt := articlelikeMixinFields1[1].Descriptor()
+	// articlelike.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	articlelike.DefaultUpdatedAt = articlelikeDescUpdatedAt.Default.(func() time.Time)
+	// articlelike.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	articlelike.UpdateDefaultUpdatedAt = articlelikeDescUpdatedAt.UpdateDefault.(func() time.Time)
 	descriptionproblemMixin := schema.DescriptionProblem{}.Mixin()
 	descriptionproblemMixinFields1 := descriptionproblemMixin[1].Fields()
 	_ = descriptionproblemMixinFields1

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/user"
 	"time"
 
@@ -91,6 +92,21 @@ func (ac *ArticleCreate) SetPostID(id uuid.UUID) *ArticleCreate {
 // SetPost sets the "post" edge to the User entity.
 func (ac *ArticleCreate) SetPost(u *User) *ArticleCreate {
 	return ac.SetPostID(u.ID)
+}
+
+// AddArticleLikeIDs adds the "article_likes" edge to the ArticleLike entity by IDs.
+func (ac *ArticleCreate) AddArticleLikeIDs(ids ...uuid.UUID) *ArticleCreate {
+	ac.mutation.AddArticleLikeIDs(ids...)
+	return ac
+}
+
+// AddArticleLikes adds the "article_likes" edges to the ArticleLike entity.
+func (ac *ArticleCreate) AddArticleLikes(a ...*ArticleLike) *ArticleCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ac.AddArticleLikeIDs(ids...)
 }
 
 // Mutation returns the ArticleMutation object of the builder.
@@ -226,6 +242,22 @@ func (ac *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.ArticleLikesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   article.ArticleLikesTable,
+			Columns: []string{article.ArticleLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(articlelike.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

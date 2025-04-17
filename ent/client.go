@@ -12,6 +12,7 @@ import (
 	"study-pal-backend/ent/migrate"
 
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/role"
@@ -38,6 +39,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Article is the client for interacting with the Article builders.
 	Article *ArticleClient
+	// ArticleLike is the client for interacting with the ArticleLike builders.
+	ArticleLike *ArticleLikeClient
 	// DescriptionProblem is the client for interacting with the DescriptionProblem builders.
 	DescriptionProblem *DescriptionProblemClient
 	// Permission is the client for interacting with the Permission builders.
@@ -72,6 +75,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Article = NewArticleClient(c.config)
+	c.ArticleLike = NewArticleLikeClient(c.config)
 	c.DescriptionProblem = NewDescriptionProblemClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Role = NewRoleClient(c.config)
@@ -176,6 +180,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                     ctx,
 		config:                  cfg,
 		Article:                 NewArticleClient(cfg),
+		ArticleLike:             NewArticleLikeClient(cfg),
 		DescriptionProblem:      NewDescriptionProblemClient(cfg),
 		Permission:              NewPermissionClient(cfg),
 		Role:                    NewRoleClient(cfg),
@@ -207,6 +212,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                     ctx,
 		config:                  cfg,
 		Article:                 NewArticleClient(cfg),
+		ArticleLike:             NewArticleLikeClient(cfg),
 		DescriptionProblem:      NewDescriptionProblemClient(cfg),
 		Permission:              NewPermissionClient(cfg),
 		Role:                    NewRoleClient(cfg),
@@ -247,9 +253,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Article, c.DescriptionProblem, c.Permission, c.Role, c.SelectionProblem,
-		c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
+		c.Article, c.ArticleLike, c.DescriptionProblem, c.Permission, c.Role,
+		c.SelectionProblem, c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User,
+		c.Workbook, c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
 	} {
 		n.Use(hooks...)
 	}
@@ -259,9 +265,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Article, c.DescriptionProblem, c.Permission, c.Role, c.SelectionProblem,
-		c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User, c.Workbook,
-		c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
+		c.Article, c.ArticleLike, c.DescriptionProblem, c.Permission, c.Role,
+		c.SelectionProblem, c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User,
+		c.Workbook, c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -272,6 +278,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ArticleMutation:
 		return c.Article.mutate(ctx, m)
+	case *ArticleLikeMutation:
+		return c.ArticleLike.mutate(ctx, m)
 	case *DescriptionProblemMutation:
 		return c.DescriptionProblem.mutate(ctx, m)
 	case *PermissionMutation:
@@ -423,6 +431,22 @@ func (c *ArticleClient) QueryPost(a *Article) *UserQuery {
 	return query
 }
 
+// QueryArticleLikes queries the article_likes edge of a Article.
+func (c *ArticleClient) QueryArticleLikes(a *Article) *ArticleLikeQuery {
+	query := (&ArticleLikeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(article.Table, article.FieldID, id),
+			sqlgraph.To(articlelike.Table, articlelike.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, article.ArticleLikesTable, article.ArticleLikesColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ArticleClient) Hooks() []Hook {
 	return c.hooks.Article
@@ -445,6 +469,155 @@ func (c *ArticleClient) mutate(ctx context.Context, m *ArticleMutation) (Value, 
 		return (&ArticleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Article mutation op: %q", m.Op())
+	}
+}
+
+// ArticleLikeClient is a client for the ArticleLike schema.
+type ArticleLikeClient struct {
+	config
+}
+
+// NewArticleLikeClient returns a client for the ArticleLike from the given config.
+func NewArticleLikeClient(c config) *ArticleLikeClient {
+	return &ArticleLikeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `articlelike.Hooks(f(g(h())))`.
+func (c *ArticleLikeClient) Use(hooks ...Hook) {
+	c.hooks.ArticleLike = append(c.hooks.ArticleLike, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `articlelike.Intercept(f(g(h())))`.
+func (c *ArticleLikeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ArticleLike = append(c.inters.ArticleLike, interceptors...)
+}
+
+// Create returns a builder for creating a ArticleLike entity.
+func (c *ArticleLikeClient) Create() *ArticleLikeCreate {
+	mutation := newArticleLikeMutation(c.config, OpCreate)
+	return &ArticleLikeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ArticleLike entities.
+func (c *ArticleLikeClient) CreateBulk(builders ...*ArticleLikeCreate) *ArticleLikeCreateBulk {
+	return &ArticleLikeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ArticleLikeClient) MapCreateBulk(slice any, setFunc func(*ArticleLikeCreate, int)) *ArticleLikeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ArticleLikeCreateBulk{err: fmt.Errorf("calling to ArticleLikeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ArticleLikeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ArticleLikeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ArticleLike.
+func (c *ArticleLikeClient) Update() *ArticleLikeUpdate {
+	mutation := newArticleLikeMutation(c.config, OpUpdate)
+	return &ArticleLikeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ArticleLikeClient) UpdateOne(al *ArticleLike) *ArticleLikeUpdateOne {
+	mutation := newArticleLikeMutation(c.config, OpUpdateOne, withArticleLike(al))
+	return &ArticleLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ArticleLikeClient) UpdateOneID(id uuid.UUID) *ArticleLikeUpdateOne {
+	mutation := newArticleLikeMutation(c.config, OpUpdateOne, withArticleLikeID(id))
+	return &ArticleLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ArticleLike.
+func (c *ArticleLikeClient) Delete() *ArticleLikeDelete {
+	mutation := newArticleLikeMutation(c.config, OpDelete)
+	return &ArticleLikeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ArticleLikeClient) DeleteOne(al *ArticleLike) *ArticleLikeDeleteOne {
+	return c.DeleteOneID(al.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ArticleLikeClient) DeleteOneID(id uuid.UUID) *ArticleLikeDeleteOne {
+	builder := c.Delete().Where(articlelike.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ArticleLikeDeleteOne{builder}
+}
+
+// Query returns a query builder for ArticleLike.
+func (c *ArticleLikeClient) Query() *ArticleLikeQuery {
+	return &ArticleLikeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeArticleLike},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ArticleLike entity by its id.
+func (c *ArticleLikeClient) Get(ctx context.Context, id uuid.UUID) (*ArticleLike, error) {
+	return c.Query().Where(articlelike.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ArticleLikeClient) GetX(ctx context.Context, id uuid.UUID) *ArticleLike {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryArticle queries the article edge of a ArticleLike.
+func (c *ArticleLikeClient) QueryArticle(al *ArticleLike) *ArticleQuery {
+	query := (&ArticleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := al.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(articlelike.Table, articlelike.FieldID, id),
+			sqlgraph.To(article.Table, article.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, articlelike.ArticleTable, articlelike.ArticleColumn),
+		)
+		fromV = sqlgraph.Neighbors(al.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ArticleLikeClient) Hooks() []Hook {
+	return c.hooks.ArticleLike
+}
+
+// Interceptors returns the client interceptors.
+func (c *ArticleLikeClient) Interceptors() []Interceptor {
+	return c.inters.ArticleLike
+}
+
+func (c *ArticleLikeClient) mutate(ctx context.Context, m *ArticleLikeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ArticleLikeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ArticleLikeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ArticleLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ArticleLikeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ArticleLike mutation op: %q", m.Op())
 	}
 }
 
@@ -2378,12 +2551,12 @@ func (c *WorkbookMemberClient) mutate(ctx context.Context, m *WorkbookMemberMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Article, DescriptionProblem, Permission, Role, SelectionProblem,
+		Article, ArticleLike, DescriptionProblem, Permission, Role, SelectionProblem,
 		SelectionProblemAnswer, TrueOrFalseProblem, User, Workbook, WorkbookCategory,
 		WorkbookCategoryClosure, WorkbookMember []ent.Hook
 	}
 	inters struct {
-		Article, DescriptionProblem, Permission, Role, SelectionProblem,
+		Article, ArticleLike, DescriptionProblem, Permission, Role, SelectionProblem,
 		SelectionProblemAnswer, TrueOrFalseProblem, User, Workbook, WorkbookCategory,
 		WorkbookCategoryClosure, WorkbookMember []ent.Interceptor
 	}

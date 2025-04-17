@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"study-pal-backend/ent/article"
+	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/descriptionproblem"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/predicate"
@@ -37,6 +38,7 @@ const (
 
 	// Node types.
 	TypeArticle                 = "Article"
+	TypeArticleLike             = "ArticleLike"
 	TypeDescriptionProblem      = "DescriptionProblem"
 	TypePermission              = "Permission"
 	TypeRole                    = "Role"
@@ -53,20 +55,23 @@ const (
 // ArticleMutation represents an operation that mutates the Article nodes in the graph.
 type ArticleMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	updated_at    *time.Time
-	page_id       *int
-	addpage_id    *int
-	description   *string
-	clearedFields map[string]struct{}
-	post          *uuid.UUID
-	clearedpost   bool
-	done          bool
-	oldValue      func(context.Context) (*Article, error)
-	predicates    []predicate.Article
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	created_at           *time.Time
+	updated_at           *time.Time
+	page_id              *int
+	addpage_id           *int
+	description          *string
+	clearedFields        map[string]struct{}
+	post                 *uuid.UUID
+	clearedpost          bool
+	article_likes        map[uuid.UUID]struct{}
+	removedarticle_likes map[uuid.UUID]struct{}
+	clearedarticle_likes bool
+	done                 bool
+	oldValue             func(context.Context) (*Article, error)
+	predicates           []predicate.Article
 }
 
 var _ ent.Mutation = (*ArticleMutation)(nil)
@@ -427,6 +432,60 @@ func (m *ArticleMutation) ResetPost() {
 	m.clearedpost = false
 }
 
+// AddArticleLikeIDs adds the "article_likes" edge to the ArticleLike entity by ids.
+func (m *ArticleMutation) AddArticleLikeIDs(ids ...uuid.UUID) {
+	if m.article_likes == nil {
+		m.article_likes = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.article_likes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearArticleLikes clears the "article_likes" edge to the ArticleLike entity.
+func (m *ArticleMutation) ClearArticleLikes() {
+	m.clearedarticle_likes = true
+}
+
+// ArticleLikesCleared reports if the "article_likes" edge to the ArticleLike entity was cleared.
+func (m *ArticleMutation) ArticleLikesCleared() bool {
+	return m.clearedarticle_likes
+}
+
+// RemoveArticleLikeIDs removes the "article_likes" edge to the ArticleLike entity by IDs.
+func (m *ArticleMutation) RemoveArticleLikeIDs(ids ...uuid.UUID) {
+	if m.removedarticle_likes == nil {
+		m.removedarticle_likes = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.article_likes, ids[i])
+		m.removedarticle_likes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedArticleLikes returns the removed IDs of the "article_likes" edge to the ArticleLike entity.
+func (m *ArticleMutation) RemovedArticleLikesIDs() (ids []uuid.UUID) {
+	for id := range m.removedarticle_likes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ArticleLikesIDs returns the "article_likes" edge IDs in the mutation.
+func (m *ArticleMutation) ArticleLikesIDs() (ids []uuid.UUID) {
+	for id := range m.article_likes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetArticleLikes resets all changes to the "article_likes" edge.
+func (m *ArticleMutation) ResetArticleLikes() {
+	m.article_likes = nil
+	m.clearedarticle_likes = false
+	m.removedarticle_likes = nil
+}
+
 // Where appends a list predicates to the ArticleMutation builder.
 func (m *ArticleMutation) Where(ps ...predicate.Article) {
 	m.predicates = append(m.predicates, ps...)
@@ -652,9 +711,12 @@ func (m *ArticleMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArticleMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.post != nil {
 		edges = append(edges, article.EdgePost)
+	}
+	if m.article_likes != nil {
+		edges = append(edges, article.EdgeArticleLikes)
 	}
 	return edges
 }
@@ -667,27 +729,47 @@ func (m *ArticleMutation) AddedIDs(name string) []ent.Value {
 		if id := m.post; id != nil {
 			return []ent.Value{*id}
 		}
+	case article.EdgeArticleLikes:
+		ids := make([]ent.Value, 0, len(m.article_likes))
+		for id := range m.article_likes {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArticleMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedarticle_likes != nil {
+		edges = append(edges, article.EdgeArticleLikes)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ArticleMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case article.EdgeArticleLikes:
+		ids := make([]ent.Value, 0, len(m.removedarticle_likes))
+		for id := range m.removedarticle_likes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArticleMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedpost {
 		edges = append(edges, article.EdgePost)
+	}
+	if m.clearedarticle_likes {
+		edges = append(edges, article.EdgeArticleLikes)
 	}
 	return edges
 }
@@ -698,6 +780,8 @@ func (m *ArticleMutation) EdgeCleared(name string) bool {
 	switch name {
 	case article.EdgePost:
 		return m.clearedpost
+	case article.EdgeArticleLikes:
+		return m.clearedarticle_likes
 	}
 	return false
 }
@@ -720,8 +804,559 @@ func (m *ArticleMutation) ResetEdge(name string) error {
 	case article.EdgePost:
 		m.ResetPost()
 		return nil
+	case article.EdgeArticleLikes:
+		m.ResetArticleLikes()
+		return nil
 	}
 	return fmt.Errorf("unknown Article edge %s", name)
+}
+
+// ArticleLikeMutation represents an operation that mutates the ArticleLike nodes in the graph.
+type ArticleLikeMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	updated_at     *time.Time
+	user_id        *uuid.UUID
+	clearedFields  map[string]struct{}
+	article        *uuid.UUID
+	clearedarticle bool
+	done           bool
+	oldValue       func(context.Context) (*ArticleLike, error)
+	predicates     []predicate.ArticleLike
+}
+
+var _ ent.Mutation = (*ArticleLikeMutation)(nil)
+
+// articlelikeOption allows management of the mutation configuration using functional options.
+type articlelikeOption func(*ArticleLikeMutation)
+
+// newArticleLikeMutation creates new mutation for the ArticleLike entity.
+func newArticleLikeMutation(c config, op Op, opts ...articlelikeOption) *ArticleLikeMutation {
+	m := &ArticleLikeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeArticleLike,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withArticleLikeID sets the ID field of the mutation.
+func withArticleLikeID(id uuid.UUID) articlelikeOption {
+	return func(m *ArticleLikeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ArticleLike
+		)
+		m.oldValue = func(ctx context.Context) (*ArticleLike, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ArticleLike.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withArticleLike sets the old ArticleLike of the mutation.
+func withArticleLike(node *ArticleLike) articlelikeOption {
+	return func(m *ArticleLikeMutation) {
+		m.oldValue = func(context.Context) (*ArticleLike, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ArticleLikeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ArticleLikeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ArticleLike entities.
+func (m *ArticleLikeMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ArticleLikeMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ArticleLikeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ArticleLike.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ArticleLikeMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ArticleLikeMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ArticleLike entity.
+// If the ArticleLike object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleLikeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ArticleLikeMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ArticleLikeMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ArticleLikeMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ArticleLike entity.
+// If the ArticleLike object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleLikeMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ArticleLikeMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetArticleID sets the "article_id" field.
+func (m *ArticleLikeMutation) SetArticleID(u uuid.UUID) {
+	m.article = &u
+}
+
+// ArticleID returns the value of the "article_id" field in the mutation.
+func (m *ArticleLikeMutation) ArticleID() (r uuid.UUID, exists bool) {
+	v := m.article
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArticleID returns the old "article_id" field's value of the ArticleLike entity.
+// If the ArticleLike object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleLikeMutation) OldArticleID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArticleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArticleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArticleID: %w", err)
+	}
+	return oldValue.ArticleID, nil
+}
+
+// ResetArticleID resets all changes to the "article_id" field.
+func (m *ArticleLikeMutation) ResetArticleID() {
+	m.article = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *ArticleLikeMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ArticleLikeMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the ArticleLike entity.
+// If the ArticleLike object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleLikeMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ArticleLikeMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// ClearArticle clears the "article" edge to the Article entity.
+func (m *ArticleLikeMutation) ClearArticle() {
+	m.clearedarticle = true
+	m.clearedFields[articlelike.FieldArticleID] = struct{}{}
+}
+
+// ArticleCleared reports if the "article" edge to the Article entity was cleared.
+func (m *ArticleLikeMutation) ArticleCleared() bool {
+	return m.clearedarticle
+}
+
+// ArticleIDs returns the "article" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ArticleID instead. It exists only for internal usage by the builders.
+func (m *ArticleLikeMutation) ArticleIDs() (ids []uuid.UUID) {
+	if id := m.article; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetArticle resets all changes to the "article" edge.
+func (m *ArticleLikeMutation) ResetArticle() {
+	m.article = nil
+	m.clearedarticle = false
+}
+
+// Where appends a list predicates to the ArticleLikeMutation builder.
+func (m *ArticleLikeMutation) Where(ps ...predicate.ArticleLike) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ArticleLikeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ArticleLikeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ArticleLike, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ArticleLikeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ArticleLikeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ArticleLike).
+func (m *ArticleLikeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ArticleLikeMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, articlelike.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, articlelike.FieldUpdatedAt)
+	}
+	if m.article != nil {
+		fields = append(fields, articlelike.FieldArticleID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, articlelike.FieldUserID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ArticleLikeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case articlelike.FieldCreatedAt:
+		return m.CreatedAt()
+	case articlelike.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case articlelike.FieldArticleID:
+		return m.ArticleID()
+	case articlelike.FieldUserID:
+		return m.UserID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ArticleLikeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case articlelike.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case articlelike.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case articlelike.FieldArticleID:
+		return m.OldArticleID(ctx)
+	case articlelike.FieldUserID:
+		return m.OldUserID(ctx)
+	}
+	return nil, fmt.Errorf("unknown ArticleLike field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ArticleLikeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case articlelike.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case articlelike.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case articlelike.FieldArticleID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArticleID(v)
+		return nil
+	case articlelike.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ArticleLike field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ArticleLikeMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ArticleLikeMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ArticleLikeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ArticleLike numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ArticleLikeMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ArticleLikeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ArticleLikeMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ArticleLike nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ArticleLikeMutation) ResetField(name string) error {
+	switch name {
+	case articlelike.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case articlelike.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case articlelike.FieldArticleID:
+		m.ResetArticleID()
+		return nil
+	case articlelike.FieldUserID:
+		m.ResetUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown ArticleLike field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ArticleLikeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.article != nil {
+		edges = append(edges, articlelike.EdgeArticle)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ArticleLikeMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case articlelike.EdgeArticle:
+		if id := m.article; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ArticleLikeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ArticleLikeMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ArticleLikeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedarticle {
+		edges = append(edges, articlelike.EdgeArticle)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ArticleLikeMutation) EdgeCleared(name string) bool {
+	switch name {
+	case articlelike.EdgeArticle:
+		return m.clearedarticle
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ArticleLikeMutation) ClearEdge(name string) error {
+	switch name {
+	case articlelike.EdgeArticle:
+		m.ClearArticle()
+		return nil
+	}
+	return fmt.Errorf("unknown ArticleLike unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ArticleLikeMutation) ResetEdge(name string) error {
+	switch name {
+	case articlelike.EdgeArticle:
+		m.ResetArticle()
+		return nil
+	}
+	return fmt.Errorf("unknown ArticleLike edge %s", name)
 }
 
 // DescriptionProblemMutation represents an operation that mutates the DescriptionProblem nodes in the graph.

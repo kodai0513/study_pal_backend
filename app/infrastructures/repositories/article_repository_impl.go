@@ -51,6 +51,10 @@ func (a *ArticleRepositoryImpl) Delete(id uuid.UUID) {
 		ExecX(a.ctx)
 }
 
+func (a *ArticleRepositoryImpl) ExistById(id uuid.UUID) bool {
+	return a.tx.Article.Query().Where(article.IDEQ(id)).ExistX(a.ctx)
+}
+
 func (a *ArticleRepositoryImpl) FindById(id uuid.UUID) *entities.Article {
 	result := a.tx.Article.
 		Query().

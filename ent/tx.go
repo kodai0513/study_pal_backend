@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Article is the client for interacting with the Article builders.
 	Article *ArticleClient
+	// ArticleLike is the client for interacting with the ArticleLike builders.
+	ArticleLike *ArticleLikeClient
 	// DescriptionProblem is the client for interacting with the DescriptionProblem builders.
 	DescriptionProblem *DescriptionProblemClient
 	// Permission is the client for interacting with the Permission builders.
@@ -168,6 +170,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Article = NewArticleClient(tx.config)
+	tx.ArticleLike = NewArticleLikeClient(tx.config)
 	tx.DescriptionProblem = NewDescriptionProblemClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
