@@ -76,7 +76,7 @@ func generateAction(generateInfo *generateInfo) {
 			panic(err)
 		}
 
-		actionOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(actionType) + "_action.go"
+		actionOutputPath := currentPath + "/../../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + strings.ToLower(actionType) + "_action.go"
 		if _, err := os.Stat(actionOutputPath); err == nil {
 			fmt.Println("file has already been created")
 			return
@@ -110,7 +110,7 @@ func generateAction(generateInfo *generateInfo) {
 		"packageName": camelToSnake(pluralize.NewClient().Plural(generateInfo.name)),
 		"dtoName":     generateInfo.name + "Dto",
 	}
-	dtoOutputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + camelToSnake(generateInfo.name) + "_dto.go"
+	dtoOutputPath := currentPath + "/../../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + camelToSnake(generateInfo.name) + "_dto.go"
 
 	outputFile, err := os.Create(dtoOutputPath)
 	if err != nil {
@@ -156,7 +156,7 @@ func generateController(generateInfo *generateInfo) {
 		panic(err)
 	}
 
-	outputPath := currentPath + "/../app/controllers/" + camelToSnake(generateInfo.name) + "_controller.go"
+	outputPath := currentPath + "/../../app/controllers/" + camelToSnake(generateInfo.name) + "_controller.go"
 	if _, err := os.Stat(outputPath); err == nil {
 		fmt.Println("file has already been created")
 		return
@@ -198,7 +198,7 @@ func generateQuery(generateInfo *generateInfo) {
 		panic(err)
 	}
 
-	outputPath := currentPath + "/../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + camelToSnake(generateInfo.name) + "_query_service.go"
+	outputPath := currentPath + "/../../app/usecases/" + camelToSnake(pluralize.NewClient().Plural(generateInfo.name)) + "/" + camelToSnake(generateInfo.name) + "_query_service.go"
 	if _, err := os.Stat(outputPath); err == nil {
 		fmt.Println("file has already been created")
 		return
