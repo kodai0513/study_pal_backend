@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
+	"study-pal-backend/app/infrastructures/permission_guard"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/workbook_categories"
@@ -39,6 +40,7 @@ type IndexWorkbookCategoryResponse struct {
 //	@Success	200			{object}	IndexWorkbookCategoryResponse
 //	@Failure	400			{object}	app_types.ErrorResponse
 //	@Failure	401			{object}	app_types.ErrorResponse
+//	@Failure	403			{object}	app_types.ErrorResponse
 //	@Failure	404			{object}	app_types.ErrorResponse
 //	@Failure	500			{object}	app_types.ErrorResponse
 //	@Router		/{workbook_id}/workbook-categories [get]
@@ -60,11 +62,14 @@ func (a *WorkbookCategoryController) Index(c *gin.Context) {
 		panic(err)
 	}
 	action := &workbook_categories.IndexAction{
+		PermissionGuard:            permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		WorkbookCategoryRepository: repositories.NewWorkbookCategoryRepositoryImpl(tx, c),
 	}
 
+	userId, _ := c.Get("user_id")
 	categoryDtos, usecaseErrGroup := action.Execute(
 		&workbook_categories.IndexActionCommand{
+			UserId:     userId.(uuid.UUID),
 			WorkbookId: workbookId,
 		},
 	)

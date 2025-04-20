@@ -13,7 +13,7 @@ func UsecaseErrorToHttpStatus(usecaseErrGroup usecase_error.UsecaseErrorGroup) i
 	case usecase_error.QueryDataNotFoundError:
 		return http.StatusNotFound
 	case usecase_error.UnPermittedOperation:
-		return http.StatusUnauthorized
+		return http.StatusForbidden
 	case usecase_error.DatabaseError:
 		return http.StatusInternalServerError
 	default:
