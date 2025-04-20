@@ -29,7 +29,39 @@ w.client.Workbook.Create().
 		SaveX(w.ctx)
 ```
 
-# マイグレーション手順
+
+### コントローラのテンプレートファイル作成
+```sh
+cd cmd/codegen
+
+# コントローラー作成
+go run . controller [コントローラー名]
+# example
+go run . controller Test
+```
+
+### ユースケースアクションのテンプレートファイル作成
+```sh
+cd cmd/codegen
+
+# ユースケースアクション作成
+go run . action [アクション名]
+#example
+go run gen.go action Test
+```
+
+### ユースケースクエリのテンプレートファイル作成
+```sh
+cd cmd/codegen
+
+# ユースケースクエリ作成
+go run . query [クエリ名]
+#example
+go run . query Test
+```
+
+
+# マイグレーション、ドメイン追加手順
 
 ### コマンドを実行しスキーマを定義
 ```sh
@@ -46,6 +78,20 @@ go generate ./ent
 cd cmd/migration
 
 go run main.go
+```
+
+### バリューオブジェクト作成(任意)
+```sh
+cd cmd/codegen
+
+go run . valueObject [エンティティ名] [バリューオブジェクト名] [int or string]
+```
+
+### エンティティ作成
+```sh
+cd cmd/codegen
+
+go run . entity [エンティティ名] [--no-field (任意)]
 ```
 
 
@@ -100,24 +146,4 @@ docker logs study_pal_backend --tail 20 -f
 ```sh
 psql -h study_pal_db -p 5432 -U postgres -d study_pal
 Password for user postgres: postgres
-```
-
-### controller、usecase層のテンプレートファイル作成
-```sh
-cd generate
-
-# コントローラー作成
-go run gen.go controller [コントローラー名]
-# example
-go run gen.go controller Test
-
-# ユースケースアクション作成
-go run gen.go action [アクション名]
-#example
-go run gen.go action Test
-
-# ユースケースクエリ作成
-go run gen.go query [クエリ名]
-#example
-go run gen.go query Test
 ```
