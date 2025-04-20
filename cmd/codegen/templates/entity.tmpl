@@ -1,0 +1,40 @@
+package entities
+
+{{- if ne (len .entityFields) 0 }}
+import (
+{{- if .existValueObject }}
+	"study-pal-backend/app/domains/models/value_objects/{{ .importEntityName }}"
+{{- end }}
+
+	"github.com/google/uuid"
+)
+{{- end }}
+
+type {{ .structEntityName }} struct {
+{{- range .entityFields }}
+	{{ .Name }} {{ .FieldType }}
+{{- end }}
+}
+
+func New{{ .structEntityName }}(
+{{- range .entityFields }}
+	{{ .Name }} {{ .FieldType }},
+{{- end }}
+) *{{ .structEntityName }} {
+	return &{{ .structEntityName }}{
+		{{- range .entityFields }}
+		{{ .Name }}: {{ .Name }},
+		{{- end }}
+	}
+}
+
+
+{{ range .entityGetters }}
+func ({{ .VarEntityName }} *{{ .EntityName }}) {{ .GetterFuncName }}() {{ .GetterReturnType }} {
+{{- if .IsValueObject }}
+	return {{ .VarEntityName }}.{{ .FieldName }}.Value()
+{{- else }}
+	return {{ .VarEntityName }}.{{ .FieldName }}
+{{- end }}
+}
+{{ end }}

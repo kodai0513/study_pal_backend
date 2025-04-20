@@ -28,17 +28,17 @@ func (WorkbookMember) Mixin() []ent.Mixin {
 // Fields of the WorkbookMember.
 func (WorkbookMember) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID(role.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID(user.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
+		field.UUID("role_id", uuid.UUID{}).Unique(),
+		field.UUID("user_id", uuid.UUID{}).Unique(),
+		field.UUID("workbook_id", uuid.UUID{}).Unique(),
 	}
 }
 
 // Edges of the WorkbookMember.
 func (WorkbookMember) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From(role.Label, Role.Type).Ref(workbookmember.Table).Unique().Required().Field(role.Label + "_id"),
-		edge.From(user.Label, User.Type).Ref(workbookmember.Table).Unique().Required().Field(user.Label + "_id"),
-		edge.From(workbook.Label, Workbook.Type).Ref(workbookmember.Table).Unique().Required().Field(workbook.Label + "_id"),
+		edge.From(role.Label, Role.Type).Ref(workbookmember.Table).Unique().Required().Field("role_id"),
+		edge.From(user.Label, User.Type).Ref(workbookmember.Table).Unique().Required().Field("user_id"),
+		edge.From(workbook.Label, Workbook.Type).Ref(workbookmember.Table).Unique().Required().Field("workbook_id"),
 	}
 }

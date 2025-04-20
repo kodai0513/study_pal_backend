@@ -31,7 +31,7 @@ func (WorkbookCategory) Mixin() []ent.Mixin {
 func (WorkbookCategory) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").MaxLen(255).NotEmpty(),
-		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
+		field.UUID("workbook_id", uuid.UUID{}).Unique(),
 	}
 }
 
@@ -41,6 +41,6 @@ func (WorkbookCategory) Edges() []ent.Edge {
 		edge.To(descriptionproblem.Table, DescriptionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.From(workbook.Label, Workbook.Type).Ref(workbookcategory.Table).Unique().Required().Field(workbook.Label + "_id"),
+		edge.From(workbook.Label, Workbook.Type).Ref(workbookcategory.Table).Unique().Required().Field("workbook_id"),
 	}
 }

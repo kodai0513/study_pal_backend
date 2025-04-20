@@ -29,15 +29,15 @@ func (DescriptionProblem) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("correct_statement").MaxLen(255).NotEmpty(),
 		field.String("statement").MaxLen(1000).NotEmpty(),
-		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
+		field.UUID("workbook_id", uuid.UUID{}).Unique(),
+		field.UUID("workbook_category_id", uuid.UUID{}).Nillable().Optional().Unique(),
 	}
 }
 
 // Edges of the DescriptionProblem.
 func (DescriptionProblem) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From(workbook.Label, Workbook.Type).Ref(descriptionproblem.Table).Unique().Required().Field(workbook.Label + "_id"),
-		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(descriptionproblem.Table).Unique().Field(workbookcategory.Label + "_id"),
+		edge.From(workbook.Label, Workbook.Type).Ref(descriptionproblem.Table).Unique().Required().Field("workbook_id"),
+		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(descriptionproblem.Table).Unique().Field("workbook_category_id"),
 	}
 }

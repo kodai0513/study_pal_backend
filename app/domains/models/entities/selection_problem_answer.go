@@ -43,10 +43,10 @@ func (s *SelectionProblemAnswer) Statement() string {
 	return s.statement.Value()
 }
 
-func (s *SelectionProblemAnswer) setIsCorrect(isCorrect bool) {
+func (s *SelectionProblemAnswer) SetIsCorrect(isCorrect bool) {
 	s.isCorrect = isCorrect
 }
 
-func (s *SelectionProblemAnswer) setStatement(statement selection_problem_answers.Statement) {
+func (s *SelectionProblemAnswer) SetStatement(statement selection_problem_answers.Statement) {
 	s.statement = statement
 }

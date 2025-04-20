@@ -126,7 +126,7 @@ func TestDescriptionProblem_全属性取得確認(t *testing.T) {
 	assert.Equal(t, &workbookCategoryId, problem.WorkbookCategoryId())
 }
 
-// テスト用ヘルパー関数：指定した長さの文字列を生成
+// // テスト用ヘルパー関数：指定した長さの文字列を生成
 func generateString(length int) string {
 	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)

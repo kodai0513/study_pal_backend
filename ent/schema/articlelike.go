@@ -4,7 +4,6 @@ import (
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/articlelike"
 	"study-pal-backend/ent/mixin"
-	"study-pal-backend/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
@@ -27,14 +26,14 @@ func (ArticleLike) Mixin() []ent.Mixin {
 // Fields of the ArticleLike.
 func (ArticleLike) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID(article.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID(user.Label+"_id", uuid.UUID{}).Unique(),
+		field.UUID("article_id", uuid.UUID{}).Unique(),
+		field.UUID("user_id", uuid.UUID{}).Unique(),
 	}
 }
 
 // Edges of the ArticleLike.
 func (ArticleLike) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From(article.Label, Article.Type).Ref(articlelike.Table).Unique().Required().Field(article.Label + "_id"),
+		edge.From(article.Label, Article.Type).Ref(articlelike.Table).Unique().Required().Field("article_id"),
 	}
 }

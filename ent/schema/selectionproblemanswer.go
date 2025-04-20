@@ -27,7 +27,7 @@ func (SelectionProblemAnswer) Mixin() []ent.Mixin {
 func (SelectionProblemAnswer) Fields() []ent.Field {
 	return []ent.Field{
 		field.Bool("is_correct"),
-		field.UUID(selectionproblem.Label+"_id", uuid.UUID{}).Unique(),
+		field.UUID("selection_problem_id", uuid.UUID{}).Unique(),
 		field.String("statement").MaxLen(255).NotEmpty(),
 	}
 }
@@ -35,6 +35,6 @@ func (SelectionProblemAnswer) Fields() []ent.Field {
 // Edges of the SelectionProblemAnswer.
 func (SelectionProblemAnswer) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From(selectionproblem.Label, SelectionProblem.Type).Ref(selectionproblemanswer.Table).Unique().Required().Field(selectionproblem.Label + "_id"),
+		edge.From(selectionproblem.Label, SelectionProblem.Type).Ref(selectionproblemanswer.Table).Unique().Required().Field("selection_problem_id"),
 	}
 }

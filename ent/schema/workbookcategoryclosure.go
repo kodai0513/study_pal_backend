@@ -2,7 +2,6 @@ package schema
 
 import (
 	"study-pal-backend/ent/mixin"
-	"study-pal-backend/ent/workbook"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
@@ -25,7 +24,7 @@ func (WorkbookCategoryClosure) Mixin() []ent.Mixin {
 // Fields of the WorkbookCategoryClosure.
 func (WorkbookCategoryClosure) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID(workbook.Label+"_id", uuid.UUID{}),
+		field.UUID("workbook_id", uuid.UUID{}),
 		field.UUID("child_id", uuid.UUID{}),
 		field.Bool("is_root"),
 		field.UUID("parent_id", uuid.UUID{}),
