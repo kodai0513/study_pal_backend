@@ -1,0 +1,20 @@
+package query_services
+
+import (
+	"context"
+	queryService "study-pal-backend/app/usecases/{{ .importQueryServiceName }}"
+	"study-pal-backend/ent"
+)
+
+type {{ .queryServiceName }}QueryServiceImpl struct {
+	client *ent.Client
+	ctx    context.Context
+}
+
+func New{{ .queryServiceName }}QueryServiceImpl(client *ent.Client, ctx context.Context) queryService.{{ .queryServiceName }}QueryService {
+	return &{{ .queryServiceName }}QueryServiceImpl{
+		client: client,
+		ctx:    ctx,
+	}
+}
+

@@ -1,0 +1,21 @@
+package {{ .packageName }}
+
+import validation "github.com/go-ozzo/ozzo-validation"
+
+type {{ .valueObjectName }} struct {
+	value {{ .fieldType }}
+}
+
+func New{{ .valueObjectName }}(value {{ .fieldType }}) ({{ .valueObjectName }}, error) {
+	err := validation.Validate(value)
+
+	if err != nil {
+		return {{ .valueObjectName }}{value: {{ .errValue }}}, err
+	}
+
+	return {{ .valueObjectName }}{value: value}, nil
+}
+
+func (v *{{ .valueObjectName }}) Value() {{ .fieldType }} {
+	return v.value
+}

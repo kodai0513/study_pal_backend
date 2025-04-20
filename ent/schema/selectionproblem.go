@@ -30,8 +30,8 @@ func (SelectionProblem) Mixin() []ent.Mixin {
 func (SelectionProblem) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("statement").MaxLen(255).NotEmpty(),
-		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
+		field.UUID("workbook_id", uuid.UUID{}).Unique(),
+		field.UUID("workbook_category_id", uuid.UUID{}).Nillable().Optional().Unique(),
 	}
 }
 

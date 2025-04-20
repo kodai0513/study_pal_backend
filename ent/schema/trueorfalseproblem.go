@@ -29,15 +29,15 @@ func (TrueOrFalseProblem) Fields() []ent.Field {
 	return []ent.Field{
 		field.Bool("is_correct"),
 		field.String("statement").MaxLen(255).NotEmpty(),
-		field.UUID(workbook.Label+"_id", uuid.UUID{}).Unique(),
-		field.UUID(workbookcategory.Label+"_id", uuid.UUID{}).Nillable().Optional().Unique(),
+		field.UUID("workbook_id", uuid.UUID{}).Unique(),
+		field.UUID("workbook_category_id", uuid.UUID{}).Nillable().Optional().Unique(),
 	}
 }
 
 // Edges of the TrueOrFalseProblem.
 func (TrueOrFalseProblem) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From(workbook.Label, Workbook.Type).Ref(trueorfalseproblem.Table).Unique().Required().Field(workbook.Label + "_id"),
-		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(trueorfalseproblem.Table).Unique().Field(workbookcategory.Label + "_id"),
+		edge.From(workbook.Label, Workbook.Type).Ref(trueorfalseproblem.Table).Unique().Required().Field("workbook_id"),
+		edge.From(workbookcategory.Label, WorkbookCategory.Type).Ref(trueorfalseproblem.Table).Unique().Field("workbook_category_id"),
 	}
 }

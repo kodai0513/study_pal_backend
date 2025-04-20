@@ -1,0 +1,19 @@
+package repositories
+
+import (
+	"context"
+	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/ent"
+)
+
+type {{ .repositoryName }}RepositoryImpl struct {
+	tx  *ent.Tx
+	ctx context.Context
+}
+
+func New{{ .repositoryName }}RepositoryImpl(tx *ent.Tx, ctx context.Context) repositories.{{ .repositoryName }}Repository {
+	return &{{ .repositoryName }}RepositoryImpl{
+		tx:  tx,
+		ctx: ctx,
+	}
+}

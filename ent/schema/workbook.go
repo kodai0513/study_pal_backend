@@ -32,7 +32,7 @@ func (Workbook) Mixin() []ent.Mixin {
 // Fields of the Workbook.
 func (Workbook) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID(user.Label+"_id", uuid.UUID{}),
+		field.UUID("user_id", uuid.UUID{}),
 		field.String("description").MaxLen(400).Nillable(),
 		field.Bool("is_public").Default(false),
 		field.String("title").MaxLen(255).NotEmpty(),
@@ -45,7 +45,7 @@ func (Workbook) Edges() []ent.Edge {
 		edge.To(descriptionproblem.Table, DescriptionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.From(user.Label, User.Type).Ref(workbook.Table).Unique().Required().Field(user.Label + "_id"),
+		edge.From(user.Label, User.Type).Ref(workbook.Table).Unique().Required().Field("user_id"),
 		edge.To(workbookcategory.Table, WorkbookCategory.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
