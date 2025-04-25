@@ -6,6 +6,7 @@ import (
 	"study-pal-backend/app/domains/models/value_objects/selection_problem_answers"
 	"study-pal-backend/app/domains/models/value_objects/selection_problems"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/permission_guard"
 	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
@@ -22,15 +23,22 @@ type UpdateActionCommand struct {
 	SelectionProblemAnswers []*SelectionProblemAnswer
 	SelectionProblemId      uuid.UUID
 	Statement               string
+	UserId                  uuid.UUID
+	WorkbookId              uuid.UUID
 }
 
 type UpdateAction struct {
+	PermissionGuard            permission_guard.WorkbookPermissionGuard
 	SelectionProblemRepository repositories.SelectionProblemRepository
 	Tx                         trancaction.Tx
 }
 
 func (a *UpdateAction) Execute(command *UpdateActionCommand) (*SelectionProblemDto, usecase_error.UsecaseErrorGroup) {
-	problem := a.SelectionProblemRepository.FindById(command.SelectionProblemId)
+	err := a.PermissionGuard.Check("update:selection-problems", command.UserId, command.WorkbookId)
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, err))
+	}
+	problem := a.SelectionProblemRepository.FindByIdAndWorkbookId(command.SelectionProblemId, command.WorkbookId)
 
 	if problem == nil {
 		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("selectionProblem not found")))
@@ -67,7 +75,7 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) (*SelectionProblemD
 
 	var updatedProblem *entities.SelectionProblem
 	err = trancaction.WithTx(a.Tx, func() {
-		updatedProblem = a.SelectionProblemRepository.Update(problem)
+		updatedProblem = a.SelectionProblemRepository.Update(problem, command.WorkbookId)
 	})
 
 	if err != nil {

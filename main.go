@@ -75,7 +75,7 @@ func main() {
 		articles := v1.Group("/articles")
 		{
 			articles.POST("/", authRequired, articleController.Create)
-			articles.PUT("/:article_id", authRequired, articleController.Update)
+			articles.PATCH("/:article_id", authRequired, articleController.Update)
 			articles.DELETE("/:article_id", authRequired, articleController.Delete)
 
 			likes := articles.Group("/:article_id/likes")
@@ -84,35 +84,39 @@ func main() {
 				likes.DELETE("/:article_like_id", authRequired, articleLikeController.Delete)
 			}
 		}
-		descriptionProblems := v1.Group("/description-problems")
-		{
-			descriptionProblems.PUT("/:description_problem_id", authRequired, descriptionProblemController.Update)
-			descriptionProblems.DELETE("/:description_problem_id", authRequired, descriptionProblemController.Delete)
-		}
 		v1.POST("/login", authController.Login)
 		v1.POST("/refresh-token", authController.RefreshToken)
-		selectionProblems := v1.Group("/selection-problems")
-		{
-			selectionProblems.PUT("/:selection_problem_id", authRequired, selectionProblemController.Update)
-			selectionProblems.DELETE("/:selection_problem_id", authRequired, selectionProblemController.Delete)
-		}
-		trueOrFalseProblems := v1.Group("/true-or-false-problems")
-		{
-			trueOrFalseProblems.PUT("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Update)
-			trueOrFalseProblems.DELETE("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Delete)
-		}
 		v1.GET("/timelines", timelineController.Index)
-		v1.POST("/:workbook_id/problems", problemController.Create)
 		workbooks := v1.Group("/workbooks")
 		{
 			workbooks.POST("/", authRequired, workbookController.Create)
-			workbooks.PUT("/:workbook_id", authRequired, workbookController.Update)
+			workbooks.PATCH("/:workbook_id", authRequired, workbookController.Update)
 			workbooks.DELETE("/:workbook_id", authRequired, workbookController.Delete)
-		}
-		workbookCategories := v1.Group("/:workbook_id/workbook-categories")
-		{
-			workbookCategories.GET("", authRequired, workbookCategoryController.Index)
-			workbookCategories.PUT("", authRequired, workbookCategoryController.Update)
+
+			workbookGroups := workbooks.Group("/:workbook_id")
+			{
+				descriptionProblems := workbookGroups.Group("/description-problems")
+				{
+					descriptionProblems.PATCH("/:description_problem_id", authRequired, descriptionProblemController.Update)
+					descriptionProblems.DELETE("/:description_problem_id", authRequired, descriptionProblemController.Delete)
+				}
+				selectionProblems := workbookGroups.Group("/selection-problems")
+				{
+					selectionProblems.PATCH("/:selection_problem_id", authRequired, selectionProblemController.Update)
+					selectionProblems.DELETE("/:selection_problem_id", authRequired, selectionProblemController.Delete)
+				}
+				trueOrFalseProblems := workbookGroups.Group("/true-or-false-problems")
+				{
+					trueOrFalseProblems.PATCH("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Update)
+					trueOrFalseProblems.DELETE("/:true_or_false_problem_id", authRequired, trueOrFalseProblemController.Delete)
+				}
+				workbookGroups.POST("/problems", authRequired, problemController.Create)
+				workbookCategories := workbookGroups.Group("/workbook-categories")
+				{
+					workbookCategories.GET("", authRequired, workbookCategoryController.Index)
+					workbookCategories.PUT("", authRequired, workbookCategoryController.Update)
+				}
+			}
 		}
 	}
 

@@ -77,13 +77,18 @@ func (s *SelectionProblemRepositoryImpl) CreateBulk(problems []*entities.Selecti
 	})
 }
 
-func (s *SelectionProblemRepositoryImpl) Delete(id uuid.UUID) {
-	s.tx.SelectionProblem.DeleteOneID(id).ExecX(s.ctx)
+func (s *SelectionProblemRepositoryImpl) Delete(id uuid.UUID, workbookId uuid.UUID) {
+	s.tx.SelectionProblem.DeleteOneID(id).
+		Where(selectionproblem.WorkbookIDEQ(workbookId)).
+		ExecX(s.ctx)
 }
 
-func (s *SelectionProblemRepositoryImpl) FindById(id uuid.UUID) *entities.SelectionProblem {
+func (s *SelectionProblemRepositoryImpl) FindByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) *entities.SelectionProblem {
 	result := s.tx.SelectionProblem.Query().
-		Where(selectionproblem.IDEQ(id)).
+		Where(
+			selectionproblem.IDEQ(id),
+			selectionproblem.WorkbookIDEQ(workbookId),
+		).
 		WithSelectionProblemAnswers().
 		FirstX(s.ctx)
 
@@ -111,12 +116,18 @@ func (s *SelectionProblemRepositoryImpl) FindById(id uuid.UUID) *entities.Select
 	)
 }
 
-func (s *SelectionProblemRepositoryImpl) ExistById(id uuid.UUID) bool {
-	return s.tx.SelectionProblem.Query().Where(selectionproblem.IDEQ(id)).ExistX(s.ctx)
+func (s *SelectionProblemRepositoryImpl) ExistByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) bool {
+	return s.tx.SelectionProblem.Query().
+		Where(
+			selectionproblem.IDEQ(id),
+			selectionproblem.WorkbookIDEQ(workbookId),
+		).
+		ExistX(s.ctx)
 }
 
-func (s *SelectionProblemRepositoryImpl) Update(problem *entities.SelectionProblem) *entities.SelectionProblem {
+func (s *SelectionProblemRepositoryImpl) Update(problem *entities.SelectionProblem, workbookId uuid.UUID) *entities.SelectionProblem {
 	problemResult := s.tx.SelectionProblem.UpdateOneID(problem.Id()).
+		Where(selectionproblem.WorkbookIDEQ(workbookId)).
 		SetStatement(problem.Statement()).
 		SaveX(s.ctx)
 

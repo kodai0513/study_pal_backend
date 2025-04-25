@@ -43,7 +43,7 @@ type IndexWorkbookCategoryResponse struct {
 //	@Failure	403			{object}	app_types.ErrorResponse
 //	@Failure	404			{object}	app_types.ErrorResponse
 //	@Failure	500			{object}	app_types.ErrorResponse
-//	@Router		/{workbook_id}/workbook-categories [get]
+//	@Router		/workbooks/{workbook_id}/workbook-categories [get]
 func (a *WorkbookCategoryController) Index(c *gin.Context) {
 	workbookId, err := uuid.Parse(c.Param("workbook_id"))
 	if err != nil {
@@ -149,7 +149,7 @@ type UpdateWorkbookCategoryResponse struct {
 //	@Failure	401			{object}	app_types.ErrorResponse
 //	@Failure	404			{object}	app_types.ErrorResponse
 //	@Failure	500			{object}	app_types.ErrorResponse
-//	@Router		/{workbook_id}/workbook-categories [put]
+//	@Router		/workbooks/{workbook_id}/workbook-categories [put]
 func (a *WorkbookCategoryController) Update(c *gin.Context) {
 	var request UpdateWorkbookCategoryRequest
 	err := c.BindJSON(&request)
@@ -163,6 +163,7 @@ func (a *WorkbookCategoryController) Update(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
 	workbookId, err := uuid.Parse(c.Param("workbook_id"))
 	if err != nil {
 		c.SecureJSON(
@@ -180,10 +181,13 @@ func (a *WorkbookCategoryController) Update(c *gin.Context) {
 		panic(err)
 	}
 	action := &workbook_categories.UpdateAction{
+		PermissionGuard:            permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		Tx:                         trancaction.NewTx(tx),
 		WorkbookCategoryRepository: repositories.NewWorkbookCategoryRepositoryImpl(tx, c),
 	}
+	userId, _ := c.Get("user_id")
 	command := &workbook_categories.UpdateActionCommand{
+		UserId:             userId.(uuid.UUID),
 		WorkbookId:         workbookId,
 		WorkbookCategories: make([]*workbook_categories.WorkbookCategory, 0),
 	}

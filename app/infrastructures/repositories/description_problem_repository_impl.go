@@ -46,20 +46,32 @@ func (d *DescriptionProblemRepositoryImpl) CreateBulk(problems []*entities.Descr
 	})
 }
 
-func (d *DescriptionProblemRepositoryImpl) Delete(descriptionProblemId uuid.UUID) {
-	d.tx.DescriptionProblem.DeleteOneID(descriptionProblemId).ExecX(d.ctx)
+func (d *DescriptionProblemRepositoryImpl) Delete(id uuid.UUID, workbookId uuid.UUID) {
+	d.tx.DescriptionProblem.DeleteOneID(id).
+		Where(descriptionproblem.WorkbookIDEQ(workbookId)).
+		ExecX(d.ctx)
 }
 
-func (d *DescriptionProblemRepositoryImpl) ExistById(descriptionProblemId uuid.UUID) bool {
-	return d.tx.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(descriptionProblemId)).ExistX(d.ctx)
+func (d *DescriptionProblemRepositoryImpl) ExistByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) bool {
+	return d.tx.DescriptionProblem.Query().
+		Where(
+			descriptionproblem.IDEQ(id),
+			descriptionproblem.WorkbookIDEQ(workbookId),
+		).
+		ExistX(d.ctx)
 }
 
 func (d *DescriptionProblemRepositoryImpl) ExistByWorkbookId(workbookId uuid.UUID) bool {
 	return d.tx.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(workbookId)).ExistX(d.ctx)
 }
 
-func (d *DescriptionProblemRepositoryImpl) FindById(descriptionProblemId uuid.UUID) *entities.DescriptionProblem {
-	result := d.tx.DescriptionProblem.Query().Where(descriptionproblem.IDEQ(descriptionProblemId)).FirstX(d.ctx)
+func (d *DescriptionProblemRepositoryImpl) FindByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) *entities.DescriptionProblem {
+	result := d.tx.DescriptionProblem.Query().
+		Where(
+			descriptionproblem.IDEQ(id),
+			descriptionproblem.WorkbookIDEQ(workbookId),
+		).
+		FirstX(d.ctx)
 
 	if result == nil {
 		return nil
@@ -76,8 +88,10 @@ func (d *DescriptionProblemRepositoryImpl) FindById(descriptionProblemId uuid.UU
 	)
 }
 
-func (d *DescriptionProblemRepositoryImpl) Update(problem *entities.DescriptionProblem) *entities.DescriptionProblem {
-	result := d.tx.DescriptionProblem.UpdateOneID(problem.Id()).
+func (d *DescriptionProblemRepositoryImpl) Update(problem *entities.DescriptionProblem, workbookId uuid.UUID) *entities.DescriptionProblem {
+	result := d.tx.DescriptionProblem.
+		UpdateOneID(problem.Id()).
+		Where(descriptionproblem.WorkbookIDEQ(workbookId)).
 		SetCorrectStatement(problem.CorrectStatement()).
 		SetStatement(problem.Statement()).
 		SaveX(d.ctx)

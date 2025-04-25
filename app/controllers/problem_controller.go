@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
+	"study-pal-backend/app/infrastructures/permission_guard"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/problems"
 	"study-pal-backend/app/usecases/shared/trancaction"
@@ -67,9 +68,10 @@ type CreateProblemResponse struct {
 //	@Success		201			{object}	CreateProblemResponse
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		403			{object}	app_types.ErrorResponse
 //	@Failure		404			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
-//	@Router			/{workbook_id}/problems [post]
+//	@Router			/workbooks/{workbook_id}/problems [post]
 func (a *ProblemController) Create(c *gin.Context) {
 	var request CreateProblemRequest
 	err := c.BindJSON(&request)
@@ -83,9 +85,8 @@ func (a *ProblemController) Create(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	//userId, _ := c.Get("user_id")
-	workbookIdParam := c.Param("workbook_id")
-	workbookId, err := uuid.Parse(workbookIdParam)
+	userId, _ := c.Get("user_id")
+	workbookId, err := uuid.Parse(c.Param("workbook_id"))
 	if err != nil {
 		c.SecureJSON(
 			http.StatusBadRequest,
@@ -143,6 +144,7 @@ func (a *ProblemController) Create(c *gin.Context) {
 		return &problems.CreateTrueOrFalseProblem{
 			IsCorrect:          problem.IsCorrect,
 			Statement:          problem.Statement,
+			UserId:             userId.(uuid.UUID),
 			WorkbookCategoryId: workbookCategoryUuid,
 		}
 	})
@@ -164,6 +166,7 @@ func (a *ProblemController) Create(c *gin.Context) {
 	}
 	action := problems.CreateAction{
 		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(tx, c),
+		PermissionGuard:              permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		SelectionProblemRepository:   repositories.NewSelectionProblemRepositoryImpl(tx, c),
 		TrueOrFalseRepository:        repositories.NewTrueOrFalseProblemRepositoryImpl(tx, c),
 		Tx:                           trancaction.NewTx(tx),
@@ -174,6 +177,7 @@ func (a *ProblemController) Create(c *gin.Context) {
 			DescriptionProblems: descriptionProblemCommands,
 			SelectionProblems:   selectionProblemCommands,
 			TrueOrFalseProblems: trueOrFalseProblemCommands,
+			UserId:              userId.(uuid.UUID),
 			WorkbookId:          workbookId,
 		},
 	)

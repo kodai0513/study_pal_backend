@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
+	"study-pal-backend/app/infrastructures/permission_guard"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/true_or_false_problems"
@@ -37,13 +38,15 @@ type UpdateTrueOrFalseProblemResponse struct {
 //	@Accept		json
 //	@Produce	json
 //	@Param		request						body		UpdateTrueOrFalseProblem	true	"正誤問題更新リクエスト"
+//	@Param		workbook_id					path		string						true	"Workbook ID"
 //	@Param		true_or_false_problem_id	path		string						true	"TrueOrFalseProblem ID"
 //	@Success	200							{object}	UpdateTrueOrFalseProblemResponse
 //	@Failure	400							{object}	app_types.ErrorResponse
 //	@Failure	401							{object}	app_types.ErrorResponse
+//	@Failure	403							{object}	app_types.ErrorResponse
 //	@Failure	404							{object}	app_types.ErrorResponse
 //	@Failure	500							{object}	app_types.ErrorResponse
-//	@Router		/true-or-false-problems/{true_or_false_problem_id} [patch]
+//	@Router		/workbooks/{workbook_id}/true-or-false-problems/{true_or_false_problem_id} [patch]
 func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 	var request UpdateTrueOrFalseProblemRequest
 	err := c.BindJSON(&request)
@@ -56,6 +59,17 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 		)
 		c.Abort()
 		return
+	}
+
+	userId, _ := c.Get("user_id")
+	workbookId, err := uuid.Parse(c.Param("workbook_id"))
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
 	}
 
 	trueOrFalseProblemId, err := uuid.Parse(c.Param("true_or_false_problem_id"))
@@ -75,6 +89,7 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 		panic(err)
 	}
 	action := &true_or_false_problems.UpdateAction{
+		PermissionGuard:              permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(tx, c),
 		Tx:                           trancaction.NewTx(tx),
 	}
@@ -83,6 +98,8 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 			IsCorrect:            request.IsCorrect,
 			Statement:            request.Statement,
 			TrueOrFalseProblemId: trueOrFalseProblemId,
+			UserId:               userId.(uuid.UUID),
+			WorkbookId:           workbookId,
 		},
 	)
 
@@ -115,14 +132,27 @@ func (a *TrueOrFalseProblemController) Update(c *gin.Context) {
 //	@Tags		true-or-false-problem
 //	@Accept		json
 //	@Produce	json
+//	@Param		workbook_id					path		string	true	"Workbook ID"
 //	@Param		true_or_false_problem_id	path		string	true	"TrueOrFalseProblem ID"
 //	@Success	204							{object}	nil
 //	@Failure	400							{object}	app_types.ErrorResponse
 //	@Failure	401							{object}	app_types.ErrorResponse
 //	@Failure	404							{object}	app_types.ErrorResponse
 //	@Failure	500							{object}	app_types.ErrorResponse
-//	@Router		/true-or-false-problems/{true_or_false_problem_id} [delete]
+//	@Router		/workbooks/{workbook_id}/true-or-false-problems/{true_or_false_problem_id} [delete]
 func (a *TrueOrFalseProblemController) Delete(c *gin.Context) {
+	userId, _ := c.Get("user_id")
+	workbookId, err := uuid.Parse(c.Param("workbook_id"))
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	trueOrFalseProblemId, err := uuid.Parse(c.Param("true_or_false_problem_id"))
 	if err != nil {
 		c.SecureJSON(
@@ -140,12 +170,15 @@ func (a *TrueOrFalseProblemController) Delete(c *gin.Context) {
 		panic(err)
 	}
 	action := &true_or_false_problems.DeleteAction{
+		PermissionGuard:              permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		TrueOrFalseProblemRepository: repositories.NewTrueOrFalseProblemRepositoryImpl(tx, c),
 		Tx:                           trancaction.NewTx(tx),
 	}
 	usecaseErrGroup := action.Execute(
 		&true_or_false_problems.DeleteActionCommand{
 			TrueOrFalseProblemId: trueOrFalseProblemId,
+			UserId:               userId.(uuid.UUID),
+			WorkbookId:           workbookId,
 		},
 	)
 

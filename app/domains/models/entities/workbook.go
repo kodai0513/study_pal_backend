@@ -21,7 +21,7 @@ type Workbook struct {
 }
 
 func CreateWorkbook(id uuid.UUID, description workbooks.Description, userId uuid.UUID, title workbooks.Title) *Workbook {
-	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Admin, userId, id)}
+	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Owner, userId, id)}
 
 	return &Workbook{
 		id:                    id,

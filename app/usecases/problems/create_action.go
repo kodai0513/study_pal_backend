@@ -8,6 +8,7 @@ import (
 	"study-pal-backend/app/domains/models/value_objects/selection_problems"
 	"study-pal-backend/app/domains/models/value_objects/true_or_false_problems"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/permission_guard"
 	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
@@ -35,6 +36,7 @@ type CreateSelectionProblemAnswer struct {
 type CreateTrueOrFalseProblem struct {
 	IsCorrect          bool
 	Statement          string
+	UserId             uuid.UUID
 	WorkbookCategoryId *uuid.UUID
 }
 
@@ -42,11 +44,13 @@ type CreateActionCommand struct {
 	DescriptionProblems []*CreateDescriptionProblem
 	SelectionProblems   []*CreateSelectionProblem
 	TrueOrFalseProblems []*CreateTrueOrFalseProblem
+	UserId              uuid.UUID
 	WorkbookId          uuid.UUID
 }
 
 type CreateAction struct {
 	DescriptionProblemRepository repositories.DescriptionProblemRepository
+	PermissionGuard              permission_guard.WorkbookPermissionGuard
 	SelectionProblemRepository   repositories.SelectionProblemRepository
 	TrueOrFalseRepository        repositories.TrueOrFalseProblemRepository
 	Tx                           trancaction.Tx
@@ -54,6 +58,10 @@ type CreateAction struct {
 }
 
 func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, usecase_error.UsecaseErrorGroup) {
+	err := c.PermissionGuard.Check("create:problems", command.UserId, command.WorkbookId)
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, err))
+	}
 	hasWorkbook := c.WorkbookRepository.ExistById(command.WorkbookId)
 	if !hasWorkbook {
 		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.QueryDataNotFoundError, errors.New("workbook not found")))
@@ -132,7 +140,7 @@ func (c *CreateAction) Execute(command *CreateActionCommand) (*ProblemDto, useca
 	DescriptionProblemResults := []*entities.DescriptionProblem{}
 	selectoinProblemResults := []*entities.SelectionProblem{}
 	trueOrFalseProblemResults := []*entities.TrueOrFalseProblem{}
-	err := trancaction.WithTx(c.Tx, func() {
+	err = trancaction.WithTx(c.Tx, func() {
 		DescriptionProblemResults = c.DescriptionProblemRepository.CreateBulk(descriptionProblems)
 		selectoinProblemResults = c.SelectionProblemRepository.CreateBulk(selectoinProblems)
 		trueOrFalseProblemResults = c.TrueOrFalseRepository.CreateBulk(trueOrFalseProblems)

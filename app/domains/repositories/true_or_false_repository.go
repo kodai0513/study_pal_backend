@@ -7,9 +7,9 @@ import (
 )
 
 type TrueOrFalseProblemRepository interface {
-	CreateBulk([]*entities.TrueOrFalseProblem) []*entities.TrueOrFalseProblem
-	Delete(uuid.UUID)
-	ExistById(uuid.UUID) bool
-	FindById(uuid.UUID) *entities.TrueOrFalseProblem
-	Update(*entities.TrueOrFalseProblem) *entities.TrueOrFalseProblem
+	CreateBulk(problems []*entities.TrueOrFalseProblem) []*entities.TrueOrFalseProblem
+	Delete(id uuid.UUID, workbookId uuid.UUID)
+	ExistByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) bool
+	FindByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) *entities.TrueOrFalseProblem
+	Update(problem *entities.TrueOrFalseProblem, workbookId uuid.UUID) *entities.TrueOrFalseProblem
 }

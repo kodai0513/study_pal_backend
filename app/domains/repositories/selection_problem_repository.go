@@ -7,9 +7,9 @@ import (
 )
 
 type SelectionProblemRepository interface {
-	CreateBulk([]*entities.SelectionProblem) []*entities.SelectionProblem
-	Delete(uuid.UUID)
-	FindById(uuid.UUID) *entities.SelectionProblem
-	ExistById(uuid.UUID) bool
-	Update(*entities.SelectionProblem) *entities.SelectionProblem
+	CreateBulk(problems []*entities.SelectionProblem) []*entities.SelectionProblem
+	Delete(id uuid.UUID, workbookId uuid.UUID)
+	FindByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) *entities.SelectionProblem
+	ExistByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) bool
+	Update(problem *entities.SelectionProblem, workbookId uuid.UUID) *entities.SelectionProblem
 }
