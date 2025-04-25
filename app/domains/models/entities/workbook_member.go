@@ -26,18 +26,6 @@ func (w *WorkbookMember) Id() uuid.UUID {
 	return w.id
 }
 
-func (w *WorkbookMember) IsAdmin() bool {
-	return w.roleId == master_roles.Admin
-}
-
-func (w *WorkbookMember) IsEditor() bool {
-	return w.roleId == master_roles.Editor
-}
-
-func (w *WorkbookMember) IsReader() bool {
-	return w.roleId == master_roles.Reader
-}
-
 func (w *WorkbookMember) RoleId() uuid.UUID {
 	return w.roleId
 }
@@ -50,14 +38,14 @@ func (w *WorkbookMember) WorkbookId() uuid.UUID {
 	return w.workbookId
 }
 
-func (w *WorkbookMember) ChangeAdmin() {
-	w.roleId = master_roles.Admin
+func (w *WorkbookMember) ChangeOwner() {
+	w.roleId = master_roles.Owner
 }
 
-func (w *WorkbookMember) ChangeEditor() {
-	w.roleId = master_roles.Editor
+func (w *WorkbookMember) ChangeMember() {
+	w.roleId = master_roles.Member
 }
 
-func (w *WorkbookMember) ChangeReader() {
-	w.roleId = master_roles.Reader
+func (w *WorkbookMember) ChangeGuest() {
+	w.roleId = master_roles.Guest
 }

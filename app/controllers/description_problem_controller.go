@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
+	"study-pal-backend/app/infrastructures/permission_guard"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/description_problems"
 	"study-pal-backend/app/usecases/shared/trancaction"
@@ -37,13 +38,15 @@ type UpdateDescriptionProblemResponse struct {
 //	@Accept			json
 //	@Produce		json
 //	@Param			request					body		UpdateDescriptionProblemRequest	true	"記述問題更新リクエスト"
+//	@Param			workbook_id				path		string							true	"Workbook ID"
 //	@Param			description_problem_id	path		string							true	"DescriptionProblem ID"
 //	@Success		200						{object}	UpdateDescriptionProblemResponse
 //	@Failure		400						{object}	app_types.ErrorResponse
 //	@Failure		401						{object}	app_types.ErrorResponse
+//	@Failure		403						{object}	app_types.ErrorResponse
 //	@Failure		404						{object}	app_types.ErrorResponse
 //	@Failure		500						{object}	app_types.ErrorResponse
-//	@Router			/description-problems/{description_problem_id} [patch]
+//	@Router			/workbooks/{workbook_id}/description-problems/{description_problem_id} [patch]
 func (a *DescriptionProblemController) Update(c *gin.Context) {
 	var request UpdateDescriptionProblemRequest
 	err := c.BindJSON(&request)
@@ -58,8 +61,21 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 		return
 	}
 
-	descriptionProblemIdParam := c.Param("description_problem_id")
-	descriptionProblemId, err := uuid.Parse(descriptionProblemIdParam)
+	userId, _ := c.Get("user_id")
+
+	workbookId, err := uuid.Parse(c.Param("workbook_id"))
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
+
+	descriptionProblemId, err := uuid.Parse(c.Param("description_problem_id"))
 	if err != nil {
 		c.SecureJSON(
 			http.StatusBadRequest,
@@ -77,6 +93,7 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 	}
 	action := &description_problems.UpdateAction{
 		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(tx, c),
+		PermissionGuard:              permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		Tx:                           trancaction.NewTx(tx),
 	}
 	descriptionProblemDto, usecaseErrGroup := action.Execute(
@@ -84,6 +101,8 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 			DescriptionProblemId: descriptionProblemId,
 			CorrentStatement:     request.CorrentStatement,
 			Statement:            request.Statement,
+			UserId:               userId.(uuid.UUID),
+			WorkbookId:           workbookId,
 		},
 	)
 
@@ -116,14 +135,29 @@ func (a *DescriptionProblemController) Update(c *gin.Context) {
 //	@Tags		description-problem
 //	@Accept		json
 //	@Produce	json
+//	@Param		workbook_id				path		string	true	"Workbook ID"
 //	@Param		description_problem_id	path		string	true	"DescriptionProblem ID"
 //	@Success	204						{object}	nil
 //	@Failure	400						{object}	app_types.ErrorResponse
 //	@Failure	401						{object}	app_types.ErrorResponse
+//	@Failure	403						{object}	app_types.ErrorResponse
 //	@Failure	404						{object}	app_types.ErrorResponse
 //	@Failure	500						{object}	app_types.ErrorResponse
-//	@Router		/description-problems/{description_problem_id} [delete]
+//	@Router		/workbooks/{workbook_id}/description-problems/{description_problem_id} [delete]
 func (a *DescriptionProblemController) Delete(c *gin.Context) {
+	userId, _ := c.Get("user_id")
+
+	workbookId, err := uuid.Parse(c.Param("workbook_id"))
+	if err != nil {
+		c.SecureJSON(
+			http.StatusBadRequest,
+			&app_types.ErrorResponse{
+				Errors: []string{err.Error()},
+			},
+		)
+		c.Abort()
+		return
+	}
 	descriptionProblemId, err := uuid.Parse(c.Param("description_problem_id"))
 	if err != nil {
 		c.SecureJSON(
@@ -142,11 +176,14 @@ func (a *DescriptionProblemController) Delete(c *gin.Context) {
 	}
 	action := &description_problems.DeleteAction{
 		DescriptionProblemRepository: repositories.NewDescriptionProblemRepositoryImpl(tx, c),
+		PermissionGuard:              permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		Tx:                           trancaction.NewTx(tx),
 	}
 	usecaseErrGroup := action.Execute(
 		&description_problems.DeleteActionCommand{
 			DescriptionProblemId: descriptionProblemId,
+			UserId:               userId.(uuid.UUID),
+			WorkbookId:           workbookId,
 		},
 	)
 

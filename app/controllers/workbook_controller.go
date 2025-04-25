@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"study-pal-backend/app/app_types"
 	"study-pal-backend/app/controllers/shared/mappers"
+	"study-pal-backend/app/infrastructures/permission_guard"
 	"study-pal-backend/app/infrastructures/repositories"
 	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/workbooks"
@@ -104,6 +105,7 @@ type UpdateWorkbookResponse struct {
 //	@Success		200			{object}	UpdateWorkbookResponse
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		403			{object}	app_types.ErrorResponse
 //	@Failure		404			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
 //	@Router			/workbooks/{workbook_id} [patch]
@@ -138,6 +140,7 @@ func (a *WorkbookController) Update(c *gin.Context) {
 		panic(err)
 	}
 	action := &workbooks.UpdateAction{
+		PermissionGuard:    permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		Tx:                 trancaction.NewTx(tx),
 		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(tx, c),
 	}
@@ -182,6 +185,7 @@ func (a *WorkbookController) Update(c *gin.Context) {
 //	@Success		204			{object}	nil
 //	@Failure		400			{object}	app_types.ErrorResponse
 //	@Failure		401			{object}	app_types.ErrorResponse
+//	@Failure		403			{object}	app_types.ErrorResponse
 //	@Failure		500			{object}	app_types.ErrorResponse
 //	@Router			/workbooks/{workbook_id} [delete]
 func (a *WorkbookController) Delete(c *gin.Context) {
@@ -203,13 +207,13 @@ func (a *WorkbookController) Delete(c *gin.Context) {
 		panic(err)
 	}
 	action := &workbooks.DeleteAction{
+		PermissionGuard:    permission_guard.NewWorkbookPermissionGuard(a.AppData.Client(), c),
 		Tx:                 trancaction.NewTx(tx),
 		WorkbookRepository: repositories.NewWorkbookRepositoryImpl(tx, c),
 	}
 	usecaseErrGroup := action.Execute(
 		&workbooks.DeleteActionCommand{
-			UserId: userId.(uuid.UUID),
-
+			UserId:     userId.(uuid.UUID),
 			WorkbookId: workbookId,
 		},
 	)

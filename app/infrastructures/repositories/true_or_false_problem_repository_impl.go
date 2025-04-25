@@ -45,16 +45,29 @@ func (t *TrueOrFalseProblemRepositoryImpl) CreateBulk(problems []*entities.TrueO
 	})
 }
 
-func (t *TrueOrFalseProblemRepositoryImpl) Delete(id uuid.UUID) {
-	t.tx.TrueOrFalseProblem.DeleteOneID(id).ExecX(t.ctx)
+func (t *TrueOrFalseProblemRepositoryImpl) Delete(id uuid.UUID, workbookId uuid.UUID) {
+	t.tx.TrueOrFalseProblem.
+		DeleteOneID(id).
+		Where(trueorfalseproblem.WorkbookIDEQ(workbookId)).
+		ExecX(t.ctx)
 }
 
-func (t *TrueOrFalseProblemRepositoryImpl) ExistById(id uuid.UUID) bool {
-	return t.tx.TrueOrFalseProblem.Query().Where(trueorfalseproblem.IDEQ(id)).ExistX(t.ctx)
+func (t *TrueOrFalseProblemRepositoryImpl) ExistByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) bool {
+	return t.tx.TrueOrFalseProblem.Query().
+		Where(
+			trueorfalseproblem.IDEQ(id),
+			trueorfalseproblem.WorkbookIDEQ(workbookId),
+		).
+		ExistX(t.ctx)
 }
 
-func (t *TrueOrFalseProblemRepositoryImpl) FindById(id uuid.UUID) *entities.TrueOrFalseProblem {
-	result := t.tx.TrueOrFalseProblem.Query().Where(trueorfalseproblem.IDEQ(id)).FirstX(t.ctx)
+func (t *TrueOrFalseProblemRepositoryImpl) FindByIdAndWorkbookId(id uuid.UUID, workbookId uuid.UUID) *entities.TrueOrFalseProblem {
+	result := t.tx.TrueOrFalseProblem.Query().
+		Where(
+			trueorfalseproblem.IDEQ(id),
+			trueorfalseproblem.WorkbookIDEQ(workbookId),
+		).
+		FirstX(t.ctx)
 
 	if result == nil {
 		return nil
@@ -70,8 +83,9 @@ func (t *TrueOrFalseProblemRepositoryImpl) FindById(id uuid.UUID) *entities.True
 	)
 }
 
-func (t *TrueOrFalseProblemRepositoryImpl) Update(problem *entities.TrueOrFalseProblem) *entities.TrueOrFalseProblem {
+func (t *TrueOrFalseProblemRepositoryImpl) Update(problem *entities.TrueOrFalseProblem, workbookId uuid.UUID) *entities.TrueOrFalseProblem {
 	result := t.tx.TrueOrFalseProblem.UpdateOneID(problem.Id()).
+		Where(trueorfalseproblem.WorkbookIDEQ(workbookId)).
 		SetIsCorrect(problem.IsCorrect()).
 		SetStatement(problem.Statement()).
 		SaveX(t.ctx)

@@ -4,6 +4,7 @@ import (
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/models/value_objects/workbook_categories"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/permission_guard"
 	"study-pal-backend/app/usecases/shared/trancaction"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 	"study-pal-backend/app/utils/type_converts"
@@ -19,16 +20,22 @@ type WorkbookCategory struct {
 }
 
 type UpdateActionCommand struct {
+	UserId             uuid.UUID
 	WorkbookId         uuid.UUID
 	WorkbookCategories []*WorkbookCategory
 }
 
 type UpdateAction struct {
+	PermissionGuard            permission_guard.WorkbookPermissionGuard
 	Tx                         trancaction.Tx
 	WorkbookCategoryRepository repositories.WorkbookCategoryRepository
 }
 
 func (a *UpdateAction) Execute(command *UpdateActionCommand) ([]*WorkbookCategoryDto, usecase_error.UsecaseErrorGroup) {
+	err := a.PermissionGuard.Check("update:workbook-categories", command.UserId, command.WorkbookId)
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, err))
+	}
 	invalidUsecaseErrGroup := usecase_error.NewUsecaseErrorGroup(usecase_error.InvalidParameter)
 
 	categories := lo.Map(command.WorkbookCategories, func(root *WorkbookCategory, _ int) *entities.WorkbookCategory {
@@ -88,7 +95,7 @@ func (a *UpdateAction) Execute(command *UpdateActionCommand) ([]*WorkbookCategor
 	}
 
 	results := []*entities.WorkbookCategory{}
-	err := trancaction.WithTx(a.Tx, func() {
+	err = trancaction.WithTx(a.Tx, func() {
 		results = a.WorkbookCategoryRepository.UpsertAndDeleteBulk(categories, command.WorkbookId)
 	})
 

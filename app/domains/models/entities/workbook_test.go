@@ -38,7 +38,7 @@ func TestWorkbook_正常に更新できるか(t *testing.T) {
 	assert.NoError(t, err)
 	userId := uuid.New()
 	workbookId := uuid.New()
-	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Admin, userId, workbookId)}
+	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Owner, userId, workbookId)}
 	workbook := NewWorkbook(
 		workbookId,
 		description,
@@ -75,7 +75,7 @@ func TestWorkbook_問題が無い時に公開できないようになってい�
 	assert.NoError(t, err)
 	userId := uuid.New()
 	workbookId := uuid.New()
-	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Admin, userId, workbookId)}
+	workbookMembers := []*WorkbookMember{NewWorkbookMember(uuid.New(), master_roles.Owner, userId, workbookId)}
 	workbook := NewWorkbook(
 		workbookId,
 		description,

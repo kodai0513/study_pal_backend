@@ -4,6 +4,7 @@ import (
 	"errors"
 	"study-pal-backend/app/domains/models/entities"
 	"study-pal-backend/app/domains/repositories"
+	"study-pal-backend/app/usecases/shared/permission_guard"
 	"study-pal-backend/app/usecases/shared/usecase_error"
 
 	"github.com/google/uuid"
@@ -11,14 +12,20 @@ import (
 )
 
 type IndexActionCommand struct {
+	UserId     uuid.UUID
 	WorkbookId uuid.UUID
 }
 
 type IndexAction struct {
+	PermissionGuard            permission_guard.WorkbookPermissionGuard
 	WorkbookCategoryRepository repositories.WorkbookCategoryRepository
 }
 
 func (a *IndexAction) Execute(command *IndexActionCommand) ([]*WorkbookCategoryDto, usecase_error.UsecaseErrorGroup) {
+	err := a.PermissionGuard.Check("read:workbook-categories", command.UserId, command.WorkbookId)
+	if err != nil {
+		return nil, usecase_error.NewUsecaseErrorGroupWithMessage(usecase_error.NewUsecaseError(usecase_error.UnPermittedOperation, err))
+	}
 	workbookCategories := a.WorkbookCategoryRepository.FindByWorkbookId(command.WorkbookId)
 
 	if len(workbookCategories) == 0 {
