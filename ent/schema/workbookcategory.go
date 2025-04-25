@@ -38,9 +38,9 @@ func (WorkbookCategory) Fields() []ent.Field {
 // Edges of the WorkbookCategory.
 func (WorkbookCategory) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To(descriptionproblem.Table, DescriptionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(descriptionproblem.Table, DescriptionProblem.Type).Annotations(entsql.OnDelete(entsql.SetNull)),
+		edge.To(selectionproblem.Table, SelectionProblem.Type).Annotations(entsql.OnDelete(entsql.SetNull)),
+		edge.To(trueorfalseproblem.Table, TrueOrFalseProblem.Type).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.From(workbook.Label, Workbook.Type).Ref(workbookcategory.Table).Unique().Required().Field("workbook_id"),
 	}
 }
