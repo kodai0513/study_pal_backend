@@ -80,7 +80,7 @@ var (
 				Symbol:     "description_problems_workbook_categories_description_problems",
 				Columns:    []*schema.Column{DescriptionProblemsColumns[6]},
 				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
-				OnDelete:   schema.Cascade,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -135,7 +135,7 @@ var (
 				Symbol:     "selection_problems_workbook_categories_selection_problems",
 				Columns:    []*schema.Column{SelectionProblemsColumns[5]},
 				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
-				OnDelete:   schema.Cascade,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -188,7 +188,7 @@ var (
 				Symbol:     "true_or_false_problems_workbook_categories_true_or_false_problems",
 				Columns:    []*schema.Column{TrueOrFalseProblemsColumns[6]},
 				RefColumns: []*schema.Column{WorkbookCategoriesColumns[0]},
-				OnDelete:   schema.Cascade,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
