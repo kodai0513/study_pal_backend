@@ -8,6 +8,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -48,5 +49,6 @@ func (Workbook) Edges() []ent.Edge {
 		edge.From(user.Label, User.Type).Ref(workbook.Table).Unique().Required().Field("user_id"),
 		edge.To(workbookcategory.Table, WorkbookCategory.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(workbookinvitationmember.Table, WorkbookInvitationMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

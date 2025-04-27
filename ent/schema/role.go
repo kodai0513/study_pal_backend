@@ -4,6 +4,7 @@ import (
 	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/role"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -35,6 +36,7 @@ func (Role) Fields() []ent.Field {
 func (Role) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Restrict)),
+		edge.To(workbookinvitationmember.Table, WorkbookInvitationMember.Type).Annotations(entsql.OnDelete(entsql.Restrict)),
 		edge.From(permission.Table, Permission.Type).Ref(role.Table).Required(),
 	}
 }

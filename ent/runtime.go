@@ -16,6 +16,7 @@ import (
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 )
@@ -450,6 +451,21 @@ func init() {
 	workbookcategoryclosure.DefaultUpdatedAt = workbookcategoryclosureDescUpdatedAt.Default.(func() time.Time)
 	// workbookcategoryclosure.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	workbookcategoryclosure.UpdateDefaultUpdatedAt = workbookcategoryclosureDescUpdatedAt.UpdateDefault.(func() time.Time)
+	workbookinvitationmemberMixin := schema.WorkbookInvitationMember{}.Mixin()
+	workbookinvitationmemberMixinFields1 := workbookinvitationmemberMixin[1].Fields()
+	_ = workbookinvitationmemberMixinFields1
+	workbookinvitationmemberFields := schema.WorkbookInvitationMember{}.Fields()
+	_ = workbookinvitationmemberFields
+	// workbookinvitationmemberDescCreatedAt is the schema descriptor for created_at field.
+	workbookinvitationmemberDescCreatedAt := workbookinvitationmemberMixinFields1[0].Descriptor()
+	// workbookinvitationmember.DefaultCreatedAt holds the default value on creation for the created_at field.
+	workbookinvitationmember.DefaultCreatedAt = workbookinvitationmemberDescCreatedAt.Default.(func() time.Time)
+	// workbookinvitationmemberDescUpdatedAt is the schema descriptor for updated_at field.
+	workbookinvitationmemberDescUpdatedAt := workbookinvitationmemberMixinFields1[1].Descriptor()
+	// workbookinvitationmember.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	workbookinvitationmember.DefaultUpdatedAt = workbookinvitationmemberDescUpdatedAt.Default.(func() time.Time)
+	// workbookinvitationmember.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	workbookinvitationmember.UpdateDefaultUpdatedAt = workbookinvitationmemberDescUpdatedAt.UpdateDefault.(func() time.Time)
 	workbookmemberMixin := schema.WorkbookMember{}.Mixin()
 	workbookmemberMixinFields1 := workbookmemberMixin[1].Fields()
 	_ = workbookmemberMixinFields1

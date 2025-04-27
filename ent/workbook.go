@@ -51,9 +51,11 @@ type WorkbookEdges struct {
 	WorkbookCategories []*WorkbookCategory `json:"workbook_categories,omitempty"`
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
+	// WorkbookInvitationMembers holds the value of the workbook_invitation_members edge.
+	WorkbookInvitationMembers []*WorkbookInvitationMember `json:"workbook_invitation_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // DescriptionProblemsOrErr returns the DescriptionProblems value or an error if the edge
@@ -110,6 +112,15 @@ func (e WorkbookEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
 		return e.WorkbookMembers, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_members"}
+}
+
+// WorkbookInvitationMembersOrErr returns the WorkbookInvitationMembers value or an error if the edge
+// was not loaded in eager-loading.
+func (e WorkbookEdges) WorkbookInvitationMembersOrErr() ([]*WorkbookInvitationMember, error) {
+	if e.loadedTypes[6] {
+		return e.WorkbookInvitationMembers, nil
+	}
+	return nil, &NotLoadedError{edge: "workbook_invitation_members"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -224,6 +235,11 @@ func (w *Workbook) QueryWorkbookCategories() *WorkbookCategoryQuery {
 // QueryWorkbookMembers queries the "workbook_members" edge of the Workbook entity.
 func (w *Workbook) QueryWorkbookMembers() *WorkbookMemberQuery {
 	return NewWorkbookClient(w.config).QueryWorkbookMembers(w)
+}
+
+// QueryWorkbookInvitationMembers queries the "workbook_invitation_members" edge of the Workbook entity.
+func (w *Workbook) QueryWorkbookInvitationMembers() *WorkbookInvitationMemberQuery {
+	return NewWorkbookClient(w.config).QueryWorkbookInvitationMembers(w)
 }
 
 // Update returns a builder for updating this Workbook.

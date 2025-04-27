@@ -14,6 +14,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -26,16 +27,17 @@ import (
 // WorkbookQuery is the builder for querying Workbook entities.
 type WorkbookQuery struct {
 	config
-	ctx                     *QueryContext
-	order                   []workbook.OrderOption
-	inters                  []Interceptor
-	predicates              []predicate.Workbook
-	withDescriptionProblems *DescriptionProblemQuery
-	withSelectionProblems   *SelectionProblemQuery
-	withTrueOrFalseProblems *TrueOrFalseProblemQuery
-	withUser                *UserQuery
-	withWorkbookCategories  *WorkbookCategoryQuery
-	withWorkbookMembers     *WorkbookMemberQuery
+	ctx                           *QueryContext
+	order                         []workbook.OrderOption
+	inters                        []Interceptor
+	predicates                    []predicate.Workbook
+	withDescriptionProblems       *DescriptionProblemQuery
+	withSelectionProblems         *SelectionProblemQuery
+	withTrueOrFalseProblems       *TrueOrFalseProblemQuery
+	withUser                      *UserQuery
+	withWorkbookCategories        *WorkbookCategoryQuery
+	withWorkbookMembers           *WorkbookMemberQuery
+	withWorkbookInvitationMembers *WorkbookInvitationMemberQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -197,6 +199,28 @@ func (wq *WorkbookQuery) QueryWorkbookMembers() *WorkbookMemberQuery {
 			sqlgraph.From(workbook.Table, workbook.FieldID, selector),
 			sqlgraph.To(workbookmember.Table, workbookmember.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, workbook.WorkbookMembersTable, workbook.WorkbookMembersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWorkbookInvitationMembers chains the current query on the "workbook_invitation_members" edge.
+func (wq *WorkbookQuery) QueryWorkbookInvitationMembers() *WorkbookInvitationMemberQuery {
+	query := (&WorkbookInvitationMemberClient{config: wq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, selector),
+			sqlgraph.To(workbookinvitationmember.Table, workbookinvitationmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbook.WorkbookInvitationMembersTable, workbook.WorkbookInvitationMembersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -391,17 +415,18 @@ func (wq *WorkbookQuery) Clone() *WorkbookQuery {
 		return nil
 	}
 	return &WorkbookQuery{
-		config:                  wq.config,
-		ctx:                     wq.ctx.Clone(),
-		order:                   append([]workbook.OrderOption{}, wq.order...),
-		inters:                  append([]Interceptor{}, wq.inters...),
-		predicates:              append([]predicate.Workbook{}, wq.predicates...),
-		withDescriptionProblems: wq.withDescriptionProblems.Clone(),
-		withSelectionProblems:   wq.withSelectionProblems.Clone(),
-		withTrueOrFalseProblems: wq.withTrueOrFalseProblems.Clone(),
-		withUser:                wq.withUser.Clone(),
-		withWorkbookCategories:  wq.withWorkbookCategories.Clone(),
-		withWorkbookMembers:     wq.withWorkbookMembers.Clone(),
+		config:                        wq.config,
+		ctx:                           wq.ctx.Clone(),
+		order:                         append([]workbook.OrderOption{}, wq.order...),
+		inters:                        append([]Interceptor{}, wq.inters...),
+		predicates:                    append([]predicate.Workbook{}, wq.predicates...),
+		withDescriptionProblems:       wq.withDescriptionProblems.Clone(),
+		withSelectionProblems:         wq.withSelectionProblems.Clone(),
+		withTrueOrFalseProblems:       wq.withTrueOrFalseProblems.Clone(),
+		withUser:                      wq.withUser.Clone(),
+		withWorkbookCategories:        wq.withWorkbookCategories.Clone(),
+		withWorkbookMembers:           wq.withWorkbookMembers.Clone(),
+		withWorkbookInvitationMembers: wq.withWorkbookInvitationMembers.Clone(),
 		// clone intermediate query.
 		sql:  wq.sql.Clone(),
 		path: wq.path,
@@ -471,6 +496,17 @@ func (wq *WorkbookQuery) WithWorkbookMembers(opts ...func(*WorkbookMemberQuery))
 		opt(query)
 	}
 	wq.withWorkbookMembers = query
+	return wq
+}
+
+// WithWorkbookInvitationMembers tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_invitation_members" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WorkbookQuery) WithWorkbookInvitationMembers(opts ...func(*WorkbookInvitationMemberQuery)) *WorkbookQuery {
+	query := (&WorkbookInvitationMemberClient{config: wq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withWorkbookInvitationMembers = query
 	return wq
 }
 
@@ -552,13 +588,14 @@ func (wq *WorkbookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wor
 	var (
 		nodes       = []*Workbook{}
 		_spec       = wq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			wq.withDescriptionProblems != nil,
 			wq.withSelectionProblems != nil,
 			wq.withTrueOrFalseProblems != nil,
 			wq.withUser != nil,
 			wq.withWorkbookCategories != nil,
 			wq.withWorkbookMembers != nil,
+			wq.withWorkbookInvitationMembers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -625,6 +662,15 @@ func (wq *WorkbookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wor
 		if err := wq.loadWorkbookMembers(ctx, query, nodes,
 			func(n *Workbook) { n.Edges.WorkbookMembers = []*WorkbookMember{} },
 			func(n *Workbook, e *WorkbookMember) { n.Edges.WorkbookMembers = append(n.Edges.WorkbookMembers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := wq.withWorkbookInvitationMembers; query != nil {
+		if err := wq.loadWorkbookInvitationMembers(ctx, query, nodes,
+			func(n *Workbook) { n.Edges.WorkbookInvitationMembers = []*WorkbookInvitationMember{} },
+			func(n *Workbook, e *WorkbookInvitationMember) {
+				n.Edges.WorkbookInvitationMembers = append(n.Edges.WorkbookInvitationMembers, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -795,6 +841,36 @@ func (wq *WorkbookQuery) loadWorkbookMembers(ctx context.Context, query *Workboo
 	}
 	query.Where(predicate.WorkbookMember(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(workbook.WorkbookMembersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.WorkbookID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "workbook_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (wq *WorkbookQuery) loadWorkbookInvitationMembers(ctx context.Context, query *WorkbookInvitationMemberQuery, nodes []*Workbook, init func(*Workbook), assign func(*Workbook, *WorkbookInvitationMember)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Workbook)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(workbookinvitationmember.FieldWorkbookID)
+	}
+	query.Where(predicate.WorkbookInvitationMember(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(workbook.WorkbookInvitationMembersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

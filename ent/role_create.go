@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/role"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 
@@ -76,6 +77,21 @@ func (rc *RoleCreate) AddWorkbookMembers(w ...*WorkbookMember) *RoleCreate {
 		ids[i] = w[i].ID
 	}
 	return rc.AddWorkbookMemberIDs(ids...)
+}
+
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (rc *RoleCreate) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) *RoleCreate {
+	rc.mutation.AddWorkbookInvitationMemberIDs(ids...)
+	return rc
+}
+
+// AddWorkbookInvitationMembers adds the "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (rc *RoleCreate) AddWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *RoleCreate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return rc.AddWorkbookInvitationMemberIDs(ids...)
 }
 
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
@@ -213,6 +229,22 @@ func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.WorkbookInvitationMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

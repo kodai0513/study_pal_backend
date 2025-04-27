@@ -34,11 +34,13 @@ type Role struct {
 type RoleEdges struct {
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
+	// WorkbookInvitationMembers holds the value of the workbook_invitation_members edge.
+	WorkbookInvitationMembers []*WorkbookInvitationMember `json:"workbook_invitation_members,omitempty"`
 	// Permissions holds the value of the permissions edge.
 	Permissions []*Permission `json:"permissions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // WorkbookMembersOrErr returns the WorkbookMembers value or an error if the edge
@@ -50,10 +52,19 @@ func (e RoleEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
 	return nil, &NotLoadedError{edge: "workbook_members"}
 }
 
+// WorkbookInvitationMembersOrErr returns the WorkbookInvitationMembers value or an error if the edge
+// was not loaded in eager-loading.
+func (e RoleEdges) WorkbookInvitationMembersOrErr() ([]*WorkbookInvitationMember, error) {
+	if e.loadedTypes[1] {
+		return e.WorkbookInvitationMembers, nil
+	}
+	return nil, &NotLoadedError{edge: "workbook_invitation_members"}
+}
+
 // PermissionsOrErr returns the Permissions value or an error if the edge
 // was not loaded in eager-loading.
 func (e RoleEdges) PermissionsOrErr() ([]*Permission, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Permissions, nil
 	}
 	return nil, &NotLoadedError{edge: "permissions"}
@@ -125,6 +136,11 @@ func (r *Role) Value(name string) (ent.Value, error) {
 // QueryWorkbookMembers queries the "workbook_members" edge of the Role entity.
 func (r *Role) QueryWorkbookMembers() *WorkbookMemberQuery {
 	return NewRoleClient(r.config).QueryWorkbookMembers(r)
+}
+
+// QueryWorkbookInvitationMembers queries the "workbook_invitation_members" edge of the Role entity.
+func (r *Role) QueryWorkbookInvitationMembers() *WorkbookInvitationMemberQuery {
+	return NewRoleClient(r.config).QueryWorkbookInvitationMembers(r)
 }
 
 // QueryPermissions queries the "permissions" edge of the Role entity.

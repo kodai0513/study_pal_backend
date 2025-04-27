@@ -61,6 +61,18 @@ go run . query Test
 ```
 
 
+### リポジトリのテンプレートファイル作成
+```sh
+cd cmd/codegen
+
+# リポジトリ作成
+go run . repository [リポジトリ名]
+
+#example
+go run . repository Test
+```
+
+
 # マイグレーション、ドメイン追加手順
 
 ### コマンドを実行しスキーマを定義

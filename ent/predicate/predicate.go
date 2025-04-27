@@ -42,5 +42,8 @@ type WorkbookCategory func(*sql.Selector)
 // WorkbookCategoryClosure is the predicate function for workbookcategoryclosure builders.
 type WorkbookCategoryClosure func(*sql.Selector)
 
+// WorkbookInvitationMember is the predicate function for workbookinvitationmember builders.
+type WorkbookInvitationMember func(*sql.Selector)
+
 // WorkbookMember is the predicate function for workbookmember builders.
 type WorkbookMember func(*sql.Selector)

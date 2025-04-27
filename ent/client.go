@@ -23,6 +23,7 @@ import (
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -61,6 +62,8 @@ type Client struct {
 	WorkbookCategory *WorkbookCategoryClient
 	// WorkbookCategoryClosure is the client for interacting with the WorkbookCategoryClosure builders.
 	WorkbookCategoryClosure *WorkbookCategoryClosureClient
+	// WorkbookInvitationMember is the client for interacting with the WorkbookInvitationMember builders.
+	WorkbookInvitationMember *WorkbookInvitationMemberClient
 	// WorkbookMember is the client for interacting with the WorkbookMember builders.
 	WorkbookMember *WorkbookMemberClient
 }
@@ -86,6 +89,7 @@ func (c *Client) init() {
 	c.Workbook = NewWorkbookClient(c.config)
 	c.WorkbookCategory = NewWorkbookCategoryClient(c.config)
 	c.WorkbookCategoryClosure = NewWorkbookCategoryClosureClient(c.config)
+	c.WorkbookInvitationMember = NewWorkbookInvitationMemberClient(c.config)
 	c.WorkbookMember = NewWorkbookMemberClient(c.config)
 }
 
@@ -177,21 +181,22 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		Article:                 NewArticleClient(cfg),
-		ArticleLike:             NewArticleLikeClient(cfg),
-		DescriptionProblem:      NewDescriptionProblemClient(cfg),
-		Permission:              NewPermissionClient(cfg),
-		Role:                    NewRoleClient(cfg),
-		SelectionProblem:        NewSelectionProblemClient(cfg),
-		SelectionProblemAnswer:  NewSelectionProblemAnswerClient(cfg),
-		TrueOrFalseProblem:      NewTrueOrFalseProblemClient(cfg),
-		User:                    NewUserClient(cfg),
-		Workbook:                NewWorkbookClient(cfg),
-		WorkbookCategory:        NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryClosure: NewWorkbookCategoryClosureClient(cfg),
-		WorkbookMember:          NewWorkbookMemberClient(cfg),
+		ctx:                      ctx,
+		config:                   cfg,
+		Article:                  NewArticleClient(cfg),
+		ArticleLike:              NewArticleLikeClient(cfg),
+		DescriptionProblem:       NewDescriptionProblemClient(cfg),
+		Permission:               NewPermissionClient(cfg),
+		Role:                     NewRoleClient(cfg),
+		SelectionProblem:         NewSelectionProblemClient(cfg),
+		SelectionProblemAnswer:   NewSelectionProblemAnswerClient(cfg),
+		TrueOrFalseProblem:       NewTrueOrFalseProblemClient(cfg),
+		User:                     NewUserClient(cfg),
+		Workbook:                 NewWorkbookClient(cfg),
+		WorkbookCategory:         NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryClosure:  NewWorkbookCategoryClosureClient(cfg),
+		WorkbookInvitationMember: NewWorkbookInvitationMemberClient(cfg),
+		WorkbookMember:           NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -209,21 +214,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		Article:                 NewArticleClient(cfg),
-		ArticleLike:             NewArticleLikeClient(cfg),
-		DescriptionProblem:      NewDescriptionProblemClient(cfg),
-		Permission:              NewPermissionClient(cfg),
-		Role:                    NewRoleClient(cfg),
-		SelectionProblem:        NewSelectionProblemClient(cfg),
-		SelectionProblemAnswer:  NewSelectionProblemAnswerClient(cfg),
-		TrueOrFalseProblem:      NewTrueOrFalseProblemClient(cfg),
-		User:                    NewUserClient(cfg),
-		Workbook:                NewWorkbookClient(cfg),
-		WorkbookCategory:        NewWorkbookCategoryClient(cfg),
-		WorkbookCategoryClosure: NewWorkbookCategoryClosureClient(cfg),
-		WorkbookMember:          NewWorkbookMemberClient(cfg),
+		ctx:                      ctx,
+		config:                   cfg,
+		Article:                  NewArticleClient(cfg),
+		ArticleLike:              NewArticleLikeClient(cfg),
+		DescriptionProblem:       NewDescriptionProblemClient(cfg),
+		Permission:               NewPermissionClient(cfg),
+		Role:                     NewRoleClient(cfg),
+		SelectionProblem:         NewSelectionProblemClient(cfg),
+		SelectionProblemAnswer:   NewSelectionProblemAnswerClient(cfg),
+		TrueOrFalseProblem:       NewTrueOrFalseProblemClient(cfg),
+		User:                     NewUserClient(cfg),
+		Workbook:                 NewWorkbookClient(cfg),
+		WorkbookCategory:         NewWorkbookCategoryClient(cfg),
+		WorkbookCategoryClosure:  NewWorkbookCategoryClosureClient(cfg),
+		WorkbookInvitationMember: NewWorkbookInvitationMemberClient(cfg),
+		WorkbookMember:           NewWorkbookMemberClient(cfg),
 	}, nil
 }
 
@@ -255,7 +261,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Article, c.ArticleLike, c.DescriptionProblem, c.Permission, c.Role,
 		c.SelectionProblem, c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User,
-		c.Workbook, c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
+		c.Workbook, c.WorkbookCategory, c.WorkbookCategoryClosure,
+		c.WorkbookInvitationMember, c.WorkbookMember,
 	} {
 		n.Use(hooks...)
 	}
@@ -267,7 +274,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Article, c.ArticleLike, c.DescriptionProblem, c.Permission, c.Role,
 		c.SelectionProblem, c.SelectionProblemAnswer, c.TrueOrFalseProblem, c.User,
-		c.Workbook, c.WorkbookCategory, c.WorkbookCategoryClosure, c.WorkbookMember,
+		c.Workbook, c.WorkbookCategory, c.WorkbookCategoryClosure,
+		c.WorkbookInvitationMember, c.WorkbookMember,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -300,6 +308,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.WorkbookCategory.mutate(ctx, m)
 	case *WorkbookCategoryClosureMutation:
 		return c.WorkbookCategoryClosure.mutate(ctx, m)
+	case *WorkbookInvitationMemberMutation:
+		return c.WorkbookInvitationMember.mutate(ctx, m)
 	case *WorkbookMemberMutation:
 		return c.WorkbookMember.mutate(ctx, m)
 	default:
@@ -1059,6 +1069,22 @@ func (c *RoleClient) QueryWorkbookMembers(r *Role) *WorkbookMemberQuery {
 	return query
 }
 
+// QueryWorkbookInvitationMembers queries the workbook_invitation_members edge of a Role.
+func (c *RoleClient) QueryWorkbookInvitationMembers(r *Role) *WorkbookInvitationMemberQuery {
+	query := (&WorkbookInvitationMemberClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(workbookinvitationmember.Table, workbookinvitationmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.WorkbookInvitationMembersTable, role.WorkbookInvitationMembersColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPermissions queries the permissions edge of a Role.
 func (c *RoleClient) QueryPermissions(r *Role) *PermissionQuery {
 	query := (&PermissionClient{config: c.config}).Query()
@@ -1751,6 +1777,22 @@ func (c *UserClient) QueryWorkbookMembers(u *User) *WorkbookMemberQuery {
 	return query
 }
 
+// QueryWorkbookInvitationMembers queries the workbook_invitation_members edge of a User.
+func (c *UserClient) QueryWorkbookInvitationMembers(u *User) *WorkbookInvitationMemberQuery {
+	query := (&WorkbookInvitationMemberClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(workbookinvitationmember.Table, workbookinvitationmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WorkbookInvitationMembersTable, user.WorkbookInvitationMembersColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1973,6 +2015,22 @@ func (c *WorkbookClient) QueryWorkbookMembers(w *Workbook) *WorkbookMemberQuery 
 			sqlgraph.From(workbook.Table, workbook.FieldID, id),
 			sqlgraph.To(workbookmember.Table, workbookmember.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, workbook.WorkbookMembersTable, workbook.WorkbookMembersColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWorkbookInvitationMembers queries the workbook_invitation_members edge of a Workbook.
+func (c *WorkbookClient) QueryWorkbookInvitationMembers(w *Workbook) *WorkbookInvitationMemberQuery {
+	query := (&WorkbookInvitationMemberClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbook.Table, workbook.FieldID, id),
+			sqlgraph.To(workbookinvitationmember.Table, workbookinvitationmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, workbook.WorkbookInvitationMembersTable, workbook.WorkbookInvitationMembersColumn),
 		)
 		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
 		return fromV, nil
@@ -2367,6 +2425,187 @@ func (c *WorkbookCategoryClosureClient) mutate(ctx context.Context, m *WorkbookC
 	}
 }
 
+// WorkbookInvitationMemberClient is a client for the WorkbookInvitationMember schema.
+type WorkbookInvitationMemberClient struct {
+	config
+}
+
+// NewWorkbookInvitationMemberClient returns a client for the WorkbookInvitationMember from the given config.
+func NewWorkbookInvitationMemberClient(c config) *WorkbookInvitationMemberClient {
+	return &WorkbookInvitationMemberClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `workbookinvitationmember.Hooks(f(g(h())))`.
+func (c *WorkbookInvitationMemberClient) Use(hooks ...Hook) {
+	c.hooks.WorkbookInvitationMember = append(c.hooks.WorkbookInvitationMember, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `workbookinvitationmember.Intercept(f(g(h())))`.
+func (c *WorkbookInvitationMemberClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WorkbookInvitationMember = append(c.inters.WorkbookInvitationMember, interceptors...)
+}
+
+// Create returns a builder for creating a WorkbookInvitationMember entity.
+func (c *WorkbookInvitationMemberClient) Create() *WorkbookInvitationMemberCreate {
+	mutation := newWorkbookInvitationMemberMutation(c.config, OpCreate)
+	return &WorkbookInvitationMemberCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WorkbookInvitationMember entities.
+func (c *WorkbookInvitationMemberClient) CreateBulk(builders ...*WorkbookInvitationMemberCreate) *WorkbookInvitationMemberCreateBulk {
+	return &WorkbookInvitationMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WorkbookInvitationMemberClient) MapCreateBulk(slice any, setFunc func(*WorkbookInvitationMemberCreate, int)) *WorkbookInvitationMemberCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WorkbookInvitationMemberCreateBulk{err: fmt.Errorf("calling to WorkbookInvitationMemberClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WorkbookInvitationMemberCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WorkbookInvitationMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WorkbookInvitationMember.
+func (c *WorkbookInvitationMemberClient) Update() *WorkbookInvitationMemberUpdate {
+	mutation := newWorkbookInvitationMemberMutation(c.config, OpUpdate)
+	return &WorkbookInvitationMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WorkbookInvitationMemberClient) UpdateOne(wim *WorkbookInvitationMember) *WorkbookInvitationMemberUpdateOne {
+	mutation := newWorkbookInvitationMemberMutation(c.config, OpUpdateOne, withWorkbookInvitationMember(wim))
+	return &WorkbookInvitationMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WorkbookInvitationMemberClient) UpdateOneID(id uuid.UUID) *WorkbookInvitationMemberUpdateOne {
+	mutation := newWorkbookInvitationMemberMutation(c.config, OpUpdateOne, withWorkbookInvitationMemberID(id))
+	return &WorkbookInvitationMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WorkbookInvitationMember.
+func (c *WorkbookInvitationMemberClient) Delete() *WorkbookInvitationMemberDelete {
+	mutation := newWorkbookInvitationMemberMutation(c.config, OpDelete)
+	return &WorkbookInvitationMemberDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WorkbookInvitationMemberClient) DeleteOne(wim *WorkbookInvitationMember) *WorkbookInvitationMemberDeleteOne {
+	return c.DeleteOneID(wim.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WorkbookInvitationMemberClient) DeleteOneID(id uuid.UUID) *WorkbookInvitationMemberDeleteOne {
+	builder := c.Delete().Where(workbookinvitationmember.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WorkbookInvitationMemberDeleteOne{builder}
+}
+
+// Query returns a query builder for WorkbookInvitationMember.
+func (c *WorkbookInvitationMemberClient) Query() *WorkbookInvitationMemberQuery {
+	return &WorkbookInvitationMemberQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWorkbookInvitationMember},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WorkbookInvitationMember entity by its id.
+func (c *WorkbookInvitationMemberClient) Get(ctx context.Context, id uuid.UUID) (*WorkbookInvitationMember, error) {
+	return c.Query().Where(workbookinvitationmember.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WorkbookInvitationMemberClient) GetX(ctx context.Context, id uuid.UUID) *WorkbookInvitationMember {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRole queries the role edge of a WorkbookInvitationMember.
+func (c *WorkbookInvitationMemberClient) QueryRole(wim *WorkbookInvitationMember) *RoleQuery {
+	query := (&RoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wim.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbookinvitationmember.Table, workbookinvitationmember.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, workbookinvitationmember.RoleTable, workbookinvitationmember.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(wim.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a WorkbookInvitationMember.
+func (c *WorkbookInvitationMemberClient) QueryUser(wim *WorkbookInvitationMember) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wim.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbookinvitationmember.Table, workbookinvitationmember.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, workbookinvitationmember.UserTable, workbookinvitationmember.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(wim.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWorkbook queries the workbook edge of a WorkbookInvitationMember.
+func (c *WorkbookInvitationMemberClient) QueryWorkbook(wim *WorkbookInvitationMember) *WorkbookQuery {
+	query := (&WorkbookClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wim.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(workbookinvitationmember.Table, workbookinvitationmember.FieldID, id),
+			sqlgraph.To(workbook.Table, workbook.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, workbookinvitationmember.WorkbookTable, workbookinvitationmember.WorkbookColumn),
+		)
+		fromV = sqlgraph.Neighbors(wim.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WorkbookInvitationMemberClient) Hooks() []Hook {
+	return c.hooks.WorkbookInvitationMember
+}
+
+// Interceptors returns the client interceptors.
+func (c *WorkbookInvitationMemberClient) Interceptors() []Interceptor {
+	return c.inters.WorkbookInvitationMember
+}
+
+func (c *WorkbookInvitationMemberClient) mutate(ctx context.Context, m *WorkbookInvitationMemberMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WorkbookInvitationMemberCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WorkbookInvitationMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WorkbookInvitationMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WorkbookInvitationMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WorkbookInvitationMember mutation op: %q", m.Op())
+	}
+}
+
 // WorkbookMemberClient is a client for the WorkbookMember schema.
 type WorkbookMemberClient struct {
 	config
@@ -2553,11 +2792,12 @@ type (
 	hooks struct {
 		Article, ArticleLike, DescriptionProblem, Permission, Role, SelectionProblem,
 		SelectionProblemAnswer, TrueOrFalseProblem, User, Workbook, WorkbookCategory,
-		WorkbookCategoryClosure, WorkbookMember []ent.Hook
+		WorkbookCategoryClosure, WorkbookInvitationMember, WorkbookMember []ent.Hook
 	}
 	inters struct {
 		Article, ArticleLike, DescriptionProblem, Permission, Role, SelectionProblem,
 		SelectionProblemAnswer, TrueOrFalseProblem, User, Workbook, WorkbookCategory,
-		WorkbookCategoryClosure, WorkbookMember []ent.Interceptor
+		WorkbookCategoryClosure, WorkbookInvitationMember,
+		WorkbookMember []ent.Interceptor
 	}
 )

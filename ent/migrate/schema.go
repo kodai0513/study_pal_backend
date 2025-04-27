@@ -286,6 +286,43 @@ var (
 			},
 		},
 	}
+	// WorkbookInvitationMembersColumns holds the columns for the "workbook_invitation_members" table.
+	WorkbookInvitationMembersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "effective_at", Type: field.TypeTime},
+		{Name: "is_invited", Type: field.TypeBool},
+		{Name: "role_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "workbook_id", Type: field.TypeUUID},
+	}
+	// WorkbookInvitationMembersTable holds the schema information for the "workbook_invitation_members" table.
+	WorkbookInvitationMembersTable = &schema.Table{
+		Name:       "workbook_invitation_members",
+		Columns:    WorkbookInvitationMembersColumns,
+		PrimaryKey: []*schema.Column{WorkbookInvitationMembersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "workbook_invitation_members_roles_workbook_invitation_members",
+				Columns:    []*schema.Column{WorkbookInvitationMembersColumns[5]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.Restrict,
+			},
+			{
+				Symbol:     "workbook_invitation_members_users_workbook_invitation_members",
+				Columns:    []*schema.Column{WorkbookInvitationMembersColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "workbook_invitation_members_workbooks_workbook_invitation_members",
+				Columns:    []*schema.Column{WorkbookInvitationMembersColumns[7]},
+				RefColumns: []*schema.Column{WorkbooksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// WorkbookMembersColumns holds the columns for the "workbook_members" table.
 	WorkbookMembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -360,6 +397,7 @@ var (
 		WorkbooksTable,
 		WorkbookCategoriesTable,
 		WorkbookCategoryClosuresTable,
+		WorkbookInvitationMembersTable,
 		WorkbookMembersTable,
 		PermissionRolesTable,
 	}
@@ -379,6 +417,9 @@ func init() {
 	WorkbookCategoriesTable.ForeignKeys[0].RefTable = WorkbooksTable
 	WorkbookCategoryClosuresTable.ForeignKeys[0].RefTable = WorkbookCategoriesTable
 	WorkbookCategoryClosuresTable.ForeignKeys[1].RefTable = WorkbookCategoriesTable
+	WorkbookInvitationMembersTable.ForeignKeys[0].RefTable = RolesTable
+	WorkbookInvitationMembersTable.ForeignKeys[1].RefTable = UsersTable
+	WorkbookInvitationMembersTable.ForeignKeys[2].RefTable = WorkbooksTable
 	WorkbookMembersTable.ForeignKeys[0].RefTable = RolesTable
 	WorkbookMembersTable.ForeignKeys[1].RefTable = UsersTable
 	WorkbookMembersTable.ForeignKeys[2].RefTable = WorkbooksTable

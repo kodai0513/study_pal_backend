@@ -495,6 +495,29 @@ func HasWorkbookMembersWith(preds ...predicate.WorkbookMember) predicate.User {
 	})
 }
 
+// HasWorkbookInvitationMembers applies the HasEdge predicate on the "workbook_invitation_members" edge.
+func HasWorkbookInvitationMembers() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WorkbookInvitationMembersTable, WorkbookInvitationMembersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWorkbookInvitationMembersWith applies the HasEdge predicate on the "workbook_invitation_members" edge with a given conditions (other predicates).
+func HasWorkbookInvitationMembersWith(preds ...predicate.WorkbookInvitationMember) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newWorkbookInvitationMembersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

@@ -12,6 +12,7 @@ import (
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 
@@ -171,6 +172,21 @@ func (wc *WorkbookCreate) AddWorkbookMembers(w ...*WorkbookMember) *WorkbookCrea
 		ids[i] = w[i].ID
 	}
 	return wc.AddWorkbookMemberIDs(ids...)
+}
+
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (wc *WorkbookCreate) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) *WorkbookCreate {
+	wc.mutation.AddWorkbookInvitationMemberIDs(ids...)
+	return wc
+}
+
+// AddWorkbookInvitationMembers adds the "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (wc *WorkbookCreate) AddWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *WorkbookCreate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return wc.AddWorkbookInvitationMemberIDs(ids...)
 }
 
 // Mutation returns the WorkbookMutation object of the builder.
@@ -400,6 +416,22 @@ func (wc *WorkbookCreate) createSpec() (*Workbook, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.WorkbookInvitationMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   workbook.WorkbookInvitationMembersTable,
+			Columns: []string{workbook.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

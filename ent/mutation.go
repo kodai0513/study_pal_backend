@@ -19,6 +19,7 @@ import (
 	"study-pal-backend/ent/workbook"
 	"study-pal-backend/ent/workbookcategory"
 	"study-pal-backend/ent/workbookcategoryclosure"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 	"sync"
 	"time"
@@ -37,19 +38,20 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeArticle                 = "Article"
-	TypeArticleLike             = "ArticleLike"
-	TypeDescriptionProblem      = "DescriptionProblem"
-	TypePermission              = "Permission"
-	TypeRole                    = "Role"
-	TypeSelectionProblem        = "SelectionProblem"
-	TypeSelectionProblemAnswer  = "SelectionProblemAnswer"
-	TypeTrueOrFalseProblem      = "TrueOrFalseProblem"
-	TypeUser                    = "User"
-	TypeWorkbook                = "Workbook"
-	TypeWorkbookCategory        = "WorkbookCategory"
-	TypeWorkbookCategoryClosure = "WorkbookCategoryClosure"
-	TypeWorkbookMember          = "WorkbookMember"
+	TypeArticle                  = "Article"
+	TypeArticleLike              = "ArticleLike"
+	TypeDescriptionProblem       = "DescriptionProblem"
+	TypePermission               = "Permission"
+	TypeRole                     = "Role"
+	TypeSelectionProblem         = "SelectionProblem"
+	TypeSelectionProblemAnswer   = "SelectionProblemAnswer"
+	TypeTrueOrFalseProblem       = "TrueOrFalseProblem"
+	TypeUser                     = "User"
+	TypeWorkbook                 = "Workbook"
+	TypeWorkbookCategory         = "WorkbookCategory"
+	TypeWorkbookCategoryClosure  = "WorkbookCategoryClosure"
+	TypeWorkbookInvitationMember = "WorkbookInvitationMember"
+	TypeWorkbookMember           = "WorkbookMember"
 )
 
 // ArticleMutation represents an operation that mutates the Article nodes in the graph.
@@ -2619,22 +2621,25 @@ func (m *PermissionMutation) ResetEdge(name string) error {
 // RoleMutation represents an operation that mutates the Role nodes in the graph.
 type RoleMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *uuid.UUID
-	created_at              *time.Time
-	updated_at              *time.Time
-	name                    *string
-	clearedFields           map[string]struct{}
-	workbook_members        map[uuid.UUID]struct{}
-	removedworkbook_members map[uuid.UUID]struct{}
-	clearedworkbook_members bool
-	permissions             map[uuid.UUID]struct{}
-	removedpermissions      map[uuid.UUID]struct{}
-	clearedpermissions      bool
-	done                    bool
-	oldValue                func(context.Context) (*Role, error)
-	predicates              []predicate.Role
+	op                                 Op
+	typ                                string
+	id                                 *uuid.UUID
+	created_at                         *time.Time
+	updated_at                         *time.Time
+	name                               *string
+	clearedFields                      map[string]struct{}
+	workbook_members                   map[uuid.UUID]struct{}
+	removedworkbook_members            map[uuid.UUID]struct{}
+	clearedworkbook_members            bool
+	workbook_invitation_members        map[uuid.UUID]struct{}
+	removedworkbook_invitation_members map[uuid.UUID]struct{}
+	clearedworkbook_invitation_members bool
+	permissions                        map[uuid.UUID]struct{}
+	removedpermissions                 map[uuid.UUID]struct{}
+	clearedpermissions                 bool
+	done                               bool
+	oldValue                           func(context.Context) (*Role, error)
+	predicates                         []predicate.Role
 }
 
 var _ ent.Mutation = (*RoleMutation)(nil)
@@ -2903,6 +2908,60 @@ func (m *RoleMutation) ResetWorkbookMembers() {
 	m.removedworkbook_members = nil
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by ids.
+func (m *RoleMutation) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) {
+	if m.workbook_invitation_members == nil {
+		m.workbook_invitation_members = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.workbook_invitation_members[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookInvitationMembers clears the "workbook_invitation_members" edge to the WorkbookInvitationMember entity.
+func (m *RoleMutation) ClearWorkbookInvitationMembers() {
+	m.clearedworkbook_invitation_members = true
+}
+
+// WorkbookInvitationMembersCleared reports if the "workbook_invitation_members" edge to the WorkbookInvitationMember entity was cleared.
+func (m *RoleMutation) WorkbookInvitationMembersCleared() bool {
+	return m.clearedworkbook_invitation_members
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (m *RoleMutation) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) {
+	if m.removedworkbook_invitation_members == nil {
+		m.removedworkbook_invitation_members = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_invitation_members, ids[i])
+		m.removedworkbook_invitation_members[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookInvitationMembers returns the removed IDs of the "workbook_invitation_members" edge to the WorkbookInvitationMember entity.
+func (m *RoleMutation) RemovedWorkbookInvitationMembersIDs() (ids []uuid.UUID) {
+	for id := range m.removedworkbook_invitation_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookInvitationMembersIDs returns the "workbook_invitation_members" edge IDs in the mutation.
+func (m *RoleMutation) WorkbookInvitationMembersIDs() (ids []uuid.UUID) {
+	for id := range m.workbook_invitation_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookInvitationMembers resets all changes to the "workbook_invitation_members" edge.
+func (m *RoleMutation) ResetWorkbookInvitationMembers() {
+	m.workbook_invitation_members = nil
+	m.clearedworkbook_invitation_members = false
+	m.removedworkbook_invitation_members = nil
+}
+
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by ids.
 func (m *RoleMutation) AddPermissionIDs(ids ...uuid.UUID) {
 	if m.permissions == nil {
@@ -3124,9 +3183,12 @@ func (m *RoleMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RoleMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.workbook_members != nil {
 		edges = append(edges, role.EdgeWorkbookMembers)
+	}
+	if m.workbook_invitation_members != nil {
+		edges = append(edges, role.EdgeWorkbookInvitationMembers)
 	}
 	if m.permissions != nil {
 		edges = append(edges, role.EdgePermissions)
@@ -3144,6 +3206,12 @@ func (m *RoleMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case role.EdgeWorkbookInvitationMembers:
+		ids := make([]ent.Value, 0, len(m.workbook_invitation_members))
+		for id := range m.workbook_invitation_members {
+			ids = append(ids, id)
+		}
+		return ids
 	case role.EdgePermissions:
 		ids := make([]ent.Value, 0, len(m.permissions))
 		for id := range m.permissions {
@@ -3156,9 +3224,12 @@ func (m *RoleMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RoleMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedworkbook_members != nil {
 		edges = append(edges, role.EdgeWorkbookMembers)
+	}
+	if m.removedworkbook_invitation_members != nil {
+		edges = append(edges, role.EdgeWorkbookInvitationMembers)
 	}
 	if m.removedpermissions != nil {
 		edges = append(edges, role.EdgePermissions)
@@ -3176,6 +3247,12 @@ func (m *RoleMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case role.EdgeWorkbookInvitationMembers:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_invitation_members))
+		for id := range m.removedworkbook_invitation_members {
+			ids = append(ids, id)
+		}
+		return ids
 	case role.EdgePermissions:
 		ids := make([]ent.Value, 0, len(m.removedpermissions))
 		for id := range m.removedpermissions {
@@ -3188,9 +3265,12 @@ func (m *RoleMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RoleMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedworkbook_members {
 		edges = append(edges, role.EdgeWorkbookMembers)
+	}
+	if m.clearedworkbook_invitation_members {
+		edges = append(edges, role.EdgeWorkbookInvitationMembers)
 	}
 	if m.clearedpermissions {
 		edges = append(edges, role.EdgePermissions)
@@ -3204,6 +3284,8 @@ func (m *RoleMutation) EdgeCleared(name string) bool {
 	switch name {
 	case role.EdgeWorkbookMembers:
 		return m.clearedworkbook_members
+	case role.EdgeWorkbookInvitationMembers:
+		return m.clearedworkbook_invitation_members
 	case role.EdgePermissions:
 		return m.clearedpermissions
 	}
@@ -3224,6 +3306,9 @@ func (m *RoleMutation) ResetEdge(name string) error {
 	switch name {
 	case role.EdgeWorkbookMembers:
 		m.ResetWorkbookMembers()
+		return nil
+	case role.EdgeWorkbookInvitationMembers:
+		m.ResetWorkbookInvitationMembers()
 		return nil
 	case role.EdgePermissions:
 		m.ResetPermissions()
@@ -5316,28 +5401,31 @@ func (m *TrueOrFalseProblemMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *uuid.UUID
-	created_at              *time.Time
-	updated_at              *time.Time
-	email                   *string
-	name                    *string
-	nick_name               *string
-	password                *string
-	clearedFields           map[string]struct{}
-	articles                map[uuid.UUID]struct{}
-	removedarticles         map[uuid.UUID]struct{}
-	clearedarticles         bool
-	workbooks               map[uuid.UUID]struct{}
-	removedworkbooks        map[uuid.UUID]struct{}
-	clearedworkbooks        bool
-	workbook_members        map[uuid.UUID]struct{}
-	removedworkbook_members map[uuid.UUID]struct{}
-	clearedworkbook_members bool
-	done                    bool
-	oldValue                func(context.Context) (*User, error)
-	predicates              []predicate.User
+	op                                 Op
+	typ                                string
+	id                                 *uuid.UUID
+	created_at                         *time.Time
+	updated_at                         *time.Time
+	email                              *string
+	name                               *string
+	nick_name                          *string
+	password                           *string
+	clearedFields                      map[string]struct{}
+	articles                           map[uuid.UUID]struct{}
+	removedarticles                    map[uuid.UUID]struct{}
+	clearedarticles                    bool
+	workbooks                          map[uuid.UUID]struct{}
+	removedworkbooks                   map[uuid.UUID]struct{}
+	clearedworkbooks                   bool
+	workbook_members                   map[uuid.UUID]struct{}
+	removedworkbook_members            map[uuid.UUID]struct{}
+	clearedworkbook_members            bool
+	workbook_invitation_members        map[uuid.UUID]struct{}
+	removedworkbook_invitation_members map[uuid.UUID]struct{}
+	clearedworkbook_invitation_members bool
+	done                               bool
+	oldValue                           func(context.Context) (*User, error)
+	predicates                         []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -5822,6 +5910,60 @@ func (m *UserMutation) ResetWorkbookMembers() {
 	m.removedworkbook_members = nil
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by ids.
+func (m *UserMutation) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) {
+	if m.workbook_invitation_members == nil {
+		m.workbook_invitation_members = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.workbook_invitation_members[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookInvitationMembers clears the "workbook_invitation_members" edge to the WorkbookInvitationMember entity.
+func (m *UserMutation) ClearWorkbookInvitationMembers() {
+	m.clearedworkbook_invitation_members = true
+}
+
+// WorkbookInvitationMembersCleared reports if the "workbook_invitation_members" edge to the WorkbookInvitationMember entity was cleared.
+func (m *UserMutation) WorkbookInvitationMembersCleared() bool {
+	return m.clearedworkbook_invitation_members
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (m *UserMutation) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) {
+	if m.removedworkbook_invitation_members == nil {
+		m.removedworkbook_invitation_members = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_invitation_members, ids[i])
+		m.removedworkbook_invitation_members[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookInvitationMembers returns the removed IDs of the "workbook_invitation_members" edge to the WorkbookInvitationMember entity.
+func (m *UserMutation) RemovedWorkbookInvitationMembersIDs() (ids []uuid.UUID) {
+	for id := range m.removedworkbook_invitation_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookInvitationMembersIDs returns the "workbook_invitation_members" edge IDs in the mutation.
+func (m *UserMutation) WorkbookInvitationMembersIDs() (ids []uuid.UUID) {
+	for id := range m.workbook_invitation_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookInvitationMembers resets all changes to the "workbook_invitation_members" edge.
+func (m *UserMutation) ResetWorkbookInvitationMembers() {
+	m.workbook_invitation_members = nil
+	m.clearedworkbook_invitation_members = false
+	m.removedworkbook_invitation_members = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -6040,7 +6182,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.articles != nil {
 		edges = append(edges, user.EdgeArticles)
 	}
@@ -6049,6 +6191,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.workbook_members != nil {
 		edges = append(edges, user.EdgeWorkbookMembers)
+	}
+	if m.workbook_invitation_members != nil {
+		edges = append(edges, user.EdgeWorkbookInvitationMembers)
 	}
 	return edges
 }
@@ -6075,13 +6220,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWorkbookInvitationMembers:
+		ids := make([]ent.Value, 0, len(m.workbook_invitation_members))
+		for id := range m.workbook_invitation_members {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedarticles != nil {
 		edges = append(edges, user.EdgeArticles)
 	}
@@ -6090,6 +6241,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedworkbook_members != nil {
 		edges = append(edges, user.EdgeWorkbookMembers)
+	}
+	if m.removedworkbook_invitation_members != nil {
+		edges = append(edges, user.EdgeWorkbookInvitationMembers)
 	}
 	return edges
 }
@@ -6116,13 +6270,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWorkbookInvitationMembers:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_invitation_members))
+		for id := range m.removedworkbook_invitation_members {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedarticles {
 		edges = append(edges, user.EdgeArticles)
 	}
@@ -6131,6 +6291,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedworkbook_members {
 		edges = append(edges, user.EdgeWorkbookMembers)
+	}
+	if m.clearedworkbook_invitation_members {
+		edges = append(edges, user.EdgeWorkbookInvitationMembers)
 	}
 	return edges
 }
@@ -6145,6 +6308,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedworkbooks
 	case user.EdgeWorkbookMembers:
 		return m.clearedworkbook_members
+	case user.EdgeWorkbookInvitationMembers:
+		return m.clearedworkbook_invitation_members
 	}
 	return false
 }
@@ -6170,6 +6335,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeWorkbookMembers:
 		m.ResetWorkbookMembers()
 		return nil
+	case user.EdgeWorkbookInvitationMembers:
+		m.ResetWorkbookInvitationMembers()
+		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
@@ -6177,35 +6345,38 @@ func (m *UserMutation) ResetEdge(name string) error {
 // WorkbookMutation represents an operation that mutates the Workbook nodes in the graph.
 type WorkbookMutation struct {
 	config
-	op                            Op
-	typ                           string
-	id                            *uuid.UUID
-	created_at                    *time.Time
-	updated_at                    *time.Time
-	description                   *string
-	is_public                     *bool
-	title                         *string
-	clearedFields                 map[string]struct{}
-	description_problems          map[uuid.UUID]struct{}
-	removeddescription_problems   map[uuid.UUID]struct{}
-	cleareddescription_problems   bool
-	selection_problems            map[uuid.UUID]struct{}
-	removedselection_problems     map[uuid.UUID]struct{}
-	clearedselection_problems     bool
-	true_or_false_problems        map[uuid.UUID]struct{}
-	removedtrue_or_false_problems map[uuid.UUID]struct{}
-	clearedtrue_or_false_problems bool
-	user                          *uuid.UUID
-	cleareduser                   bool
-	workbook_categories           map[uuid.UUID]struct{}
-	removedworkbook_categories    map[uuid.UUID]struct{}
-	clearedworkbook_categories    bool
-	workbook_members              map[uuid.UUID]struct{}
-	removedworkbook_members       map[uuid.UUID]struct{}
-	clearedworkbook_members       bool
-	done                          bool
-	oldValue                      func(context.Context) (*Workbook, error)
-	predicates                    []predicate.Workbook
+	op                                 Op
+	typ                                string
+	id                                 *uuid.UUID
+	created_at                         *time.Time
+	updated_at                         *time.Time
+	description                        *string
+	is_public                          *bool
+	title                              *string
+	clearedFields                      map[string]struct{}
+	description_problems               map[uuid.UUID]struct{}
+	removeddescription_problems        map[uuid.UUID]struct{}
+	cleareddescription_problems        bool
+	selection_problems                 map[uuid.UUID]struct{}
+	removedselection_problems          map[uuid.UUID]struct{}
+	clearedselection_problems          bool
+	true_or_false_problems             map[uuid.UUID]struct{}
+	removedtrue_or_false_problems      map[uuid.UUID]struct{}
+	clearedtrue_or_false_problems      bool
+	user                               *uuid.UUID
+	cleareduser                        bool
+	workbook_categories                map[uuid.UUID]struct{}
+	removedworkbook_categories         map[uuid.UUID]struct{}
+	clearedworkbook_categories         bool
+	workbook_members                   map[uuid.UUID]struct{}
+	removedworkbook_members            map[uuid.UUID]struct{}
+	clearedworkbook_members            bool
+	workbook_invitation_members        map[uuid.UUID]struct{}
+	removedworkbook_invitation_members map[uuid.UUID]struct{}
+	clearedworkbook_invitation_members bool
+	done                               bool
+	oldValue                           func(context.Context) (*Workbook, error)
+	predicates                         []predicate.Workbook
 }
 
 var _ ent.Mutation = (*WorkbookMutation)(nil)
@@ -6825,6 +6996,60 @@ func (m *WorkbookMutation) ResetWorkbookMembers() {
 	m.removedworkbook_members = nil
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by ids.
+func (m *WorkbookMutation) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) {
+	if m.workbook_invitation_members == nil {
+		m.workbook_invitation_members = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.workbook_invitation_members[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWorkbookInvitationMembers clears the "workbook_invitation_members" edge to the WorkbookInvitationMember entity.
+func (m *WorkbookMutation) ClearWorkbookInvitationMembers() {
+	m.clearedworkbook_invitation_members = true
+}
+
+// WorkbookInvitationMembersCleared reports if the "workbook_invitation_members" edge to the WorkbookInvitationMember entity was cleared.
+func (m *WorkbookMutation) WorkbookInvitationMembersCleared() bool {
+	return m.clearedworkbook_invitation_members
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (m *WorkbookMutation) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) {
+	if m.removedworkbook_invitation_members == nil {
+		m.removedworkbook_invitation_members = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.workbook_invitation_members, ids[i])
+		m.removedworkbook_invitation_members[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWorkbookInvitationMembers returns the removed IDs of the "workbook_invitation_members" edge to the WorkbookInvitationMember entity.
+func (m *WorkbookMutation) RemovedWorkbookInvitationMembersIDs() (ids []uuid.UUID) {
+	for id := range m.removedworkbook_invitation_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WorkbookInvitationMembersIDs returns the "workbook_invitation_members" edge IDs in the mutation.
+func (m *WorkbookMutation) WorkbookInvitationMembersIDs() (ids []uuid.UUID) {
+	for id := range m.workbook_invitation_members {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWorkbookInvitationMembers resets all changes to the "workbook_invitation_members" edge.
+func (m *WorkbookMutation) ResetWorkbookInvitationMembers() {
+	m.workbook_invitation_members = nil
+	m.clearedworkbook_invitation_members = false
+	m.removedworkbook_invitation_members = nil
+}
+
 // Where appends a list predicates to the WorkbookMutation builder.
 func (m *WorkbookMutation) Where(ps ...predicate.Workbook) {
 	m.predicates = append(m.predicates, ps...)
@@ -7043,7 +7268,7 @@ func (m *WorkbookMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *WorkbookMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.description_problems != nil {
 		edges = append(edges, workbook.EdgeDescriptionProblems)
 	}
@@ -7061,6 +7286,9 @@ func (m *WorkbookMutation) AddedEdges() []string {
 	}
 	if m.workbook_members != nil {
 		edges = append(edges, workbook.EdgeWorkbookMembers)
+	}
+	if m.workbook_invitation_members != nil {
+		edges = append(edges, workbook.EdgeWorkbookInvitationMembers)
 	}
 	return edges
 }
@@ -7103,13 +7331,19 @@ func (m *WorkbookMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case workbook.EdgeWorkbookInvitationMembers:
+		ids := make([]ent.Value, 0, len(m.workbook_invitation_members))
+		for id := range m.workbook_invitation_members {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *WorkbookMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removeddescription_problems != nil {
 		edges = append(edges, workbook.EdgeDescriptionProblems)
 	}
@@ -7124,6 +7358,9 @@ func (m *WorkbookMutation) RemovedEdges() []string {
 	}
 	if m.removedworkbook_members != nil {
 		edges = append(edges, workbook.EdgeWorkbookMembers)
+	}
+	if m.removedworkbook_invitation_members != nil {
+		edges = append(edges, workbook.EdgeWorkbookInvitationMembers)
 	}
 	return edges
 }
@@ -7162,13 +7399,19 @@ func (m *WorkbookMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case workbook.EdgeWorkbookInvitationMembers:
+		ids := make([]ent.Value, 0, len(m.removedworkbook_invitation_members))
+		for id := range m.removedworkbook_invitation_members {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *WorkbookMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.cleareddescription_problems {
 		edges = append(edges, workbook.EdgeDescriptionProblems)
 	}
@@ -7186,6 +7429,9 @@ func (m *WorkbookMutation) ClearedEdges() []string {
 	}
 	if m.clearedworkbook_members {
 		edges = append(edges, workbook.EdgeWorkbookMembers)
+	}
+	if m.clearedworkbook_invitation_members {
+		edges = append(edges, workbook.EdgeWorkbookInvitationMembers)
 	}
 	return edges
 }
@@ -7206,6 +7452,8 @@ func (m *WorkbookMutation) EdgeCleared(name string) bool {
 		return m.clearedworkbook_categories
 	case workbook.EdgeWorkbookMembers:
 		return m.clearedworkbook_members
+	case workbook.EdgeWorkbookInvitationMembers:
+		return m.clearedworkbook_invitation_members
 	}
 	return false
 }
@@ -7242,6 +7490,9 @@ func (m *WorkbookMutation) ResetEdge(name string) error {
 		return nil
 	case workbook.EdgeWorkbookMembers:
 		m.ResetWorkbookMembers()
+		return nil
+	case workbook.EdgeWorkbookInvitationMembers:
+		m.ResetWorkbookInvitationMembers()
 		return nil
 	}
 	return fmt.Errorf("unknown Workbook edge %s", name)
@@ -8949,6 +9200,808 @@ func (m *WorkbookCategoryClosureMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown WorkbookCategoryClosure edge %s", name)
+}
+
+// WorkbookInvitationMemberMutation represents an operation that mutates the WorkbookInvitationMember nodes in the graph.
+type WorkbookInvitationMemberMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	updated_at      *time.Time
+	effective_at    *time.Time
+	is_invited      *bool
+	clearedFields   map[string]struct{}
+	role            *uuid.UUID
+	clearedrole     bool
+	user            *uuid.UUID
+	cleareduser     bool
+	workbook        *uuid.UUID
+	clearedworkbook bool
+	done            bool
+	oldValue        func(context.Context) (*WorkbookInvitationMember, error)
+	predicates      []predicate.WorkbookInvitationMember
+}
+
+var _ ent.Mutation = (*WorkbookInvitationMemberMutation)(nil)
+
+// workbookinvitationmemberOption allows management of the mutation configuration using functional options.
+type workbookinvitationmemberOption func(*WorkbookInvitationMemberMutation)
+
+// newWorkbookInvitationMemberMutation creates new mutation for the WorkbookInvitationMember entity.
+func newWorkbookInvitationMemberMutation(c config, op Op, opts ...workbookinvitationmemberOption) *WorkbookInvitationMemberMutation {
+	m := &WorkbookInvitationMemberMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWorkbookInvitationMember,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWorkbookInvitationMemberID sets the ID field of the mutation.
+func withWorkbookInvitationMemberID(id uuid.UUID) workbookinvitationmemberOption {
+	return func(m *WorkbookInvitationMemberMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WorkbookInvitationMember
+		)
+		m.oldValue = func(ctx context.Context) (*WorkbookInvitationMember, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WorkbookInvitationMember.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWorkbookInvitationMember sets the old WorkbookInvitationMember of the mutation.
+func withWorkbookInvitationMember(node *WorkbookInvitationMember) workbookinvitationmemberOption {
+	return func(m *WorkbookInvitationMemberMutation) {
+		m.oldValue = func(context.Context) (*WorkbookInvitationMember, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WorkbookInvitationMemberMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WorkbookInvitationMemberMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of WorkbookInvitationMember entities.
+func (m *WorkbookInvitationMemberMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WorkbookInvitationMemberMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WorkbookInvitationMemberMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WorkbookInvitationMember.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *WorkbookInvitationMemberMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *WorkbookInvitationMemberMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *WorkbookInvitationMemberMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *WorkbookInvitationMemberMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetEffectiveAt sets the "effective_at" field.
+func (m *WorkbookInvitationMemberMutation) SetEffectiveAt(t time.Time) {
+	m.effective_at = &t
+}
+
+// EffectiveAt returns the value of the "effective_at" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) EffectiveAt() (r time.Time, exists bool) {
+	v := m.effective_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEffectiveAt returns the old "effective_at" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldEffectiveAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEffectiveAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEffectiveAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEffectiveAt: %w", err)
+	}
+	return oldValue.EffectiveAt, nil
+}
+
+// ResetEffectiveAt resets all changes to the "effective_at" field.
+func (m *WorkbookInvitationMemberMutation) ResetEffectiveAt() {
+	m.effective_at = nil
+}
+
+// SetIsInvited sets the "is_invited" field.
+func (m *WorkbookInvitationMemberMutation) SetIsInvited(b bool) {
+	m.is_invited = &b
+}
+
+// IsInvited returns the value of the "is_invited" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) IsInvited() (r bool, exists bool) {
+	v := m.is_invited
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsInvited returns the old "is_invited" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldIsInvited(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsInvited is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsInvited requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsInvited: %w", err)
+	}
+	return oldValue.IsInvited, nil
+}
+
+// ResetIsInvited resets all changes to the "is_invited" field.
+func (m *WorkbookInvitationMemberMutation) ResetIsInvited() {
+	m.is_invited = nil
+}
+
+// SetRoleID sets the "role_id" field.
+func (m *WorkbookInvitationMemberMutation) SetRoleID(u uuid.UUID) {
+	m.role = &u
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) RoleID() (r uuid.UUID, exists bool) {
+	v := m.role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldRoleID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *WorkbookInvitationMemberMutation) ResetRoleID() {
+	m.role = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *WorkbookInvitationMemberMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *WorkbookInvitationMemberMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetWorkbookID sets the "workbook_id" field.
+func (m *WorkbookInvitationMemberMutation) SetWorkbookID(u uuid.UUID) {
+	m.workbook = &u
+}
+
+// WorkbookID returns the value of the "workbook_id" field in the mutation.
+func (m *WorkbookInvitationMemberMutation) WorkbookID() (r uuid.UUID, exists bool) {
+	v := m.workbook
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkbookID returns the old "workbook_id" field's value of the WorkbookInvitationMember entity.
+// If the WorkbookInvitationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WorkbookInvitationMemberMutation) OldWorkbookID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWorkbookID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWorkbookID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkbookID: %w", err)
+	}
+	return oldValue.WorkbookID, nil
+}
+
+// ResetWorkbookID resets all changes to the "workbook_id" field.
+func (m *WorkbookInvitationMemberMutation) ResetWorkbookID() {
+	m.workbook = nil
+}
+
+// ClearRole clears the "role" edge to the Role entity.
+func (m *WorkbookInvitationMemberMutation) ClearRole() {
+	m.clearedrole = true
+	m.clearedFields[workbookinvitationmember.FieldRoleID] = struct{}{}
+}
+
+// RoleCleared reports if the "role" edge to the Role entity was cleared.
+func (m *WorkbookInvitationMemberMutation) RoleCleared() bool {
+	return m.clearedrole
+}
+
+// RoleIDs returns the "role" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RoleID instead. It exists only for internal usage by the builders.
+func (m *WorkbookInvitationMemberMutation) RoleIDs() (ids []uuid.UUID) {
+	if id := m.role; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRole resets all changes to the "role" edge.
+func (m *WorkbookInvitationMemberMutation) ResetRole() {
+	m.role = nil
+	m.clearedrole = false
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *WorkbookInvitationMemberMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[workbookinvitationmember.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *WorkbookInvitationMemberMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *WorkbookInvitationMemberMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *WorkbookInvitationMemberMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// ClearWorkbook clears the "workbook" edge to the Workbook entity.
+func (m *WorkbookInvitationMemberMutation) ClearWorkbook() {
+	m.clearedworkbook = true
+	m.clearedFields[workbookinvitationmember.FieldWorkbookID] = struct{}{}
+}
+
+// WorkbookCleared reports if the "workbook" edge to the Workbook entity was cleared.
+func (m *WorkbookInvitationMemberMutation) WorkbookCleared() bool {
+	return m.clearedworkbook
+}
+
+// WorkbookIDs returns the "workbook" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// WorkbookID instead. It exists only for internal usage by the builders.
+func (m *WorkbookInvitationMemberMutation) WorkbookIDs() (ids []uuid.UUID) {
+	if id := m.workbook; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetWorkbook resets all changes to the "workbook" edge.
+func (m *WorkbookInvitationMemberMutation) ResetWorkbook() {
+	m.workbook = nil
+	m.clearedworkbook = false
+}
+
+// Where appends a list predicates to the WorkbookInvitationMemberMutation builder.
+func (m *WorkbookInvitationMemberMutation) Where(ps ...predicate.WorkbookInvitationMember) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WorkbookInvitationMemberMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WorkbookInvitationMemberMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WorkbookInvitationMember, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WorkbookInvitationMemberMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WorkbookInvitationMemberMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (WorkbookInvitationMember).
+func (m *WorkbookInvitationMemberMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WorkbookInvitationMemberMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, workbookinvitationmember.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, workbookinvitationmember.FieldUpdatedAt)
+	}
+	if m.effective_at != nil {
+		fields = append(fields, workbookinvitationmember.FieldEffectiveAt)
+	}
+	if m.is_invited != nil {
+		fields = append(fields, workbookinvitationmember.FieldIsInvited)
+	}
+	if m.role != nil {
+		fields = append(fields, workbookinvitationmember.FieldRoleID)
+	}
+	if m.user != nil {
+		fields = append(fields, workbookinvitationmember.FieldUserID)
+	}
+	if m.workbook != nil {
+		fields = append(fields, workbookinvitationmember.FieldWorkbookID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WorkbookInvitationMemberMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case workbookinvitationmember.FieldCreatedAt:
+		return m.CreatedAt()
+	case workbookinvitationmember.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case workbookinvitationmember.FieldEffectiveAt:
+		return m.EffectiveAt()
+	case workbookinvitationmember.FieldIsInvited:
+		return m.IsInvited()
+	case workbookinvitationmember.FieldRoleID:
+		return m.RoleID()
+	case workbookinvitationmember.FieldUserID:
+		return m.UserID()
+	case workbookinvitationmember.FieldWorkbookID:
+		return m.WorkbookID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WorkbookInvitationMemberMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case workbookinvitationmember.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case workbookinvitationmember.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case workbookinvitationmember.FieldEffectiveAt:
+		return m.OldEffectiveAt(ctx)
+	case workbookinvitationmember.FieldIsInvited:
+		return m.OldIsInvited(ctx)
+	case workbookinvitationmember.FieldRoleID:
+		return m.OldRoleID(ctx)
+	case workbookinvitationmember.FieldUserID:
+		return m.OldUserID(ctx)
+	case workbookinvitationmember.FieldWorkbookID:
+		return m.OldWorkbookID(ctx)
+	}
+	return nil, fmt.Errorf("unknown WorkbookInvitationMember field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookInvitationMemberMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case workbookinvitationmember.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case workbookinvitationmember.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case workbookinvitationmember.FieldEffectiveAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEffectiveAt(v)
+		return nil
+	case workbookinvitationmember.FieldIsInvited:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsInvited(v)
+		return nil
+	case workbookinvitationmember.FieldRoleID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
+		return nil
+	case workbookinvitationmember.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case workbookinvitationmember.FieldWorkbookID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkbookID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookInvitationMember field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WorkbookInvitationMemberMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WorkbookInvitationMemberMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WorkbookInvitationMemberMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown WorkbookInvitationMember numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WorkbookInvitationMemberMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WorkbookInvitationMemberMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WorkbookInvitationMemberMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown WorkbookInvitationMember nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WorkbookInvitationMemberMutation) ResetField(name string) error {
+	switch name {
+	case workbookinvitationmember.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case workbookinvitationmember.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case workbookinvitationmember.FieldEffectiveAt:
+		m.ResetEffectiveAt()
+		return nil
+	case workbookinvitationmember.FieldIsInvited:
+		m.ResetIsInvited()
+		return nil
+	case workbookinvitationmember.FieldRoleID:
+		m.ResetRoleID()
+		return nil
+	case workbookinvitationmember.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case workbookinvitationmember.FieldWorkbookID:
+		m.ResetWorkbookID()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookInvitationMember field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WorkbookInvitationMemberMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.role != nil {
+		edges = append(edges, workbookinvitationmember.EdgeRole)
+	}
+	if m.user != nil {
+		edges = append(edges, workbookinvitationmember.EdgeUser)
+	}
+	if m.workbook != nil {
+		edges = append(edges, workbookinvitationmember.EdgeWorkbook)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WorkbookInvitationMemberMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case workbookinvitationmember.EdgeRole:
+		if id := m.role; id != nil {
+			return []ent.Value{*id}
+		}
+	case workbookinvitationmember.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case workbookinvitationmember.EdgeWorkbook:
+		if id := m.workbook; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WorkbookInvitationMemberMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WorkbookInvitationMemberMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WorkbookInvitationMemberMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedrole {
+		edges = append(edges, workbookinvitationmember.EdgeRole)
+	}
+	if m.cleareduser {
+		edges = append(edges, workbookinvitationmember.EdgeUser)
+	}
+	if m.clearedworkbook {
+		edges = append(edges, workbookinvitationmember.EdgeWorkbook)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WorkbookInvitationMemberMutation) EdgeCleared(name string) bool {
+	switch name {
+	case workbookinvitationmember.EdgeRole:
+		return m.clearedrole
+	case workbookinvitationmember.EdgeUser:
+		return m.cleareduser
+	case workbookinvitationmember.EdgeWorkbook:
+		return m.clearedworkbook
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WorkbookInvitationMemberMutation) ClearEdge(name string) error {
+	switch name {
+	case workbookinvitationmember.EdgeRole:
+		m.ClearRole()
+		return nil
+	case workbookinvitationmember.EdgeUser:
+		m.ClearUser()
+		return nil
+	case workbookinvitationmember.EdgeWorkbook:
+		m.ClearWorkbook()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookInvitationMember unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WorkbookInvitationMemberMutation) ResetEdge(name string) error {
+	switch name {
+	case workbookinvitationmember.EdgeRole:
+		m.ResetRole()
+		return nil
+	case workbookinvitationmember.EdgeUser:
+		m.ResetUser()
+		return nil
+	case workbookinvitationmember.EdgeWorkbook:
+		m.ResetWorkbook()
+		return nil
+	}
+	return fmt.Errorf("unknown WorkbookInvitationMember edge %s", name)
 }
 
 // WorkbookMemberMutation represents an operation that mutates the WorkbookMember nodes in the graph.

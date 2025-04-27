@@ -9,6 +9,7 @@ import (
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/role"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 
@@ -80,6 +81,21 @@ func (ru *RoleUpdate) AddWorkbookMembers(w ...*WorkbookMember) *RoleUpdate {
 	return ru.AddWorkbookMemberIDs(ids...)
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (ru *RoleUpdate) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) *RoleUpdate {
+	ru.mutation.AddWorkbookInvitationMemberIDs(ids...)
+	return ru
+}
+
+// AddWorkbookInvitationMembers adds the "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (ru *RoleUpdate) AddWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *RoleUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return ru.AddWorkbookInvitationMemberIDs(ids...)
+}
+
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
 func (ru *RoleUpdate) AddPermissionIDs(ids ...uuid.UUID) *RoleUpdate {
 	ru.mutation.AddPermissionIDs(ids...)
@@ -119,6 +135,27 @@ func (ru *RoleUpdate) RemoveWorkbookMembers(w ...*WorkbookMember) *RoleUpdate {
 		ids[i] = w[i].ID
 	}
 	return ru.RemoveWorkbookMemberIDs(ids...)
+}
+
+// ClearWorkbookInvitationMembers clears all "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (ru *RoleUpdate) ClearWorkbookInvitationMembers() *RoleUpdate {
+	ru.mutation.ClearWorkbookInvitationMembers()
+	return ru
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to WorkbookInvitationMember entities by IDs.
+func (ru *RoleUpdate) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) *RoleUpdate {
+	ru.mutation.RemoveWorkbookInvitationMemberIDs(ids...)
+	return ru
+}
+
+// RemoveWorkbookInvitationMembers removes "workbook_invitation_members" edges to WorkbookInvitationMember entities.
+func (ru *RoleUpdate) RemoveWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *RoleUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return ru.RemoveWorkbookInvitationMemberIDs(ids...)
 }
 
 // ClearPermissions clears all "permissions" edges to the Permission entity.
@@ -254,6 +291,51 @@ func (ru *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ru.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.RemovedWorkbookInvitationMembersIDs(); len(nodes) > 0 && !ru.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.WorkbookInvitationMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if ru.mutation.PermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -368,6 +450,21 @@ func (ruo *RoleUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *RoleUpdateOn
 	return ruo.AddWorkbookMemberIDs(ids...)
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (ruo *RoleUpdateOne) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) *RoleUpdateOne {
+	ruo.mutation.AddWorkbookInvitationMemberIDs(ids...)
+	return ruo
+}
+
+// AddWorkbookInvitationMembers adds the "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (ruo *RoleUpdateOne) AddWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *RoleUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return ruo.AddWorkbookInvitationMemberIDs(ids...)
+}
+
 // AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
 func (ruo *RoleUpdateOne) AddPermissionIDs(ids ...uuid.UUID) *RoleUpdateOne {
 	ruo.mutation.AddPermissionIDs(ids...)
@@ -407,6 +504,27 @@ func (ruo *RoleUpdateOne) RemoveWorkbookMembers(w ...*WorkbookMember) *RoleUpdat
 		ids[i] = w[i].ID
 	}
 	return ruo.RemoveWorkbookMemberIDs(ids...)
+}
+
+// ClearWorkbookInvitationMembers clears all "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (ruo *RoleUpdateOne) ClearWorkbookInvitationMembers() *RoleUpdateOne {
+	ruo.mutation.ClearWorkbookInvitationMembers()
+	return ruo
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to WorkbookInvitationMember entities by IDs.
+func (ruo *RoleUpdateOne) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) *RoleUpdateOne {
+	ruo.mutation.RemoveWorkbookInvitationMemberIDs(ids...)
+	return ruo
+}
+
+// RemoveWorkbookInvitationMembers removes "workbook_invitation_members" edges to WorkbookInvitationMember entities.
+func (ruo *RoleUpdateOne) RemoveWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *RoleUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return ruo.RemoveWorkbookInvitationMemberIDs(ids...)
 }
 
 // ClearPermissions clears all "permissions" edges to the Permission entity.
@@ -565,6 +683,51 @@ func (ruo *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.RemovedWorkbookInvitationMembersIDs(); len(nodes) > 0 && !ruo.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.WorkbookInvitationMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.WorkbookInvitationMembersTable,
+			Columns: []string{role.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

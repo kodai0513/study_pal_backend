@@ -61,11 +61,18 @@ func main() {
 	}
 
 	if getCommandType(os.Args[1]) == entity {
-		entityGen(&entityCommand{
-			currentDir: currentDir,
-			entityName: os.Args[2],
-			option:     os.Args[3],
-		})
+		if len(os.Args) >= 4 {
+			entityGen(&entityCommand{
+				currentDir: currentDir,
+				entityName: os.Args[2],
+				option:     os.Args[3],
+			})
+		} else {
+			entityGen(&entityCommand{
+				currentDir: currentDir,
+				entityName: os.Args[2],
+			})
+		}
 	}
 
 	if getCommandType(os.Args[1]) == query {

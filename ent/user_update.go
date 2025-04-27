@@ -10,6 +10,7 @@ import (
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/user"
 	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 	"time"
 
@@ -153,6 +154,21 @@ func (uu *UserUpdate) AddWorkbookMembers(w ...*WorkbookMember) *UserUpdate {
 	return uu.AddWorkbookMemberIDs(ids...)
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (uu *UserUpdate) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddWorkbookInvitationMemberIDs(ids...)
+	return uu
+}
+
+// AddWorkbookInvitationMembers adds the "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (uu *UserUpdate) AddWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *UserUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWorkbookInvitationMemberIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -219,6 +235,27 @@ func (uu *UserUpdate) RemoveWorkbookMembers(w ...*WorkbookMember) *UserUpdate {
 		ids[i] = w[i].ID
 	}
 	return uu.RemoveWorkbookMemberIDs(ids...)
+}
+
+// ClearWorkbookInvitationMembers clears all "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (uu *UserUpdate) ClearWorkbookInvitationMembers() *UserUpdate {
+	uu.mutation.ClearWorkbookInvitationMembers()
+	return uu
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to WorkbookInvitationMember entities by IDs.
+func (uu *UserUpdate) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveWorkbookInvitationMemberIDs(ids...)
+	return uu
+}
+
+// RemoveWorkbookInvitationMembers removes "workbook_invitation_members" edges to WorkbookInvitationMember entities.
+func (uu *UserUpdate) RemoveWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *UserUpdate {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWorkbookInvitationMemberIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -447,6 +484,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookInvitationMembersTable,
+			Columns: []string{user.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWorkbookInvitationMembersIDs(); len(nodes) > 0 && !uu.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookInvitationMembersTable,
+			Columns: []string{user.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WorkbookInvitationMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookInvitationMembersTable,
+			Columns: []string{user.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -588,6 +670,21 @@ func (uuo *UserUpdateOne) AddWorkbookMembers(w ...*WorkbookMember) *UserUpdateOn
 	return uuo.AddWorkbookMemberIDs(ids...)
 }
 
+// AddWorkbookInvitationMemberIDs adds the "workbook_invitation_members" edge to the WorkbookInvitationMember entity by IDs.
+func (uuo *UserUpdateOne) AddWorkbookInvitationMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddWorkbookInvitationMemberIDs(ids...)
+	return uuo
+}
+
+// AddWorkbookInvitationMembers adds the "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (uuo *UserUpdateOne) AddWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWorkbookInvitationMemberIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -654,6 +751,27 @@ func (uuo *UserUpdateOne) RemoveWorkbookMembers(w ...*WorkbookMember) *UserUpdat
 		ids[i] = w[i].ID
 	}
 	return uuo.RemoveWorkbookMemberIDs(ids...)
+}
+
+// ClearWorkbookInvitationMembers clears all "workbook_invitation_members" edges to the WorkbookInvitationMember entity.
+func (uuo *UserUpdateOne) ClearWorkbookInvitationMembers() *UserUpdateOne {
+	uuo.mutation.ClearWorkbookInvitationMembers()
+	return uuo
+}
+
+// RemoveWorkbookInvitationMemberIDs removes the "workbook_invitation_members" edge to WorkbookInvitationMember entities by IDs.
+func (uuo *UserUpdateOne) RemoveWorkbookInvitationMemberIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveWorkbookInvitationMemberIDs(ids...)
+	return uuo
+}
+
+// RemoveWorkbookInvitationMembers removes "workbook_invitation_members" edges to WorkbookInvitationMember entities.
+func (uuo *UserUpdateOne) RemoveWorkbookInvitationMembers(w ...*WorkbookInvitationMember) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWorkbookInvitationMemberIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -905,6 +1023,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(workbookmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookInvitationMembersTable,
+			Columns: []string{user.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWorkbookInvitationMembersIDs(); len(nodes) > 0 && !uuo.mutation.WorkbookInvitationMembersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookInvitationMembersTable,
+			Columns: []string{user.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WorkbookInvitationMembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WorkbookInvitationMembersTable,
+			Columns: []string{user.WorkbookInvitationMembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(workbookinvitationmember.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

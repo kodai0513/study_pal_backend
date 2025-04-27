@@ -10,6 +10,7 @@ import (
 	"study-pal-backend/ent/permission"
 	"study-pal-backend/ent/predicate"
 	"study-pal-backend/ent/role"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -22,12 +23,13 @@ import (
 // RoleQuery is the builder for querying Role entities.
 type RoleQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []role.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.Role
-	withWorkbookMembers *WorkbookMemberQuery
-	withPermissions     *PermissionQuery
+	ctx                           *QueryContext
+	order                         []role.OrderOption
+	inters                        []Interceptor
+	predicates                    []predicate.Role
+	withWorkbookMembers           *WorkbookMemberQuery
+	withWorkbookInvitationMembers *WorkbookInvitationMemberQuery
+	withPermissions               *PermissionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +81,28 @@ func (rq *RoleQuery) QueryWorkbookMembers() *WorkbookMemberQuery {
 			sqlgraph.From(role.Table, role.FieldID, selector),
 			sqlgraph.To(workbookmember.Table, workbookmember.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, role.WorkbookMembersTable, role.WorkbookMembersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWorkbookInvitationMembers chains the current query on the "workbook_invitation_members" edge.
+func (rq *RoleQuery) QueryWorkbookInvitationMembers() *WorkbookInvitationMemberQuery {
+	query := (&WorkbookInvitationMemberClient{config: rq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, selector),
+			sqlgraph.To(workbookinvitationmember.Table, workbookinvitationmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.WorkbookInvitationMembersTable, role.WorkbookInvitationMembersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +319,14 @@ func (rq *RoleQuery) Clone() *RoleQuery {
 		return nil
 	}
 	return &RoleQuery{
-		config:              rq.config,
-		ctx:                 rq.ctx.Clone(),
-		order:               append([]role.OrderOption{}, rq.order...),
-		inters:              append([]Interceptor{}, rq.inters...),
-		predicates:          append([]predicate.Role{}, rq.predicates...),
-		withWorkbookMembers: rq.withWorkbookMembers.Clone(),
-		withPermissions:     rq.withPermissions.Clone(),
+		config:                        rq.config,
+		ctx:                           rq.ctx.Clone(),
+		order:                         append([]role.OrderOption{}, rq.order...),
+		inters:                        append([]Interceptor{}, rq.inters...),
+		predicates:                    append([]predicate.Role{}, rq.predicates...),
+		withWorkbookMembers:           rq.withWorkbookMembers.Clone(),
+		withWorkbookInvitationMembers: rq.withWorkbookInvitationMembers.Clone(),
+		withPermissions:               rq.withPermissions.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -316,6 +341,17 @@ func (rq *RoleQuery) WithWorkbookMembers(opts ...func(*WorkbookMemberQuery)) *Ro
 		opt(query)
 	}
 	rq.withWorkbookMembers = query
+	return rq
+}
+
+// WithWorkbookInvitationMembers tells the query-builder to eager-load the nodes that are connected to
+// the "workbook_invitation_members" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RoleQuery) WithWorkbookInvitationMembers(opts ...func(*WorkbookInvitationMemberQuery)) *RoleQuery {
+	query := (&WorkbookInvitationMemberClient{config: rq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withWorkbookInvitationMembers = query
 	return rq
 }
 
@@ -408,8 +444,9 @@ func (rq *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 	var (
 		nodes       = []*Role{}
 		_spec       = rq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			rq.withWorkbookMembers != nil,
+			rq.withWorkbookInvitationMembers != nil,
 			rq.withPermissions != nil,
 		}
 	)
@@ -438,6 +475,15 @@ func (rq *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 			return nil, err
 		}
 	}
+	if query := rq.withWorkbookInvitationMembers; query != nil {
+		if err := rq.loadWorkbookInvitationMembers(ctx, query, nodes,
+			func(n *Role) { n.Edges.WorkbookInvitationMembers = []*WorkbookInvitationMember{} },
+			func(n *Role, e *WorkbookInvitationMember) {
+				n.Edges.WorkbookInvitationMembers = append(n.Edges.WorkbookInvitationMembers, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
 	if query := rq.withPermissions; query != nil {
 		if err := rq.loadPermissions(ctx, query, nodes,
 			func(n *Role) { n.Edges.Permissions = []*Permission{} },
@@ -463,6 +509,36 @@ func (rq *RoleQuery) loadWorkbookMembers(ctx context.Context, query *WorkbookMem
 	}
 	query.Where(predicate.WorkbookMember(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(role.WorkbookMembersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RoleID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "role_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (rq *RoleQuery) loadWorkbookInvitationMembers(ctx context.Context, query *WorkbookInvitationMemberQuery, nodes []*Role, init func(*Role), assign func(*Role, *WorkbookInvitationMember)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Role)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(workbookinvitationmember.FieldRoleID)
+	}
+	query.Where(predicate.WorkbookInvitationMember(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(role.WorkbookInvitationMembersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

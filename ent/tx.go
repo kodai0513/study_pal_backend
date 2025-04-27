@@ -36,6 +36,8 @@ type Tx struct {
 	WorkbookCategory *WorkbookCategoryClient
 	// WorkbookCategoryClosure is the client for interacting with the WorkbookCategoryClosure builders.
 	WorkbookCategoryClosure *WorkbookCategoryClosureClient
+	// WorkbookInvitationMember is the client for interacting with the WorkbookInvitationMember builders.
+	WorkbookInvitationMember *WorkbookInvitationMemberClient
 	// WorkbookMember is the client for interacting with the WorkbookMember builders.
 	WorkbookMember *WorkbookMemberClient
 
@@ -181,6 +183,7 @@ func (tx *Tx) init() {
 	tx.Workbook = NewWorkbookClient(tx.config)
 	tx.WorkbookCategory = NewWorkbookCategoryClient(tx.config)
 	tx.WorkbookCategoryClosure = NewWorkbookCategoryClosureClient(tx.config)
+	tx.WorkbookInvitationMember = NewWorkbookInvitationMemberClient(tx.config)
 	tx.WorkbookMember = NewWorkbookMemberClient(tx.config)
 }
 

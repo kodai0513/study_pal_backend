@@ -38,6 +38,8 @@ const (
 	EdgeWorkbookCategories = "workbook_categories"
 	// EdgeWorkbookMembers holds the string denoting the workbook_members edge name in mutations.
 	EdgeWorkbookMembers = "workbook_members"
+	// EdgeWorkbookInvitationMembers holds the string denoting the workbook_invitation_members edge name in mutations.
+	EdgeWorkbookInvitationMembers = "workbook_invitation_members"
 	// Table holds the table name of the workbook in the database.
 	Table = "workbooks"
 	// DescriptionProblemsTable is the table that holds the description_problems relation/edge.
@@ -82,6 +84,13 @@ const (
 	WorkbookMembersInverseTable = "workbook_members"
 	// WorkbookMembersColumn is the table column denoting the workbook_members relation/edge.
 	WorkbookMembersColumn = "workbook_id"
+	// WorkbookInvitationMembersTable is the table that holds the workbook_invitation_members relation/edge.
+	WorkbookInvitationMembersTable = "workbook_invitation_members"
+	// WorkbookInvitationMembersInverseTable is the table name for the WorkbookInvitationMember entity.
+	// It exists in this package in order to avoid circular dependency with the "workbookinvitationmember" package.
+	WorkbookInvitationMembersInverseTable = "workbook_invitation_members"
+	// WorkbookInvitationMembersColumn is the table column denoting the workbook_invitation_members relation/edge.
+	WorkbookInvitationMembersColumn = "workbook_id"
 )
 
 // Columns holds all SQL columns for workbook fields.
@@ -234,6 +243,20 @@ func ByWorkbookMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newWorkbookMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByWorkbookInvitationMembersCount orders the results by workbook_invitation_members count.
+func ByWorkbookInvitationMembersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWorkbookInvitationMembersStep(), opts...)
+	}
+}
+
+// ByWorkbookInvitationMembers orders the results by workbook_invitation_members terms.
+func ByWorkbookInvitationMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkbookInvitationMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newDescriptionProblemsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -274,5 +297,12 @@ func newWorkbookMembersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WorkbookMembersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookMembersTable, WorkbookMembersColumn),
+	)
+}
+func newWorkbookInvitationMembersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkbookInvitationMembersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WorkbookInvitationMembersTable, WorkbookInvitationMembersColumn),
 	)
 }

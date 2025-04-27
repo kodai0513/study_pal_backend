@@ -44,9 +44,11 @@ type UserEdges struct {
 	Workbooks []*Workbook `json:"workbooks,omitempty"`
 	// WorkbookMembers holds the value of the workbook_members edge.
 	WorkbookMembers []*WorkbookMember `json:"workbook_members,omitempty"`
+	// WorkbookInvitationMembers holds the value of the workbook_invitation_members edge.
+	WorkbookInvitationMembers []*WorkbookInvitationMember `json:"workbook_invitation_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // ArticlesOrErr returns the Articles value or an error if the edge
@@ -74,6 +76,15 @@ func (e UserEdges) WorkbookMembersOrErr() ([]*WorkbookMember, error) {
 		return e.WorkbookMembers, nil
 	}
 	return nil, &NotLoadedError{edge: "workbook_members"}
+}
+
+// WorkbookInvitationMembersOrErr returns the WorkbookInvitationMembers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WorkbookInvitationMembersOrErr() ([]*WorkbookInvitationMember, error) {
+	if e.loadedTypes[3] {
+		return e.WorkbookInvitationMembers, nil
+	}
+	return nil, &NotLoadedError{edge: "workbook_invitation_members"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -170,6 +181,11 @@ func (u *User) QueryWorkbooks() *WorkbookQuery {
 // QueryWorkbookMembers queries the "workbook_members" edge of the User entity.
 func (u *User) QueryWorkbookMembers() *WorkbookMemberQuery {
 	return NewUserClient(u.config).QueryWorkbookMembers(u)
+}
+
+// QueryWorkbookInvitationMembers queries the "workbook_invitation_members" edge of the User entity.
+func (u *User) QueryWorkbookInvitationMembers() *WorkbookInvitationMemberQuery {
+	return NewUserClient(u.config).QueryWorkbookInvitationMembers(u)
 }
 
 // Update returns a builder for updating this User.

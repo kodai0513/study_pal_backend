@@ -5,6 +5,7 @@ import (
 	"study-pal-backend/ent/article"
 	"study-pal-backend/ent/mixin"
 	"study-pal-backend/ent/workbook"
+	"study-pal-backend/ent/workbookinvitationmember"
 	"study-pal-backend/ent/workbookmember"
 
 	"entgo.io/ent"
@@ -41,5 +42,6 @@ func (User) Edges() []ent.Edge {
 		edge.To(article.Table, Article.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbook.Table, Workbook.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To(workbookmember.Table, WorkbookMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To(workbookinvitationmember.Table, WorkbookInvitationMember.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

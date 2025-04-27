@@ -152,6 +152,18 @@ func (f WorkbookCategoryClosureFunc) Mutate(ctx context.Context, m ent.Mutation)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookCategoryClosureMutation", m)
 }
 
+// The WorkbookInvitationMemberFunc type is an adapter to allow the use of ordinary
+// function as WorkbookInvitationMember mutator.
+type WorkbookInvitationMemberFunc func(context.Context, *ent.WorkbookInvitationMemberMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WorkbookInvitationMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WorkbookInvitationMemberMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkbookInvitationMemberMutation", m)
+}
+
 // The WorkbookMemberFunc type is an adapter to allow the use of ordinary
 // function as WorkbookMember mutator.
 type WorkbookMemberFunc func(context.Context, *ent.WorkbookMemberMutation) (ent.Value, error)
